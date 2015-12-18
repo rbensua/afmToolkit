@@ -1,0 +1,15 @@
+#' @title Afmdata check.
+#' 
+#' @description 
+#' Checks wether an R object is an afmdata or not.
+#' 
+#' @param \code{x}: Any \bold{R} object.
+#' @return Returns \code{TRUE} if its argument is an afmdata (that is, has "afmdata" 
+#' amongst its classes) and \code{FALSE} otherwise.
+#' 
+#' @export
+
+
+is.afmdata <- function(x){
+  inherits(x,"afmdata")
+}

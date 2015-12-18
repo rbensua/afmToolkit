@@ -1,0 +1,18 @@
+#' @title Append to an \code{afmdata} list.
+#' 
+#' @description 
+#' This function appends a list to an existing afmdata structure.
+#' 
+#' @param \code{afmdata}: The afmdata to which the new list is going to be joined.
+#' @param \code{x}: A list to be appended.
+#' @param \code{name}: The name of new field of the resulting afmdata object. If none is given, it is the same as \code{x}.
+#' @return The new list of class \code{afmdata} 
+#' @export
+
+append.afmdata <- function(afmdata,x, name = NULL,...){
+  if (is.null(name)) name = deparse(substitute(x))
+  newlist <- list()
+  newlist[[name]] <- x
+  afmdata <- append(afmdata, newlist)
+  return(afmdata(afmdata))
+}

@@ -18,13 +18,15 @@
 #' \code{delta} The delta signal. 
 #' 
 #' \code{noise} The noise of the delta signal
+#' @export
 
 
 
-afmContactPoint <- function(afmdata,width=1,mul1,mul2,Delta=TRUE){
+afmContactPoint <- function(afmdata,width=1,mul1,mul2, lagdiff = width, 
+                            Delta=TRUE){
   data.approach <- subset(afmdata$data, Segment == "approach")
   Z <- data.approach$Z
-  Force <- data.approach$F
+  Force <- data.approach$Force
   n = length(Z)
   if(length(Force)!=n){
     stop("Z and Force must be the same length")
@@ -36,8 +38,8 @@ afmContactPoint <- function(afmdata,width=1,mul1,mul2,Delta=TRUE){
  # bRoll <- rollapply(app,width,FUN = function(X) 
   #  coef(lm.fit(X[,1:2],X[,3]))[2],by.column=FALSE,align="right")
  bRoll <- windowedFit(app,width) 
- delta<- diff(bRoll)
- delta <- c(rep(0,width+1),delta,rep(0,width))
+ delta<- diff(bRoll, lag = lagdiff)
+ delta <- c(rep(0,width+lagdiff),delta,rep(0,width))
   if (!Delta){
     delta <- c(rep(0,width),bRoll,rep(0,width))
   }
@@ -53,7 +55,7 @@ afmContactPoint <- function(afmdata,width=1,mul1,mul2,Delta=TRUE){
     return(list(CP=NA,iCP=NA,delta=delta,noise=noise))
 
   } else{
-    j <- max(idxSmTol1[idxSmTol1<min(idxGrTol2)])+1  
+    j <- max(idxSmTol1[idxSmTol1<min(idxGrTol2)])#+1  
   
   if ((j > 1) & (delta[j] != 0)){
     eps <- (tol1-abs(delta[j]))/abs(delta[j+1]-delta[j]) # factor de proporcionalidad entre 0 y 1    

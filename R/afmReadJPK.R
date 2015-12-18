@@ -11,14 +11,21 @@
 #'
 
 afmReadJPK <- function(filename){
-  print(filename)
+
   fullData <- readLines(filename)
   headerLines <- grep("#",fullData)
-  numberOfHeader <- sum(diff(headerLines)!=1)+1
+  
+  # Obtaining the spring constant
+  springLine <- grep("spring", fullData, value = T)[1]
+  SpringConstant <- as.numeric(unlist(strsplit(springLine,":"))[2])
+  params = list(SpringConstant = SpringConstant)
+  # Obtaining the number of headers
+  numberOfHeader <- as.integer(sum(diff(headerLines)!=1)+1)
   N <- length(fullData)
   Nhead <- length(headerLines)
   headerStarts <- c(1,headerLines[which(diff(headerLines)!=1)+1])
   headerEnds <- c(headerLines[which(diff(headerLines)!=1)],headerLines[Nhead])
+  
   approach <- fullData[(headerEnds[1]+1):(headerStarts[2]-2)]
   ncolumns <- length(unlist(strsplit(approach[1]," ")))
   approach <- matrix(as.numeric(unlist(strsplit(approach," "))),
@@ -35,12 +42,7 @@ afmReadJPK <- function(filename){
                          Time = approach[,tcol],
                          Segment = "approach" )  
   if (numberOfHeader==1){
-#    retract <- NULL
-#     yrange_min = min(approach$F)
-#     yrange_max = max(approach$F)
-#     plot(F~Z,data=approach,type="l",ylim =c(yrange_min,yrange_max) )
-#     legend(x = "bottomright",legend = c("Approach"),
-#            lty=1,col=c("black"))
+   
     afmExperiment <- approach
   }
   else if(numberOfHeader==2)
@@ -55,12 +57,10 @@ afmReadJPK <- function(filename){
                           Force = retract[,Fcol],
                           Time = retract[,tcol],
                           Segment = "retract")
-#     yrange_min = min(min(approach$F),min(retract$F))
-#     yrange_max = max(max(approach$F),max(retract$F))
-#     plot(F~Z,data=approach,type="l",ylim =c(yrange_min,yrange_max) )
-#     lines(F~Z,data=retract,col="red")
-#     legend(x = "bottomright",legend = c("Approach","Retract"),
-#            lty=1,col=c("black","red"))
+    if (coef(lm(retract$Z~seq_along(retract$Z)))[2]<0){
+      retract$Z <- rev(retract$Z)
+      retract$Force <- rev(retract$Force)
+    }
     afmExperiment <- rbind(approach,retract)
     }
   else{
@@ -80,8 +80,17 @@ afmReadJPK <- function(filename){
                           Force = retract[,Fcol],
                           Time = retract[,tcol], 
                           Segment = "retract")
+    if (coef(lm(retract$Z~seq_along(retract$Z)))[2]<0){
+      retract$Z <- rev(retract$Z)
+      retract$Force <- rev(retract$Force)
+    }
     afmExperiment <- rbind(approach, contact, retract)
   }
+  cat(sprintf("JPK file %s loaded. %d headers found.\n",filename,numberOfHeader))
+ 
   afmExperiment$Segment <- factor(afmExperiment$Segment)
-  return(list(data = afmExperiment))
+  
+  afmExperiment <- afmdata(data = afmExperiment, params = params)
+  return(afmExperiment)
+#  return(list(data = afmExperiment))
 }
