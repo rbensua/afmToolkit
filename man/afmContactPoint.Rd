@@ -4,7 +4,8 @@
 \alias{afmContactPoint}
 \title{Contact point}
 \usage{
-afmContactPoint(afmdata, width = 1, mul1, mul2, Delta = TRUE)
+afmContactPoint(afmdata, width = 1, mul1, mul2, lagdiff = width,
+  Delta = TRUE)
 }
 \arguments{
 \item{afmdata}{A Force-Distance curve with the afmdata structure. It should be a list with at least the 'data' field with a data frame of at least 4 columns.}
