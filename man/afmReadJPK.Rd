@@ -4,7 +4,8 @@
 \alias{afmReadJPK}
 \title{Read an ascii JPK file.}
 \usage{
-afmReadJPK(filename)
+afmReadJPK(filename, ZColStr = "Vertical", FColStr = "smoothed)",
+  tColStr = "Series")
 }
 \arguments{
 \item{filename}{String with the name of the jpk file}

@@ -17,7 +17,7 @@
 #' @export
 
 
-afmYoungModulus <- function(afmdata, model = "Hertz", geometry = "pyramid",silent = TRUE, params){
+afmYoungModulus <- function(afmdata, thickness = NULL, model = "Hertz", geometry = "pyramid",silent = TRUE, params){
   if (!("ForceCorrected" %in% names(afmdata$data))) {
     stop("Baseline correction should be done first!")
   }
@@ -30,7 +30,12 @@ afmYoungModulus <- function(afmdata, model = "Hertz", geometry = "pyramid",silen
   if (!("Indentation" %in% names(afmdata$data))){
     stop("Indentation should be computed first(run afmIndentation)!")
   }
+  if (is.null(thickness)){
   fitdata <- subset(afmdata$data, Segment == "approach" & Indentation <0)
+  } else{
+    fitdata <- subset(afmdata$data, Segment == "approach" & Indentation <0 & 
+                        abs(Indentation)< thickness)
+  }
   fitYM <- lm(ForceCorrected~I(Indentation^2)-1, data = fitdata)
   slope <- coef(fitYM)
   if (!silent){

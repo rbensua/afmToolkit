@@ -10,7 +10,7 @@
 #' afmReadJPK('testJPKfile.txt')
 #'
 
-afmReadJPK <- function(filename){
+afmReadJPK <- function(filename, ZColStr = "Vertical", FColStr = "smoothed)", tColStr = "Series"){
 
   fullData <- readLines(filename)
   headerLines <- grep("#",fullData)
@@ -25,17 +25,20 @@ afmReadJPK <- function(filename){
   Nhead <- length(headerLines)
   headerStarts <- c(1,headerLines[which(diff(headerLines)!=1)+1])
   headerEnds <- c(headerLines[which(diff(headerLines)!=1)],headerLines[Nhead])
-  
+  if (numberOfHeader >1 ){
   approach <- fullData[(headerEnds[1]+1):(headerStarts[2]-2)]
+  } else if (numberOfHeader == 1){
+    approach <- fullData[(headerEnds[1]+1):N]
+  }
   ncolumns <- length(unlist(strsplit(approach[1]," ")))
   approach <- matrix(as.numeric(unlist(strsplit(approach," "))),
                      ncol = ncolumns,
                      byrow = TRUE)
   NcolumnNames <- grep("fancy",fullData)[1]
   columnNames <- fullData[NcolumnNames]
-  Fcol <- grep("Vertical" , unlist(strsplit(columnNames," \"")))-1
-  Zcol <- grep("smoothed)" , unlist(strsplit(columnNames," \"")))-1
-  tcol <- grep("Series", unlist(strsplit(columnNames," \"")))-1
+  Fcol <- grep(ZColStr , unlist(strsplit(columnNames," \"")))-1
+  Zcol <- grep(FColStr , unlist(strsplit(columnNames," \"")))-1
+  tcol <- grep(tColStr, unlist(strsplit(columnNames," \"")))-1
   cnames <- c("Z","F","t")
   approach <- data.frame(Z = approach[,Zcol], 
                          Force = approach[,Fcol],

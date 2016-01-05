@@ -2,17 +2,10 @@
 % Please edit documentation in R/afmContactPoint.R
 \name{afmContactPoint}
 \alias{afmContactPoint}
-<<<<<<< HEAD
 \title{Contact point}
 \usage{
 afmContactPoint(afmdata, width = 1, mul1, mul2, lagdiff = width,
   Delta = TRUE)
-=======
-\title{Find the contact point in for the Force-Distance curve
-following the method described in Microscopy Research and Technique 2013}
-\usage{
-afmContactPoint(afmdata, width = 1, mul1, mul2, Delta = TRUE)
->>>>>>> 05e3141ced9de0ca59a9494352758e57a829facc
 }
 \arguments{
 \item{afmdata}{A Force-Distance curve with the afmdata structure. It should be a list with at least the 'data' field with a data frame of at least 4 columns.}
@@ -26,7 +19,6 @@ afmContactPoint(afmdata, width = 1, mul1, mul2, Delta = TRUE)
 \item{Delta}{Logical. If TRUE, then the statistic for determining the contact point is the differences between two consecutive values of the slope of the local regression line. If FALSE then the slope itself is used.}
 }
 \value{
-<<<<<<< HEAD
 A list of:
 
 \code{CP} The contact point value.
@@ -36,9 +28,6 @@ A list of:
 \code{delta} The delta signal.
 
 \code{noise} The noise of the delta signal
-=======
-A list of: CP The contact point value. iCP The position in the array for the contact point value. delta The delta signal. noise The noise of the delta signal
->>>>>>> 05e3141ced9de0ca59a9494352758e57a829facc
 }
 \description{
 Find the contact point in for the Force-Distance curve

@@ -4,8 +4,8 @@
 \alias{afmYoungModulus}
 \title{afmYoungModulus}
 \usage{
-afmYoungModulus(afmdata, model = "Hertz", geometry = "pyramid",
-  silent = TRUE, params)
+afmYoungModulus(afmdata, thickness = NULL, model = "Hertz",
+  geometry = "pyramid", silent = TRUE, params)
 }
 \arguments{
 \item{\code{afmdata}:}{An \code{afmdata} object. It should be a valid afmdata

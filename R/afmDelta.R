@@ -1,5 +1,6 @@
 afmDelta <- function(afmdata,  width = 1, segment =
-                       c("approach","retract","both"), lagdiff = 1) {
+                       c("approach","retract","both"), 
+                     lagdiff = width) {
   segment <- match.arg(segment)
   data <- subset(afmdata$data, Segment == segment)
   Z <- data$Z

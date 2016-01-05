@@ -48,6 +48,10 @@ afmContactPoint <- function(afmdata,width=1,mul1,mul2, lagdiff = width,
   tol1 <- mul1*noise
   tol2 <- mul2*noise
   
+  if(tol2 > max(abs(delta))){
+    tol2 <- max(abs(delta))-0.05*diff(range(abs(delta)))
+  }
+  
   idxGrTol2 <- which(abs(delta)>tol2)
   idxSmTol1 <- which(abs(delta)<tol1)
   if (length(idxGrTol2>tol2) ==0){
