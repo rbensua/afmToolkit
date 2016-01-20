@@ -40,7 +40,7 @@ plot.afmdata <- function(afmdata, vs = "Z", segment = "all", ...)
     if ("ForceCorrected" %in% names(afmdata$data) &
         segment != "contact") {
       plt +
-        geom_hline(xintercept = 0,lty = 2)
+        geom_hline(yintercept = 0,lty = 2)
     } else{
       plt
     }
@@ -63,7 +63,7 @@ plot.afmdata <- function(afmdata, vs = "Z", segment = "all", ...)
     if ("ForceCorrected" %in% names(afmdata$data) &
         segment != "contact") {
       plt +
-        geom_hline(xintercept = 0,lty = 2)
+        geom_hline(yintercept = 0,lty = 2)
     } else{
       plt
     }
