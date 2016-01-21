@@ -40,7 +40,10 @@ afmYoungModulus <- function(afmdata, thickness = NULL, model = "Hertz", geometry
   slope <- coef(fitYM)
   if (!silent){
     print(summary(fitYM))}
-  YoungModulus <- as.numeric(slope * sqrt(2)*(1-params$mu^2)/tan(params$alpha*pi/180))
+  if (is.null(params$nu)){
+    params$nu <- 0.5
+  }
+  YoungModulus <- as.numeric(slope * sqrt(2)*(1-params$nu^2)/tan(params$alpha*pi/180))
   afmdata$params$YoungModulus <- YoungModulus
   return(afmdata(afmdata))
 }
