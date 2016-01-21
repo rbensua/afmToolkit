@@ -23,7 +23,8 @@ afmDetachPoint <- function(afmdata,width=1,mul1,mul2, lagdiff = width,
     delta <- c(rep(0,width),bRoll,rep(0,width))
   }
   
-  noise <- sd(delta[(width+as.integer(n/3)):(width+as.integer(n/3)+as.integer(0.1*n))],na.rm=TRUE)
+#  noise <- sd(delta[(width+as.integer(n/3)):(width+as.integer(n/3)+as.integer(0.1*n))],na.rm=TRUE)
+  noise <- sd(delta[(n-width-as.integer(0.1*n)):(n-width)], na.rm = TRUE)
   tol1 <- mul1*noise
   tol2 <- mul2*noise
   

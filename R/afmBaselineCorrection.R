@@ -33,8 +33,6 @@ afmBaselineCorrection <- function(afmdata, ZPointApp = NULL, ZPointRet = NULL){
     data.retract <- subset(afmdata$data, Segment == "retract" & 
                             Z > ZPointRet, 
                             select = c("Z","Force"))
-    plot(Force~Z, data = data.retract,type = "l")
-    abline(v = ZPointRet)
     fit.retract <- lm(Force ~ Z, data = data.retract)
     F.corrected.retract <- subset(afmdata$data, Segment == "retract")$Force - 
       predict(fit.retract,data.frame(Z = subset(afmdata$data, Segment == "retract")$Z))
