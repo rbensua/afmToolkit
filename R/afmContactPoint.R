@@ -22,7 +22,7 @@
 
 
 
-afmContactPoint <- function(afmdata,width=1,mul1,mul2, lagdiff = width, 
+afmContactPoint <- function(afmdata, width = 1, mul1, mul2, lagdiff = width, 
                             Delta=TRUE){
   data.approach <- subset(afmdata$data, Segment == "approach")
   Z <- data.approach$Z
