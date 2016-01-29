@@ -8,7 +8,12 @@
 #' @param width Width of the window for the local regression (in vector position units)
 #' @param mul1 First multiplier for the first alarm threshold
 #' @param mul2 Second multiplier for the second alarm threshold  
-#' @param Delta Logical. If TRUE, then the statistic for determining the contact point is the differences between two consecutive values of the slope of the local regression line. If FALSE then the slope itself is used.
+#' @param Delta Logical. If TRUE, then the statistic for determining the contact point is the 
+#' differences between two consecutive values of the slope of the local regression line. 
+#' If FALSE then the slope itself is used.
+#' @param loessSmooth Logical If TRUE (default), a loess smoothing (via loess.smooth()) is done prior to
+#' the determination of the contact point. The span of the  smoothing is 0.05 (5%), the degree is 2 and the
+#' number of points equals the number of points in the approach segment.
 #' @return A list of: 
 #' 
 #' \code{CP} The contact point value. 
@@ -23,15 +28,24 @@
 
 
 afmContactPoint <- function(afmdata, width = 1, mul1, mul2, lagdiff = width, 
-                            Delta=TRUE){
+                            Delta=TRUE, loessSmooth = TRUE){
   data.approach <- subset(afmdata$data, Segment == "approach")
+  n <- nrow(data.approach)
+  direction <- data.approach$Z[n] - data.approach$Z[1]
+  if (loessSmooth){
+    data.approach.smoothed <- loess.smooth(data.approach$Z, data.approach$Force,
+                                           span = 0.05, degree = 2, evaluation = n)
+    Z <- data.approach.smoothed$x
+    Force <- data.approach.smoothed$y
+    if (direction <0){
+      Z <- rev(Z)
+      Force <- rev(Force)
+    }
+  } else{
   Z <- data.approach$Z
   Force <- data.approach$Force
-  n = length(Z)
-  if(length(Force)!=n){
-    stop("Z and Force must be the same length")
   }
-  b<- array(0,dim=c(n,1))
+  b <- array(0,dim=c(n,1))
   delta <- array(0,dim=c(n,1))
   imax <- n-width
   app <- matrix(c(rep(1,n),Z,Force),nrow = n,ncol = 3)

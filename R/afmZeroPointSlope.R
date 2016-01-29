@@ -33,7 +33,7 @@ afmZeroPointSlope <- function(afmdata, segment = c("approach","retract")) {
   Zmin <- Z[which.min(ForceCorrected)]
   Fmin <- min(ForceCorrected)
   indicesSlope <-
-    which(ForceCorrected > 0 & abs(Z) < min(afmdata$CP$CP,Zmin))
+    which(ForceCorrected > 0 & Z < min(afmdata$CP$CP, Zmin))
   
   if (segment == "approach") {
     i1 <- min(indicesSlope)

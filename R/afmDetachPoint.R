@@ -1,15 +1,27 @@
 
 afmDetachPoint <- function(afmdata,width=1,mul1,mul2, lagdiff = width, 
-                            Delta=TRUE){
+                            Delta=TRUE, loessSmooth = TRUE){
   data.retract <- subset(afmdata$data, Segment == "retract")
   Z <- data.retract$Z
   Force <- data.retract$Force
+  n <- length(Z)
+  direction <- Z[n] - Z[1]
+  if (direction > 0){
   Z <- rev(Z)
   Force <- rev(Force)
-  n = length(Z)
-  if(length(Force)!=n){
-    stop("Z and Force must be the same length")
   }
+  if (loessSmooth){
+    data.contact.smoothed <- loess.smooth(Z, Force, span = 0.05, 
+                                          degree = 2, evaluation = n)
+    Z <- data.contact.smoothed$x
+    Force <- data.contact.smoothed$y
+    if (Z[n]-Z[1] > 0){
+      Z <- rev(Z)
+      Force <- rev(Force)
+    }
+  }
+  
+  
   b<- array(0,dim=c(n,1))
   delta <- array(0,dim=c(n,1))
   imax <- n-width

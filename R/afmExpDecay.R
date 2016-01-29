@@ -89,6 +89,7 @@ afmExpDecay <- function(afmdata, nexp = 2, tmax = NULL,
   if (plt) {
     df <- subset(afmdata$data, Segment == "contact" & Time <= tmax,
                  select = c("Time"))
+    if (type == "CH"){
     print(
       plot(afmdata, vs = "Time", segment = "contact") +
         geom_line(
@@ -96,6 +97,15 @@ afmExpDecay <- function(afmdata, nexp = 2, tmax = NULL,
           aes(x = Time, y = Force), col = "green", size = 1.5
         )
     )
+    } else{
+      contact <- subset(afmdata$data, Segment == "contact")
+        print(ggplot(data = contact, aes(x = Time, y = Z)) + 
+          geom_line() + 
+          geom_line(
+            data = data.frame(Time = df, Z = expdecayFit),
+            aes(x = Time, y = Z), col = "green", size = 1.5
+          ))
+    }
   }
   return(list(expdecayModel = expdecayModel, expdecayFit = expdecayFit))
 }
