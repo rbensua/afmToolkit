@@ -43,7 +43,7 @@ afmBaselineCorrection <- function(afmdata, ZPointApp = NULL, ZPointRet = NULL){
                                      F.corrected.retract)
   }else{
     # If N = 3 there are approach, contact and retract.
-    Zret <- subset(afmdata$data,Segment = "retract")$Z
+    Zret <- subset(afmdata$data,Segment == "retract")$Z
     if ("CP" %in% names(afmdata) & "DP" %in% names(afmdata)){
       ZPointRet <- 0.3*max(Zret)+0.7*afmdata$DP[["DP"]]
     }else{        
