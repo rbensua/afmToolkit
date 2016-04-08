@@ -13,6 +13,7 @@
 afmReadJPK <- function(filename, FColStr = "Vertical", ZColStr = "smoothed)", tColStr = "Series"){
 
   fullData <- readLines(filename)
+  fullData <- fullData[sapply(fullData, nchar) > 0]
   headerLines <- grep("#",fullData)
   
   # Obtaining the spring constant
