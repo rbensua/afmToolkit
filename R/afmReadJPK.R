@@ -10,7 +10,7 @@
 #' afmReadJPK('testJPKfile.txt')
 #'
 
-afmReadJPK <- function(filename, ZColStr = "Vertical", FColStr = "smoothed)", tColStr = "Series"){
+afmReadJPK <- function(filename, FColStr = "Vertical", ZColStr = "smoothed)", tColStr = "Series"){
 
   fullData <- readLines(filename)
   headerLines <- grep("#",fullData)
@@ -36,8 +36,8 @@ afmReadJPK <- function(filename, ZColStr = "Vertical", FColStr = "smoothed)", tC
                      byrow = TRUE)
   NcolumnNames <- grep("fancy",fullData)[1]
   columnNames <- fullData[NcolumnNames]
-  Fcol <- grep(ZColStr , unlist(strsplit(columnNames," \"")))-1
-  Zcol <- grep(FColStr , unlist(strsplit(columnNames," \"")))-1
+  Fcol <- grep(FColStr , unlist(strsplit(columnNames," \"")))-1
+  Zcol <- grep(ZColStr , unlist(strsplit(columnNames," \"")))-1
   tcol <- grep(tColStr, unlist(strsplit(columnNames," \"")))-1
   cnames <- c("Z","F","t")
   approach <- data.frame(Z = approach[,Zcol], 

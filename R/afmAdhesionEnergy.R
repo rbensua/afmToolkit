@@ -1,11 +1,11 @@
 afmAdhesionEnergy <- function(afmdata, width = 1,segment = "retract",
-                              lagdiff = 1, mul2, mdj = NULL) {
+                              lagdiff = width, mul2, mdj = NULL) {
   # Extract the approach segment from the afmdata
   data <- subset(afmdata$data, Segment == segment)
   Z <- data$Z
   
   
-  Force <- data$ForceCorr
+  Force <- data$ForceCorrected
   
   
   imin <- min(which(Force < 0))
@@ -136,14 +136,9 @@ afmAdhesionEnergy <- function(afmdata, width = 1,segment = "retract",
   }
   Weight <- Eadh[length(Eadh)]
   EnerFun <- Eadh / Eadh[length(Eadh)]
-  return(
-    list(
-      Magnitudes = magnitudeDF,Points = c(imin,leftPoint,imax),
-      ZPoints = Z[c(imin,leftPoint,imax)],
-      EnerFun = data.frame(Zrel = Zadh - max(Zadh),EnerFun = EnerFun),
-      Energies = data.frame(
-        E1adh = E1adh, E2adh = E2adh, Weight = Weight
-      )
-    )
-  )
+  return(list(Magnitudes = magnitudeDF,Points = c(imin,leftPoint,imax),
+              delta = delta, noiseB = noiseBeginDelta, noiseE = noiseEndDelta,
+              EnerFun = data.frame(Zrel = Zadh-max(Zadh),EnerFun = EnerFun), 
+              Energies = data.frame(E1adh = E1adh, E2adh = E2adh, Weight = Weight),
+              jumpsDelta = jumpsDelta))
 }

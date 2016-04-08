@@ -4,6 +4,10 @@ Version: 0.0.0.9000
 Author: Rafael Benitez <rbenitez@unex.es>
 Maintainer: Rafael Benitez <rbenitez@unex.es>
 Description: What the package does (one paragraph)
-Depends: R (>= 3.2.2), ggplot2, minpack.lm
+Depends:
+    R (>= 3.2.2),
+    ggplot2,
+    minpack.lm
 License: GPL
 LazyData: true
+RoxygenNote: 5.0.1

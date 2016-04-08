@@ -31,15 +31,33 @@ afmYoungModulus <- function(afmdata, thickness = NULL, model = "Hertz", geometry
     stop("Indentation should be computed first(run afmIndentation)!")
   }
   if (is.null(thickness)){
-  fitdata <- subset(afmdata$data, Segment == "approach" & Indentation <0)
+  fitdata <- subset(afmdata$data, Segment == "approach" & Indentation < -6e-8 & Indentation > -8e-8)
   } else{
     fitdata <- subset(afmdata$data, Segment == "approach" & Indentation <0 & 
-                        abs(Indentation)< thickness)
+                        abs(Indentation)<thickness)
   }
+#  fitdata$Indentation <- -fitdata$Indentation
+  fitdata$Indentation <- fitdata$Indentation - fitdata$Indentation[1]
+  fitdata$ForceCorrected <- fitdata$ForceCorrected - fitdata$ForceCorrected[1]
+  fitLM <- lm(ForceCorrected  ~ Z, data = fitdata)
   fitYM <- lm(ForceCorrected~I(Indentation^2)-1, data = fitdata)
+  fitYMfullPoly <- lm(ForceCorrected~poly(Indentation,2, raw = TRUE), data = fitdata)
+  predYM <-  predict(fitYM, newdata = 
+                       data.frame(Indentation = fitdata$Indentation))
+  predYMFP <- predict(fitYMfullPoly, newdata = 
+                        data.frame(Indentation = fitdata$Indentation))
+  
+  plot(fitdata$Indentation,fitdata$ForceCorrected, 
+       xlab = "Indentation", ylab = "Force")
+  lines(fitdata$Indentation, predYM, col = "green", lwd = 2)
+  lines(fitdata$Indentation, predYMFP, col = "red", lwd = 2)
+  legend("topright", c("Hertz - Sneddon", "Hertz+Adhesion"), 
+         lty = c(1,1), col = c("green","red"))
+  
   slope <- coef(fitYM)
   if (!silent){
-    print(summary(fitYM))}
+    print(summary(fitYM))
+    print(summary(fitYMfullPoly))}
   if (is.null(params$nu)){
     params$nu <- 0.5
   }
