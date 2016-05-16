@@ -4,23 +4,24 @@
 #' This function performs the baseline correction to an AFM F-z curve within an
 #' \code{afmdata} structure.
 #'
-#'  It substracts a best fit line to the cuve: for the approach and contact segments, it fits a line to the approach curve
+#'  It substracts a best fit line to the cuve: for the approach and contact 
+#'  segments, it fits a line to the approach curve
 #' points where for which ·\eqn{|z|>ZPointApp} and for the retract segment,
 #' it fits a line to the retract curve where $|z|> ZpointRet$.
 #'
-#' If no ZPointApp is given and the contact point has been already estimated (via
-#' \code{afmContactPoint()} function), then it is found as
+#' If no ZPointApp is given and the contact point has been already estimated 
+#' (via \code{afmContactPoint()} function), then it is found as
 #' \deqn{
 #' ZPointApp = 0.7 ContactPoint + 0.3 max(Z)
 #' }
 #' @param \code{afmdata} An \code{afmdata} structure.
 #' @param \code{ZPointApp} Point in the approach segment of the curve
 #' that defines the approach baseline
-#' @param \code{ZPointRet} Point in the retract segment of the curves that defines the
-#' retract baseline
-#' @return \code{afmdata} An \code{afmdata} structure identical to the one in the input, but
-#' with an additional \code{ForceCorrected} column in the \code{data} dataframe
-#' of the \code{afmdata} structure.
+#' @param \code{ZPointRet} Point in the retract segment of the curves that 
+#' defines the retract baseline
+#' @return \code{afmdata} An \code{afmdata} structure identical to the one in 
+#' the input, but with an additional \code{ForceCorrected} column in the
+#'  \code{data} dataframe of the \code{afmdata} structure.
 #' @examples
 #' JPKexample <- paste(path.package("afmToolkit"), "force-save-JPK-2h.txt",sep = "/")
 #' AFMcurve <- afmReadJPK(JPKexample)
@@ -28,7 +29,7 @@
 #' ZPointRet <- 6.45e-6
 #' AFMcurve <- afmBaselineCorrection(AFMcurve,ZPointApp = ZPointApp,ZPointRet = ZPointRet)
 #' plot(AFMcurve)
-#' 
+#'
 #' # Without providing ZPointApp
 #' JPKexample <- paste(path.package("afmToolkit"), "force-save-JPK-3h.txt",sep = "/")
 #' AFMcurve <- afmReadJPK(JPKexample)
@@ -93,7 +94,7 @@ afmBaselineCorrection <-
       fit.retract <- lm(Force ~ Z, data = data.retract)
       F.corrected.retract <-
         subset(afmdata$data, Segment == "retract")$Force -
-        predict(fit.retract, data.frame(Z = subset(afmdata$data, 
+        predict(fit.retract, data.frame(Z = subset(afmdata$data,
                                                    Segment == "retract")$Z))
       if (N == 2) {
         afmdata$data$ForceCorrected <- c(F.corrected.approach,
@@ -110,4 +111,4 @@ afmBaselineCorrection <-
       }
     
     return(afmdata(afmdata))
-    }
+      }
