@@ -23,6 +23,14 @@
 #' \code{delta} The delta signal. 
 #' 
 #' \code{noise} The noise of the delta signal
+#' @examples
+#' JPKexample <- paste(path.package("afmToolkit"), "force-save-JPK-3h.txt",sep = "/")
+#' data <- afmReadJPK(JPKexample)
+#' width <- 20
+#' mul1 <- 1
+#' mul2 <- 10
+#' CP <- afmContactPoint(data, width = width, mul1 = mul1, mul2 = mul2)
+#' plot(data, segment = "approach") + geom_vline(xintercept = CP$CP, lty = 2)
 #' @export
 
 

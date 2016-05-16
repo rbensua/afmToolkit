@@ -1,6 +1,6 @@
 #' Read an ascii JPK file.
 #'
-#' Reads an ascii JPK file with one to three headers. 
+#' Reads an ascii JPK file with one to three headers.
 #'
 #' @param filename String with the name of the jpk file
 #'
@@ -10,91 +10,105 @@
 #' afmReadJPK('testJPKfile.txt')
 #'
 
-afmReadJPK <- function(filename, FColStr = "Vertical", ZColStr = "smoothed)", tColStr = "Series"){
-
-  fullData <- readLines(filename)
-  fullData <- fullData[sapply(fullData, nchar) > 0]
-  headerLines <- grep("#",fullData)
-  
-  # Obtaining the spring constant
-  springLine <- grep("spring", fullData, value = T)[1]
-  SpringConstant <- as.numeric(unlist(strsplit(springLine,":"))[2])
-  params = list(SpringConstant = SpringConstant)
-  # Obtaining the number of headers
-  numberOfHeader <- as.integer(sum(diff(headerLines)!=1)+1)
-  N <- length(fullData)
-  Nhead <- length(headerLines)
-  headerStarts <- c(1,headerLines[which(diff(headerLines)!=1)+1])
-  headerEnds <- c(headerLines[which(diff(headerLines)!=1)],headerLines[Nhead])
-  if (numberOfHeader >1 ){
-  approach <- fullData[(headerEnds[1]+1):(headerStarts[2]-2)]
-  } else if (numberOfHeader == 1){
-    approach <- fullData[(headerEnds[1]+1):N]
-  }
-  ncolumns <- length(unlist(strsplit(approach[1]," ")))
-  approach <- matrix(as.numeric(unlist(strsplit(approach," "))),
-                     ncol = ncolumns,
-                     byrow = TRUE)
-  NcolumnNames <- grep("fancy",fullData)[1]
-  columnNames <- fullData[NcolumnNames]
-  Fcol <- grep(FColStr , unlist(strsplit(columnNames," \"")))-1
-  Zcol <- grep(ZColStr , unlist(strsplit(columnNames," \"")))-1
-  tcol <- grep(tColStr, unlist(strsplit(columnNames," \"")))-1
-  cnames <- c("Z","F","t")
-  approach <- data.frame(Z = approach[,Zcol], 
-                         Force = approach[,Fcol],
-                         Time = approach[,tcol],
-                         Segment = "approach" )  
-  if (numberOfHeader==1){
-   
-    afmExperiment <- approach
-  }
-  else if(numberOfHeader==2)
-  {
-    retract <- fullData[(headerEnds[2]+1):N]
-  
-    retract <-  matrix(as.numeric(unlist(strsplit(retract," "))),
-                     ncol = ncolumns,
-                     byrow=TRUE)
-  
-    retract <- data.frame(Z = retract[,Zcol], 
-                          Force = retract[,Fcol],
-                          Time = retract[,tcol],
-                          Segment = "retract")
-    if (coef(lm(retract$Z~seq_along(retract$Z)))[2]<0){
-      retract$Z <- rev(retract$Z)
-      retract$Force <- rev(retract$Force)
+afmReadJPK <-
+  function(filename,
+           FColStr = "Vertical",
+           ZColStr = "smoothed)",
+           tColStr = "Series") {
+    fullData <- readLines(filename)
+    fullData <- fullData[sapply(fullData, nchar) > 0]
+    headerLines <- grep("#", fullData)
+    
+    # Obtaining the spring constant
+    springLine <- grep("spring", fullData, value = T)[1]
+    SpringConstant <- as.numeric(unlist(strsplit(springLine, ":"))[2])
+    params = list(SpringConstant = SpringConstant)
+    # Obtaining the number of headers
+    numberOfHeader <- as.integer(sum(diff(headerLines) != 1) + 1)
+    N <- length(fullData)
+    Nhead <- length(headerLines)
+    headerStarts <- c(1, headerLines[which(diff(headerLines) != 1) + 1])
+    headerEnds <-
+      c(headerLines[which(diff(headerLines) != 1)], headerLines[Nhead])
+    if (numberOfHeader > 1) {
+      approach <- fullData[(headerEnds[1] + 1):(headerStarts[2] - 2)]
+    } else if (numberOfHeader == 1) {
+      approach <- fullData[(headerEnds[1] + 1):N]
     }
-    afmExperiment <- rbind(approach,retract)
-    }
-  else{
-    contact <- fullData[(headerEnds[2]+1):(headerStarts[3]-2)]
-    contact <-  matrix(as.numeric(unlist(strsplit(contact," "))),
+    ncolumns <- length(unlist(strsplit(approach[1], " ")))
+    approach <- matrix(as.numeric(unlist(strsplit(approach, " "))),
                        ncol = ncolumns,
-                       byrow=TRUE)
-    retract <- fullData[(headerEnds[3]+1):N]
-    retract <-  matrix(as.numeric(unlist(strsplit(retract," "))),
-                       ncol = ncolumns,
-                       byrow=TRUE)
-    contact <- data.frame(Z = contact[,Zcol],
-                          Force = contact[,Fcol],
-                          Time = contact[,tcol],
-                          Segment = "contact")
-    retract <- data.frame(Z = retract[,Zcol],
-                          Force = retract[,Fcol],
-                          Time = retract[,tcol], 
-                          Segment = "retract")
-    if (coef(lm(retract$Z~seq_along(retract$Z)))[2]<0){
-      retract$Z <- rev(retract$Z)
-      retract$Force <- rev(retract$Force)
+                       byrow = TRUE)
+    NcolumnNames <- grep("fancy", fullData)[1]
+    columnNames <- fullData[NcolumnNames]
+    Fcol <- grep(FColStr , unlist(strsplit(columnNames, " \""))) - 1
+    Zcol <- grep(ZColStr , unlist(strsplit(columnNames, " \""))) - 1
+    tcol <- grep(tColStr, unlist(strsplit(columnNames, " \""))) - 1
+    cnames <- c("Z", "F", "t")
+    approach <- data.frame(
+      Z = approach[, Zcol],
+      Force = approach[, Fcol],
+      Time = approach[, tcol],
+      Segment = "approach"
+    )
+    if (numberOfHeader == 1) {
+      afmExperiment <- approach
     }
-    afmExperiment <- rbind(approach, contact, retract)
+    else if (numberOfHeader == 2)
+    {
+      retract <- fullData[(headerEnds[2] + 1):N]
+      
+      retract <-  matrix(as.numeric(unlist(strsplit(retract, " "))),
+                         ncol = ncolumns,
+                         byrow = TRUE)
+      
+      retract <- data.frame(
+        Z = retract[, Zcol],
+        Force = retract[, Fcol],
+        Time = retract[, tcol],
+        Segment = "retract"
+      )
+      if (coef(lm(retract$Z ~ seq_along(retract$Z)))[2] < 0) {
+        retract$Z <- rev(retract$Z)
+        retract$Force <- rev(retract$Force)
+      }
+      afmExperiment <- rbind(approach, retract)
+    }
+    else{
+      contact <- fullData[(headerEnds[2] + 1):(headerStarts[3] - 2)]
+      contact <-  matrix(as.numeric(unlist(strsplit(contact, " "))),
+                         ncol = ncolumns,
+                         byrow = TRUE)
+      retract <- fullData[(headerEnds[3] + 1):N]
+      retract <-  matrix(as.numeric(unlist(strsplit(retract, " "))),
+                         ncol = ncolumns,
+                         byrow = TRUE)
+      contact <- data.frame(
+        Z = contact[, Zcol],
+        Force = contact[, Fcol],
+        Time = contact[, tcol],
+        Segment = "contact"
+      )
+      retract <- data.frame(
+        Z = retract[, Zcol],
+        Force = retract[, Fcol],
+        Time = retract[, tcol],
+        Segment = "retract"
+      )
+      if (coef(lm(retract$Z ~ seq_along(retract$Z)))[2] < 0) {
+        retract$Z <- rev(retract$Z)
+        retract$Force <- rev(retract$Force)
+      }
+      afmExperiment <- rbind(approach, contact, retract)
+    }
+    cat(sprintf(
+      "JPK file %s loaded. %d headers found.\n",
+      filename,
+      numberOfHeader
+    ))
+    
+    afmExperiment$Segment <- factor(afmExperiment$Segment)
+    
+    afmExperiment <- afmdata(data = afmExperiment, params = params)
+    return(afmExperiment)
   }
-  cat(sprintf("JPK file %s loaded. %d headers found.\n",filename,numberOfHeader))
- 
-  afmExperiment$Segment <- factor(afmExperiment$Segment)
-  
-  afmExperiment <- afmdata(data = afmExperiment, params = params)
-  return(afmExperiment)
-#  return(list(data = afmExperiment))
-}

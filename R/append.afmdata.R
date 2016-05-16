@@ -11,8 +11,12 @@
 
 append.afmdata <- function(afmdata,x, name = NULL,...){
   if (is.null(name)) name = deparse(substitute(x))
+  if (name %in% names(afmdata)){
+    afmdata[[name]] <- x
+  }else {
   newlist <- list()
   newlist[[name]] <- x
   afmdata <- append(afmdata, newlist)
+  }
   return(afmdata(afmdata))
 }
