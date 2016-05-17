@@ -16,8 +16,8 @@ afmContactPoint(afmdata, width = 1, mul1, mul2, lagdiff = width,
 
 \item{mul2}{Second multiplier for the second alarm threshold}
 
-\item{Delta}{Logical. If TRUE, then the statistic for determining the contact point is the 
-differences between two consecutive values of the slope of the local regression line. 
+\item{Delta}{Logical. If TRUE, then the statistic for determining the contact point is the
+differences between two consecutive values of the slope of the local regression line.
 If FALSE then the slope itself is used.}
 
 \item{loessSmooth}{Logical If TRUE (default), a loess smoothing (via loess.smooth()) is done prior to
@@ -25,13 +25,13 @@ the determination of the contact point. The span of the  smoothing is 0.05 (5%),
 number of points equals the number of points in the approach segment.}
 }
 \value{
-A list of: 
+A list of:
 
-\code{CP} The contact point value. 
+\code{CP} The contact point value.
 
-\code{iCP} The position in the array for the contact point value. 
+\code{iCP} The position in the array for the contact point value.
 
-\code{delta} The delta signal. 
+\code{delta} The delta signal.
 
 \code{noise} The noise of the delta signal
 }
