@@ -9,20 +9,20 @@ afmYoungModulus(afmdata, thickness = NULL, model = "Hertz",
 }
 \arguments{
 \item{\code{afmdata}:}{An \code{afmdata} object. It should be a valid afmdata
-object upon which the Contact Point, the baseline correction and the Zero 
-Force Point must have been calculated first (using functions 
+object upon which the Contact Point, the baseline correction and the Zero
+Force Point must have been calculated first (using functions
 \code{afmContactPoint()}, \code{afmBaselineCorrection()}) and
  \code{afmZeroPointSlope()}}
 }
 \value{
 Returns a list with one field:
 
-\code{afmdata}: An afmdata class in which a Deformation vector is added 
+\code{afmdata}: An afmdata class in which a Deformation vector is added
 in the \code{data} field
 }
 \description{
-This function computes the Young's Modulus of the sample 
-from the approach curve using different contact models and for different 
+This function computes the Young's Modulus of the sample
+from the approach curve using different contact models and for different
 tip geometries.
 }
 

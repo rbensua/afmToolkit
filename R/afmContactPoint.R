@@ -43,6 +43,17 @@ afmContactPoint <-
            lagdiff = width,
            Delta = TRUE,
            loessSmooth = TRUE) {
+    if(is.afmexperiment(afmdata)){
+      CP <- lapply(afmdata, function(x) afmContactPoint(x, width = width,
+                                                        mul1 = mul1,
+                                                        mul2 = mul2,
+                                                        lagdiff = lagdiff,
+                                                        Delta = Delta,
+                                                        loessSmooth = loessSmooth))
+      afmexperiment <- mapply(afmdata,CP, FUN = function(x,y) append.afmdata(x,y, name = "CP"),
+                              SIMPLIFY = FALSE)
+      return(afmexperiment(afmexperiment))
+    }else if(is.afmdata(afmdata)){
     data.approach <- subset(afmdata$data, Segment == "approach")
     n <- nrow(data.approach)
     direction <- data.approach$Z[n] - data.approach$Z[1]
@@ -118,5 +129,8 @@ afmContactPoint <-
         delta = delta,
         noise = noise
       ))
+    }
+    }else{
+      stop("No afmdata class input provided.")
     }
   }

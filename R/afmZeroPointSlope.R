@@ -18,49 +18,67 @@
 
 
 
-afmZeroPointSlope <- function(afmdata, segment = c("approach","retract")) {
-  if (!("ForceCorrected" %in% names(afmdata$data))) {
-    stop("Baseline correction should be done first!")
-  }
-  if (!any(sapply(afmdata, function(x)
-    "CP" %in% names(x)))) {
-    stop("Contact Point should be found first!")
-  }
-  segment <- match.arg(segment)
-  Z <- subset(afmdata$data, Segment == segment)$Z
-  ForceCorrected <-
-    subset(afmdata$data, Segment == segment)$ForceCorrected
-  Zmin <- Z[which.min(ForceCorrected)]
-  Fmin <- min(ForceCorrected)
-  
-  if (segment == "approach") {
-    indicesSlope <-
-      which(ForceCorrected > 0 & Z < min(afmdata$CP$CP, Zmin))
-    i1 <- min(indicesSlope)
-    i0 <- i1 - 1
-    if (abs(Zmin) < abs(afmdata$CP$CP)){
-      Z0Point <- Z[i0] - ForceCorrected[i0] * (Z[i1] - Z[i0]) /
-        (ForceCorrected[i1] - ForceCorrected[i0])
-    } else {
-      Z0Point <- afmdata$CP$CP
+afmZeroPointSlope <-
+  function(afmdata, segment = c("approach", "retract")) {
+    if (is.afmexperiment(afmdata)) {
+      ZeroPoint <-
+        lapply(data, function(x)
+          afmZeroPointSlope(x, segment = segment))
+      afmdata <-
+        mapply(
+          afmdata,
+          ZeroPoint,
+          FUN = function(x, y)
+            append.afmdata(x, y, name = "Slopes"),
+          SIMPLIFY = FALSE
+        )
+      return(afmexperiment(afmdata))
+    } else if (is.afmdata(afmdata)) {
+      if (!("ForceCorrected" %in% names(afmdata$data))) {
+        stop("Baseline correction should be done first!")
+      }
+      if (!any(sapply(afmdata, function(x)
+        "CP" %in% names(x)))) {
+        stop("Contact Point should be found first!")
+      }
+      segment <- match.arg(segment)
+      Z <- subset(afmdata$data, Segment == segment)$Z
+      ForceCorrected <-
+        subset(afmdata$data, Segment == segment)$ForceCorrected
+      Zmin <- Z[which.min(ForceCorrected)]
+      Fmin <- min(ForceCorrected)
+      
+      if (segment == "approach") {
+        indicesSlope <-
+          which(ForceCorrected > 0 & Z < min(afmdata$CP$CP, Zmin))
+        i1 <- min(indicesSlope)
+        i0 <- i1 - 1
+        if (abs(Zmin) < abs(afmdata$CP$CP)) {
+          Z0Point <- Z[i0] - ForceCorrected[i0] * (Z[i1] - Z[i0]) /
+            (ForceCorrected[i1] - ForceCorrected[i0])
+        } else {
+          Z0Point <- afmdata$CP$CP
+        }
+        
+      } else {
+        indicesSlope <-
+          which(ForceCorrected > 0 & Z < min(afmdata$DP$DP, Zmin))
+        i1 <- max(indicesSlope)
+        i0 <- i1 + 1
+        #  if (Zmin < afmdata$DP$DP){
+        Z0Point <- Z[i0] - ForceCorrected[i0] * (Z[i1] - Z[i0]) /
+          (ForceCorrected[i1] - ForceCorrected[i0])
+        # } else {
+        #   Z0Point <- afmdata$DP$DP
+        #  }
+      }
+      
+      Zslope <- Z[indicesSlope]
+      Fslope <- ForceCorrected[indicesSlope]
+      FitSlope <- lm(Fslope ~ Zslope)
+      slope <- coef(FitSlope)[2] # Second coefficient of the fit
+      return(list = list(Z0Point = Z0Point, Slope = slope))
+    } else{
+      stop("Error: input is not a valid afmdata or afmexperiment.")
     }
-    
-  } else {
-    indicesSlope <-
-      which(ForceCorrected > 0 & Z < min(afmdata$DP$DP, Zmin))
-    i1 <- max(indicesSlope)
-    i0 <- i1 + 1
-  #  if (Zmin < afmdata$DP$DP){
-      Z0Point <- Z[i0] - ForceCorrected[i0] * (Z[i1] - Z[i0]) /
-        (ForceCorrected[i1] - ForceCorrected[i0])
-   # } else {
-   #   Z0Point <- afmdata$DP$DP
-  #  }
   }
-  
-  Zslope <- Z[indicesSlope]
-  Fslope <- ForceCorrected[indicesSlope]
-  FitSlope <- lm(Fslope ~ Zslope)
-  slope <- coef(FitSlope)[2] # Second coefficient of the fit
-  return(list = list(Z0Point = Z0Point, Slope = slope))
-}

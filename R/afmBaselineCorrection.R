@@ -42,6 +42,13 @@ afmBaselineCorrection <-
   function(afmdata,
            ZPointApp = NULL,
            ZPointRet = NULL) {
+    if (is.afmexperiment(afmdata)){
+      data <- lapply(afmdata, function(x) afmBaselineCorrection(x,
+                                                                ZPointApp = ZPointApp,
+                                                                ZPointRet = ZPointRet))
+      return(afmexperiment(data))
+    }else if (is.afmdata(afmdata)){
+    
     # First determine how many segments are in the curve
     
     
@@ -111,4 +118,7 @@ afmBaselineCorrection <-
       }
     
     return(afmdata(afmdata))
+      }else{
+    stop("input is not a valid afmdata or afmexperiment.")
       }
+  }

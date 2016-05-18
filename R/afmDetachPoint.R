@@ -1,6 +1,50 @@
-
+#' @title Detach point
+#'
+#' @description
+#' Finds the detach point in for the Force-Distance curve
+#' following the method described in Microscopy Research and Technique 2013
+#'
+#' @param afmdata A Force-Distance curve with the afmdata structure. It should be a list with at least the 'data' field with a data frame of at least 4 columns.
+#' @param width Width of the window for the local regression (in vector position units)
+#' @param mul1 First multiplier for the first alarm threshold
+#' @param mul2 Second multiplier for the second alarm threshold
+#' @param Delta Logical. If TRUE, then the statistic for determining the contact point is the
+#' differences between two consecutive values of the slope of the local regression line.
+#' If FALSE then the slope itself is used.
+#' @param loessSmooth Logical If TRUE (default), a loess smoothing (via loess.smooth()) is done prior to
+#' the determination of the contact point. The span of the  smoothing is 0.05 (5%), the degree is 2 and the
+#' number of points equals the number of points in the approach segment.
+#' @return A list of:
+#'
+#' \code{CP} The contact point value.
+#'
+#' \code{iCP} The position in the array for the contact point value.
+#'
+#' \code{delta} The delta signal.
+#'
+#' \code{noise} The noise of the delta signal
+#' @examples
+#' JPKexample <- paste(path.package("afmToolkit"), "force-save-JPK-3h.txt",sep = "/")
+#' data <- afmReadJPK(JPKexample)
+#' width <- 20
+#' mul1 <- 1
+#' mul2 <- 10
+#' CP <- afmContactPoint(data, width = width, mul1 = mul1, mul2 = mul2)
+#' plot(data, segment = "approach") + geom_vline(xintercept = CP$CP, lty = 2)
+#' @export
 afmDetachPoint <- function(afmdata,width=1,mul1,mul2, lagdiff = width, 
                             Delta=TRUE, loessSmooth = TRUE){
+  if (is.afmexperiment(afmdata)){
+    DP <- lapply(afmdata, function(x) afmDetachPoint(x, width = width,
+                                                      mul1 = mul1,
+                                                      mul2 = mul2,
+                                                      lagdiff = lagdiff,
+                                                      Delta = Delta,
+                                                      loessSmooth = loessSmooth))
+    afmexperiment <- mapply(afmdata,DP, FUN = function(x,y) append.afmdata(x,y, name = "DP"),
+                            SIMPLIFY = FALSE)
+    return(afmexperiment(afmexperiment))
+  }else if (is.afmdata(afmdata)){
   data.retract <- subset(afmdata$data, Segment == "retract")
   Z <- data.retract$Z
   Force <- data.retract$Force
@@ -63,5 +107,8 @@ afmDetachPoint <- function(afmdata,width=1,mul1,mul2, lagdiff = width,
     z_detach = Z[i_detach]
     z_detach = as.numeric(z_detach+eps*(Z[i_detach+1]-z_detach));  
     return(list(DP=z_detach, iDP=i_detach,delta=delta,noise=noise))
+  }
+  }else{
+    stop("Error: Input is not a valid afmdata or afmexperiment.")
   }
 }
