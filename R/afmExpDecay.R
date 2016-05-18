@@ -36,10 +36,17 @@
 
 afmExpDecay <- function(afmdata, nexp = 2, tmax = NULL,
                         type = c("CH","CF"), plt = TRUE, ...) {
+  
   type <- match.arg(type)
-  if (!is.afmdata(afmdata)) {
-    stop("Input must be an afmdata object!")
-  }
+  if (is.afmexperiment(afmdata)){
+    expfit <- lapply(afmdata, function(x) afmExpDecay(x, nexp = nexp, tmax = tmax,
+                                                      type = type, plt = plt, ...))
+    afmdata <- mapply(afmdata,expfit, FUN = function(x,y) 
+      append.afmdata(x,y,name = "ExpFit"), SIMPLIFY = FALSE)
+    return(afmexperiment(afmdata))
+  }else if (!is.afmdata(afmdata)) {
+    stop("Input must be an afmdata or an afmexperiment object!")
+  }else{
   if (!"contact" %in% levels(afmdata$data$Segment)) {
     stop("A contact segment must be present!")
   }
@@ -108,4 +115,5 @@ afmExpDecay <- function(afmdata, nexp = 2, tmax = NULL,
     }
   }
   return(list(expdecayModel = expdecayModel, expdecayFit = expdecayFit))
+  }
 }
