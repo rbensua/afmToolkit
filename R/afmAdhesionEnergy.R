@@ -2,10 +2,10 @@ afmAdhesionEnergy <- function(afmdata, width = 1,segment = "retract",
                               lagdiff = width, mul2, mdj = NULL) {
   # Extract the approach segment from the afmdata
   data <- subset(afmdata$data, Segment == segment)
-  Z <- data$Z
+  Z <- rev(data$Z)
   
   
-  Force <- data$ForceCorrected
+  Force <- rev(data$ForceCorrected)
   
   
   imin <- min(which(Force < 0))
@@ -46,7 +46,7 @@ afmAdhesionEnergy <- function(afmdata, width = 1,segment = "retract",
   jumpsDelta <- list()
   
   # Indices above the threshold (in the slope)
-  idxGrTol2Begin <- which(abs(delta) > tol2Begin)
+  idxGrTol2Begin <- which(abs(delta) > tol2End)
   idxGrTol2Begin <- idxGrTol2Begin[idxGrTol2Begin <= imax + width &
                                      idxGrTol2Begin >= which.min(Force)]
   # Compute the number of jumps at the beginning

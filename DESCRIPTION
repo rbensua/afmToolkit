@@ -7,7 +7,10 @@ Description: What the package does (one paragraph)
 Depends:
     R (>= 3.2.2),
     ggplot2,
-    minpack.lm
+    minpack.lm,
+    grid,
+    gridExtra,
+    scales
 License: GPL
 LazyData: true
 RoxygenNote: 5.0.1

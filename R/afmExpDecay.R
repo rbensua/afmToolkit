@@ -92,7 +92,7 @@ afmExpDecay <- function(afmdata, nexp = 2, tmax = NULL,
     expdecayFit <-
       predict(expdecayModel, data.frame(Time = decay$Time))
   } else
-    stop("type shoulf either 'CF' or 'CH'!")
+    stop("type should be either 'CF' or 'CH'!")
   if (plt) {
     df <- subset(afmdata$data, Segment == "contact" & Time <= tmax,
                  select = c("Time"))

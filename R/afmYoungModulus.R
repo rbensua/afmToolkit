@@ -25,7 +25,7 @@ afmYoungModulus <-
            silent = TRUE,
            params) {
     if (is.afmexperiment(afmdata)) {
-      afmdata <-
+      YM <-
         lapply(afmdata, function(x)
           afmYoungModulus(
             x,
@@ -35,8 +35,9 @@ afmYoungModulus <-
             params = params,
             silent = silent
           ))
-      
-      return(afmexperiment(afmdata))
+      afmexperiment <- mapply(afmdata,YM, FUN = function(x,y) append.afmdata(x,y, name = "YoungModulus"),
+                              SIMPLIFY = FALSE)
+      return(afmexperiment(afmexperiment))
     } else if (is.afmdata(afmdata)) {
       if (!("ForceCorrected" %in% names(afmdata$data))) {
         stop("Baseline correction should be done first!")
@@ -107,8 +108,12 @@ afmYoungModulus <-
       YoungModulus <-
         as.numeric(slope * sqrt(2) * (1 - params$nu ^ 2) / tan(params$alpha * pi /
                                                                  180))
-      afmdata$params$YoungModulus <- YoungModulus
-      return(afmdata(afmdata))
+      #afmdata$params$YoungModulus <- YoungModulus
+      #return(afmdata(afmdata))
+      return(list(YoungModulus = YoungModulus,
+                  fitYM = fitYM,
+                  fitdata = subset(fitdata, 
+                                   select = c(Indentation,ForceCorrected))))
     } else {
       stop("Error: input is not a valid afmdata or afmexperiment.")
     }
