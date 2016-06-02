@@ -10,7 +10,8 @@ Depends:
     minpack.lm,
     grid,
     gridExtra,
-    scales
+    scales,
+    dplyr
 License: GPL
 LazyData: true
 RoxygenNote: 5.0.1

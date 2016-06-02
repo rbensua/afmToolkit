@@ -48,21 +48,25 @@ summary.afmdata <- function(afmdata,plt = TRUE){
     names(output) <- newnames
   }
   if ("ExpFit" %in% names(afmdata)){
-    if(grepl("Force ~",afmdata$ExpFit$expdecayModel$call[2])){
-      typeoffit <- "Constant Height"
-    }else{
+    if(grepl("Z ~",afmdata$ExpFit$expdecayModel$call[2])){
       typeoffit <- "Constant Force"
+    }else{
+      typeoffit <- "Constant Height"
     }
     newnames <- c(names(output),"Type of Experiment")
     output <- cbind(output,typeoffit)
     names(output) <- newnames
     expfit <- summary(afmdata$ExpFit$expdecayModel)
+    print(expfit$coefficients)
   }
+  print(output)
   if (plt){
-    
+     
     fancy_scientific <- function(l) {
       # turn in to character string in scientific notation
+      #print(l)
       l <- format(l, scientific = TRUE)
+      
       l[as.numeric(l) == 0] <- "0"
       # quote the part before the exponent to keep all the digits
       l <- gsub("^(.*)e", "'\\1'e", l)
@@ -81,14 +85,19 @@ summary.afmdata <- function(afmdata,plt = TRUE){
                             row.names = c("C. Point:", "Zero F. Pt.:",
                                           "Young's Modulus:"))
     names(mytable) <- NULL
+    
     # Theme for tableGrob
     mytheme <- ttheme_default(base_size = 10,core=list(fg_params=list(hjust=0, x=0.1)),
                               rowhead = list(fg_params = list(fontface = "bold")))
     # Base Plot
-    applt <- plot(afmdata, segment = "approach") + 
-      geom_vline(xintercept = output$`Contact Point`, lty = 2, lwd = .2)+
-      geom_vline(xintercept = output$`Zero force pt.`, lty = 3, lwd = .3,
+    applt <- plot(afmdata, segment = "approach") 
+    if ("CP" %in% fields){
+      applt<- applt+geom_vline(xintercept = output$`Contact Point`, lty = 2, lwd = .2)
+    }
+    if ("Slopes" %in% names(afmdata)){
+      applt <- applt + geom_vline(xintercept = output$`Zero force pt.`, lty = 3, lwd = .3,
                  colour = "red")
+    }
     # Getting table position 
     xrange <- layer_scales(applt)$x$range$range[2] -
       layer_scales(applt)$x$range$range[1]
@@ -106,6 +115,7 @@ summary.afmdata <- function(afmdata,plt = TRUE){
                               xmax = xmax, ymin = ymin, ymax = ymax) +
       ggtitle('Approach segment')
     
+    if ("YoungModulus" %in% names(afmdata)){
     # AÑADIR inset con la gráfica del ajuste de YM
     N <- nrow(afmdata$YoungModulus$fitdata)
     YMfitdata <- subset(afmdata$data, Segment == "approach" &
@@ -118,18 +128,125 @@ summary.afmdata <- function(afmdata,plt = TRUE){
     inset <- inset + geom_line(aes(x = -Indentation, 
                                    y = afmdata$YoungModulus$fitYM$fitted.values), 
                                colour = "red", lwd = 1) + theme_bw()+
-      scale_x_continuous(name = "Indentation",labels = fancy_scientific)+
-      scale_y_continuous(name = "Force",labels = fancy_scientific)+
+      scale_x_continuous(name = "Indentation") + #,labels = fancy_scientific)+
+      scale_y_continuous(name = "Force") + #,labels = fancy_scientific)+
       theme(axis.text.x = element_text(angle = 45, vjust = 0.5, size = 7))+
       theme(axis.text.y = element_text(size = 7))
     ins <- ggplotGrob(inset)
-    applt + annotation_custom(grob = ins, 
+    applt <- applt + annotation_custom(grob = ins, 
                               xmin = xini + 0.4*xrange, 
                               xmax = xini + 1*xrange, 
                               ymax = yini + 0.75*yrange, 
                               ymin = yini + 0.1*yrange)
-    if ("retract" %in% levels(afmdata$data$Segment)){
-      
     }
+    print(applt)
+    if ("contact" %in% levels(afmdata$data$Segment)){
+     ctc1 <- plot(afmdata, segment = "contact", vs = "Time") + xlab(NULL) + 
+       scale_x_continuous(labels = NULL)+
+       #scale_y_continuous(labels = fancy_scientific) +
+       ggtitle("Contact segment")
+     ctc2 <- ggplot(data = subset(afmdata$data, Segment == "contact"),
+                    aes(x = Time, y = Z)) + geom_line() +
+       #scale_y_continuous(labels = fancy_scientific)+
+       theme_bw()
+     if ("ExpFit" %in% names(afmdata)){
+       times <- subset(afmdata$data, 
+                       Segment == "contact")$Time[seq_along(afmdata$ExpFit$expdecayFit)]
+       fitcoef <- summary(afmdata$ExpFit$expdecayModel)$coefficients[,1:2]
+       fitcoef <- format(fitcoef, digits = 2)
+       xrange <- layer_scales(ctc2)$x$range$range[2] -
+         layer_scales(ctc2)$x$range$range[1]
+       xini <- layer_scales(ctc2)$x$range$range[1]
+       xmin <- xini + 0.7*xrange
+       xmax <- xini + 0.9*xrange
+       mytheme <- ttheme_default(base_size = 10,core=list(fg_params=list(hjust=0, x=0.1)),
+                                 rowhead = list(fg_params = list(fontface = "bold")))
+       if (typeoffit == "Constant Force"){
+         yrange <- layer_scales(ctc2)$y$range$range[2] -
+           layer_scales(ctc2)$y$range$range[1]
+         yini <- layer_scales(ctc2)$y$range$range[1]
+         ymin <- yini + 0.3*yrange
+         ymax <- yini + 0.9*yrange
+         ctc2 <- ctc2 + geom_line(data = data.frame(Time = times, 
+                                                    Z = afmdata$ExpFit$expdecayFit),
+                                  aes(x = Time, y = Z), col = "green", size = 1.5) +
+           annotation_custom(tableGrob(fitcoef, theme = mytheme), xmin = xmin , 
+                             xmax = xmax, ymin = ymin, ymax = ymax) 
+       }else {
+         yrange <- layer_scales(ctc1)$y$range$range[2] -
+           layer_scales(ctc1)$y$range$range[1]
+         yini <- layer_scales(ctc1)$y$range$range[1]
+         ymin <- yini + 0.3*yrange
+         ymax <- yini + 0.9*yrange
+         ctc1 <- ctc1 + geom_line(data = data.frame(Time = times, 
+                                                    Force = afmdata$ExpFit$expdecayFit),
+                                  aes(x = Time, y = Force), col = "green", size = 1.5)+
+           annotation_custom(tableGrob(fitcoef, theme = mytheme), xmin = xmin , 
+                             xmax = xmax, ymin = ymin, ymax = ymax) 
+       }
+     }
+       g1 <- ggplotGrob(ctc1)
+       g2 <- ggplotGrob(ctc2)
+       g <- rbind(g1,g2, size = "first")
+       g$widths <- unit.pmax(g1$widths,g2$widths)
+       g$layout[grepl("guide", g$layout$name),c("t","b")] <- c(1,nrow(g))
+       grid.newpage()
+       grid.draw(g)
+    }
+    if ("retract" %in% levels(afmdata$data$Segment)){
+      retplt <- plot(afmdata, segment = "retract") + ggtitle("Retract segment")
+      if ("AdhEner" %in% names(afmdata)){
+        energies <- data.frame(abs(afmdata$AdhEner$Energies), row.names = NULL)
+        colnames(energies) <- c("Adh. Energy", "Full detach Ener.", "Total Energy")
+        energies <- format(energies, digits = 4)
+        energies <- data.frame(t(energies))
+        colnames(energies) <- NULL
+        xrange <- layer_scales(retplt)$x$range$range[2] -
+          layer_scales(retplt)$x$range$range[1]
+        yrange <- layer_scales(retplt)$y$range$range[2] -
+          layer_scales(retplt)$y$range$range[1]
+        
+        xini <- layer_scales(retplt)$x$range$range[1]
+        xmin <- xini + 0.7*xrange
+        xmax <- xini + 0.9*xrange
+        yini <- layer_scales(retplt)$y$range$range[1]
+        ymin <- yini + 0.3*yrange
+        ymax <- yini + 0.9*yrange
+        mytheme <- ttheme_default(base_size = 10,core=list(fg_params=list(hjust=0, x=0.1)),
+                                  rowhead = list(fg_params = list(fontface = "bold")))
+        
+        
+        
+        afmdata$data %>% filter(Segment == "retract") %>% 
+          select(one_of("Z","ForceCorrected")) %>% 
+          filter(Z>=Z[afmdata$AdhEner$Points[1]] & 
+                   Z<=Z[afmdata$AdhEner$Points[2]])  -> poly1
+        afmdata$data %>% filter(Segment == "retract") %>% 
+          select(one_of("Z","ForceCorrected")) %>% 
+          filter(Z>=Z[afmdata$AdhEner$Points[2]] & 
+                   Z<=Z[afmdata$AdhEner$Points[3]])  -> poly2
+        poly1 <- bind_rows(data.frame(Z = poly1$Z[1], 
+                                      ForceCorrected = 0), poly1)
+        poly1 <- bind_rows(poly1, data.frame(Z = poly1$Z[nrow(poly1)], 
+                                             ForceCorrected = 0))
+        poly2 <- bind_rows(data.frame(Z = poly2$Z[1], 
+                                      ForceCorrected = 0), poly2)
+        poly2 <- bind_rows(poly2, data.frame(Z = poly2$Z[nrow(poly2)], 
+                                             ForceCorrected = 0))
+        retplt <- retplt + 
+          geom_polygon(data = poly1, aes(x = Z, y = ForceCorrected), fill = "red") +
+          geom_polygon(data = poly2, aes(x = Z, y = ForceCorrected), fill = "green") +
+          geom_vline(xintercept = 
+                       subset(afmdata$data, 
+                              Segment == "retract")$Z[afmdata$AdhEner$Points],
+                     lty = 2, colour = "grey")+
+          annotation_custom(tableGrob(energies, theme = mytheme), xmin = xmin , 
+                            xmax = xmax, ymin = ymin, ymax = ymax) 
+      }
+      print(retplt)
+    }
+    
   }
+  
+     
 }
