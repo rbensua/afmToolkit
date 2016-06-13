@@ -32,7 +32,9 @@ segment with the overlay of the fit is shown.}
 square method.}
 }
 \value{
-A list of:
+An \code{afmdata} class variable which will consist on the original 
+input \code{afmdata} variable plus a new list named \code{ExpFit} with the 
+following fields:
   
   \code{expdecayModel}: A nls object returned from  \code{nlsM()} function.
   
@@ -41,6 +43,23 @@ A list of:
 }
 \description{
 Fits a viscoelastic exponential decay in a Force-Relaxation or
-Creep experiments.
+Creep experiments as described in Nanotechnology 2010 (see references).
+}
+\examples{
+JPKexample <- paste(path.package("afmToolkit"), "force-save-JPK-3h.txt",sep = "/")
+data <- afmReadJPK(JPKexample)
+width <- 20
+mul1 <- 1
+mul2 <- 10
+data <- afmContactPoint(data, width = width, mul1 = mul1, mul2 = mul2)
+data <- afmDetachPoint(data, width = width, mul1 = mul1, mul2 = mul2)
+data <- afmBaselineCorrection(data)
+data <- afmExpDecay(data, nexp = 2, type = "CH")
+}
+\references{
+Susana Moreno-Flores, Rafael Benítez, María dM Vivanco and José Luis 
+ Toca-Herrera (2010). “Stress relaxation and creep on living cells with the atomic force 
+ microscope: a means to calculate elastic moduli and viscosities of 
+ cell components.” Nanotechnology, \strong{21} (44), pp. 445101.
 }
 

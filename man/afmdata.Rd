@@ -5,7 +5,7 @@
 \title{AFM data}
 \usage{
 afmdata(data, dstr = "Z", Fstr = "Force", Segstr = "Segment",
-  params = list(SpringConstant = numeric()))
+  params = list(SpringConstant = numeric(), curvename = NULL))
 }
 \arguments{
 \item{\code{data}:}{A data frame consisting in 3 or 4 columns. A minimum of 
@@ -23,6 +23,12 @@ variable.}
 
 \item{\code{tstr}:}{Character string with the posible names for the time
 variable.}
+
+\item{\code{params}:}{A list that may contain parameters describing the F-d 
+curve. At least will contain the \code{SpringConstant} and the 
+\code{curvename}, being the former the cantilever spring constant and the 
+latter  a F-d curve ID. Function \code{afmReadJPK} will try to obtain the spring
+constant from the file header and the curvename from the data file name.}
 }
 \value{
 An object of class \code{afmdata}
@@ -42,5 +48,8 @@ Force <- -u0*(12*z0^6/z^7-12*z0^12/z^13)
 Segment <- rep("approach",n)
 AFMcurve <- afmdata(data.frame(Z = z, Force = Force, Segment  = Segment))
 plot(AFMcurve)
+}
+\seealso{
+\code{\link{afmexperiment}}
 }
 

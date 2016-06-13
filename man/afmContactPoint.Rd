@@ -5,7 +5,7 @@
 \title{Contact point}
 \usage{
 afmContactPoint(afmdata, width = 1, mul1, mul2, lagdiff = width,
-  Delta = TRUE, loessSmooth = TRUE)
+  Delta = TRUE, loessSmooth = FALSE)
 }
 \arguments{
 \item{afmdata}{A Force-Distance curve with the afmdata structure. It should be a list with at least the 'data' field with a data frame of at least 4 columns.}
@@ -16,16 +16,21 @@ afmContactPoint(afmdata, width = 1, mul1, mul2, lagdiff = width,
 
 \item{mul2}{Second multiplier for the second alarm threshold}
 
+\item{lagdiff}{Lag for estimating the differences in Delta (or slopes) signal. 
+By default it takes the same value as the window with.}
+
 \item{Delta}{Logical. If TRUE, then the statistic for determining the contact point is the
 differences between two consecutive values of the slope of the local regression line.
 If FALSE then the slope itself is used.}
 
-\item{loessSmooth}{Logical If TRUE (default), a loess smoothing (via loess.smooth()) is done prior to
+\item{loessSmooth}{Logical If TRUE, a loess smoothing (via loess.smooth()) is done prior to
 the determination of the contact point. The span of the  smoothing is 0.05 (5%), the degree is 2 and the
 number of points equals the number of points in the approach segment.}
 }
 \value{
-A list of:
+An \code{afmdata} class variable which will consist on the original 
+input \code{afmdata} variable plus a new list named \code{CP} with the 
+following fields:
 
 \code{CP} The contact point value.
 
@@ -37,7 +42,8 @@ A list of:
 }
 \description{
 Find the contact point in for the Force-Distance curve
-following the method described in Microscopy Research and Technique 2013
+following the local regression and two thresholds methods described 
+in Microscopy Research and Technique 2013 (see reference).
 }
 \examples{
 JPKexample <- paste(path.package("afmToolkit"), "force-save-JPK-3h.txt",sep = "/")
@@ -45,7 +51,15 @@ data <- afmReadJPK(JPKexample)
 width <- 20
 mul1 <- 1
 mul2 <- 10
-CP <- afmContactPoint(data, width = width, mul1 = mul1, mul2 = mul2)
-plot(data, segment = "approach") + geom_vline(xintercept = CP$CP, lty = 2)
+data <- afmContactPoint(data, width = width, mul1 = mul1, mul2 = mul2)
+plot(data, segment = "approach") + geom_vline(xintercept = data$CP$CP, lty = 2)
+}
+\references{
+Benítez R., Moreno-Flores S., Bolós V. J. and Toca-Herrera J.L. (2013). “A 
+ new automatic contact point detection algorithm for AFM force curves.” 
+ Microscopy research and technique, \strong{76} (8), pp. 870-876.
+}
+\seealso{
+\code{\link{afmDetachPoint}}
 }
 
