@@ -134,10 +134,10 @@ summary.afmdata <- function(afmdata,plt = TRUE){
       theme(axis.text.y = element_text(size = 7))
     ins <- ggplotGrob(inset)
     applt <- applt + annotation_custom(grob = ins, 
-                              xmin = xini + 0.4*xrange, 
+                              xmin = xini + 0.5*xrange, 
                               xmax = xini + 1*xrange, 
                               ymax = yini + 0.75*yrange, 
-                              ymin = yini + 0.1*yrange)
+                              ymin = yini + 0.2*yrange)
     }
     print(applt)
     if ("contact" %in% levels(afmdata$data$Segment)){
@@ -239,7 +239,7 @@ summary.afmdata <- function(afmdata,plt = TRUE){
           geom_vline(xintercept = 
                        subset(afmdata$data, 
                               Segment == "retract")$Z[afmdata$AdhEner$Points],
-                     lty = 2, colour = "grey")+
+                     lty = 2, colour = "darkgrey")+
           annotation_custom(tableGrob(energies, theme = mytheme), xmin = xmin , 
                             xmax = xmax, ymin = ymin, ymax = ymax) 
       }

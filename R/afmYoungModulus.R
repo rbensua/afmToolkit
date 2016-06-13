@@ -25,18 +25,19 @@ afmYoungModulus <-
            silent = TRUE,
            params) {
     if (is.afmexperiment(afmdata)) {
-      YM <-
-        lapply(afmdata, function(x)
+      afmexperiment <-
+        lapply(afmdata, function(x){
+          if(!is.null(x$params$curvename)){
+            print(paste("Processing curve: ",x$params$curvename), sep = " ")
+          }
           afmYoungModulus(
             x,
             thickness = thickness,
             model = model,
             geometry = geometry,
             params = params,
-            silent = silent
-          ))
-      afmexperiment <- mapply(afmdata,YM, FUN = function(x,y) append.afmdata(x,y, name = "YoungModulus"),
-                              SIMPLIFY = FALSE)
+            silent = silent)
+          })
       return(afmexperiment(afmexperiment))
     } else if (is.afmdata(afmdata)) {
       if (!("ForceCorrected" %in% names(afmdata$data))) {
@@ -105,15 +106,16 @@ afmYoungModulus <-
       if (is.null(params$nu)) {
         params$nu <- 0.5
       }
-      YoungModulus <-
+      YM <-
         as.numeric(slope * sqrt(2) * (1 - params$nu ^ 2) / tan(params$alpha * pi /
                                                                  180))
       #afmdata$params$YoungModulus <- YoungModulus
       #return(afmdata(afmdata))
-      return(list(YoungModulus = YoungModulus,
-                  fitYM = fitYM,
-                  fitdata = subset(fitdata, 
-                                   select = c(Indentation,ForceCorrected))))
+      YoungModulus <- list(YoungModulus = YM,
+                           fitYM = fitYM,
+                           fitdata = subset(fitdata, 
+                                            select = c(Indentation,ForceCorrected))) 
+      return(append.afmdata(afmdata,YoungModulus))
     } else {
       stop("Error: input is not a valid afmdata or afmexperiment.")
     }

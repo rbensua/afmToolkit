@@ -2,7 +2,7 @@
 #'   
 #'   
 #' @description Fits a viscoelastic exponential decay in a Force-Relaxation or
-#' Creep experiments.
+#' Creep experiments as described in Nanotechnology 2010 (see references).
 #' 
 #' @param \code{afmdata}: An object of \code{afmdata} class with a 
 #'   \bold{Contact} segment and a \bold{Time} column in the \code{data}
@@ -22,13 +22,29 @@
 #'   (\code{start = list(...)}) for the Levenberg-Mardquart nonlinear least
 #'   square method.
 #'   
-#' @return A list of:
+#' @return An \code{afmdata} class variable which will consist on the original 
+#' input \code{afmdata} variable plus a new list named \code{ExpFit} with the 
+#' following fields:
 #'   
 #'   \code{expdecayModel}: A nls object returned from  \code{nlsM()} function.
 #'   
 #'   \code{expdecayFit}: The values predicted by the fit, returned from the
 #'   \code{predict()} function.
-#'   
+#' @examples 
+#' JPKexample <- paste(path.package("afmToolkit"), "force-save-JPK-3h.txt",sep = "/")
+#' data <- afmReadJPK(JPKexample)
+#' width <- 20
+#' mul1 <- 1
+#' mul2 <- 10
+#' data <- afmContactPoint(data, width = width, mul1 = mul1, mul2 = mul2)
+#' data <- afmDetachPoint(data, width = width, mul1 = mul1, mul2 = mul2)
+#' data <- afmBaselineCorrection(data)
+#' data <- afmExpDecay(data, nexp = 2, type = "CH")
+#' @references 
+#'  Susana Moreno-Flores, Rafael Benítez, María dM Vivanco and José Luis 
+#'  Toca-Herrera (2010). “Stress relaxation and creep on living cells with the atomic force 
+#'  microscope: a means to calculate elastic moduli and viscosities of 
+#'  cell components.” Nanotechnology, \strong{21} (44), pp. 445101.
 #' @export
 
 
@@ -39,10 +55,12 @@ afmExpDecay <- function(afmdata, nexp = 2, tmax = NULL,
   
   type <- match.arg(type)
   if (is.afmexperiment(afmdata)){
-    expfit <- lapply(afmdata, function(x) afmExpDecay(x, nexp = nexp, tmax = tmax,
-                                                      type = type, plt = plt, ...))
-    afmdata <- mapply(afmdata,expfit, FUN = function(x,y) 
-      append.afmdata(x,y,name = "ExpFit"), SIMPLIFY = FALSE)
+    afmdata <- lapply(afmdata, function(x){
+      if (!is.null(x$params$curvename)) {
+        print(paste("Processing curve: ", x$params$curvename), sep = " ")
+      }
+      afmExpDecay(x, nexp = nexp, tmax = tmax,type = type, plt = plt, ...)
+      })
     return(afmexperiment(afmdata))
   }else if (!is.afmdata(afmdata)) {
     stop("Input must be an afmdata or an afmexperiment object!")
@@ -114,6 +132,7 @@ afmExpDecay <- function(afmdata, nexp = 2, tmax = NULL,
           ))
     }
   }
-  return(list(expdecayModel = expdecayModel, expdecayFit = expdecayFit))
+  ExpFit<- list(expdecayModel = expdecayModel, expdecayFit = expdecayFit) 
+  return(append.afmdata(afmdata, ExpFit))
   }
 }

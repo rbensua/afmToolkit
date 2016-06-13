@@ -6,23 +6,19 @@ afmAdhesionEnergy <-
            mdj = NULL) {
     # Extract the retract segment from the afmdata
     if (is.afmexperiment(afmdata)) {
-      AdhE <-
-        lapply(afmdata, function(x)
+      afmexperiment <-
+        lapply(afmdata, function(x){
+          if (!is.null(x$params$curvename)) {
+            print(paste("Processing curve: ", x$params$curvename), sep = " ")
+          }
           afmAdhesionEnergy(
             x,
             width = width,
             mul = mul,
             lagdiff = lagdiff,
             mdj = mdj
-          ))
-      afmexperiment <-
-        mapply(
-          afmdata,
-          AdhE,
-          FUN = function(x, y)
-            append.afmdata(x, y, name = "AdhEner"),
-          SIMPLIFY = FALSE
-        )
+          )}
+    )
       return(afmexperiment(afmexperiment))
     } else if (is.afmdata(afmdata)) {
       data <- subset(afmdata$data, Segment == "retract")
@@ -158,22 +154,22 @@ afmAdhesionEnergy <-
       }
       Weight <- Eadh[length(Eadh)]
       EnerFun <- Eadh / Eadh[length(Eadh)]
-      return(
-        list(
-          Magnitudes = magnitudeDF,
-          Points = c(imin, leftPoint, imax),
-          delta = delta,
-          noiseB = noiseBeginDelta,
-          noiseE = noiseEndDelta,
-          EnerFun = data.frame(Zrel = Zadh - max(Zadh), EnerFun = EnerFun),
-          Energies = data.frame(
-            E1adh = E1adh,
-            E2adh = E2adh,
-            Weight = Weight
-          ),
-          jumpsDelta = jumpsDelta
-        )
+      EnerFun[1] <- 0
+      AdhEner <-  list(
+        Magnitudes = magnitudeDF,
+        Points = c(imin, leftPoint, imax),
+        delta = delta,
+        noiseB = noiseBeginDelta,
+        noiseE = noiseEndDelta,
+        EnerFun = data.frame(Zrel = Zadh - max(Zadh), EnerFun = EnerFun),
+        Energies = data.frame(
+          E1adh = E1adh,
+          E2adh = E2adh,
+          Weight = Weight
+        ),
+        jumpsDelta = jumpsDelta
       )
+      return(append.afmdata(afmdata,AdhEner))
     } else{
       stop("No afmdata or afmexperiment class input provided.")
     }

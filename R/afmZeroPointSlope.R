@@ -21,17 +21,13 @@
 afmZeroPointSlope <-
   function(afmdata, segment = c("approach", "retract")) {
     if (is.afmexperiment(afmdata)) {
-      ZeroPoint <-
-        lapply(data, function(x)
-          afmZeroPointSlope(x, segment = segment))
       afmdata <-
-        mapply(
-          afmdata,
-          ZeroPoint,
-          FUN = function(x, y)
-            append.afmdata(x, y, name = "Slopes"),
-          SIMPLIFY = FALSE
-        )
+        lapply(afmdata, function(x){
+          if(!is.null(x$params$curvename)){
+            print(paste("Processing curve: ",x$params$curvename), sep = " ")
+          }
+          afmZeroPointSlope(x, segment = segment)
+          })
       return(afmexperiment(afmdata))
     } else if (is.afmdata(afmdata)) {
       if (!("ForceCorrected" %in% names(afmdata$data))) {
@@ -77,7 +73,8 @@ afmZeroPointSlope <-
       Fslope <- ForceCorrected[indicesSlope]
       FitSlope <- lm(Fslope ~ Zslope)
       slope <- coef(FitSlope)[2] # Second coefficient of the fit
-      return(list = list(Z0Point = Z0Point, Slope = slope))
+      Slopes <- list(Z0Point = Z0Point, Slope = slope)
+      return(append.afmdata(afmdata,Slopes))
     } else{
       stop("Error: input is not a valid afmdata or afmexperiment.")
     }
