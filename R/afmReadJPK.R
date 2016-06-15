@@ -1,28 +1,34 @@
+#' @title Read Nanowizard JPK ascii file
+#'
+#' @description
 #' Read an ascii JPK file.
 #'
 #' Reads an ascii JPK file with one to three headers.
-#'
+#' @usage afmReadJPK(filename, path = ".", FColStr = "Vertical", ZColStr = "smoothed)", tColStr = "Series")
 #' @param filename String with the name of the jpk file
 #'
 #' @return A list containing a field 'data' which is a data frame
 #'
 #' @examples
-#' afmReadJPK('testJPKfile.txt')
-#'
+#' data <- afmReadJPK("force-save-JPK-3h.txt",path = path.package("afmToolkit"))
+#' str(data)
+#' @importFrom stats coef lm
+#' @export
 
 afmReadJPK <-
-  function(filename,
+  function(filename, path = ".",
            FColStr = "Vertical",
            ZColStr = "smoothed)",
            tColStr = "Series") {
-    fullData <- readLines(filename)
+    fullfilename <- file.path(path,filename)
+    fullData <- readLines(fullfilename)
     fullData <- fullData[sapply(fullData, nchar) > 0]
     headerLines <- grep("#", fullData)
     
     # Obtaining the spring constant
     springLine <- grep("spring", fullData, value = T)[1]
     SpringConstant <- as.numeric(unlist(strsplit(springLine, ":"))[2])
-    params = list(SpringConstant = SpringConstant)
+    params = list(SpringConstant = SpringConstant, curvename = filename)
     # Obtaining the number of headers
     numberOfHeader <- as.integer(sum(diff(headerLines) != 1) + 1)
     N <- length(fullData)

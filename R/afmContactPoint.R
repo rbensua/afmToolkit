@@ -5,6 +5,7 @@
 #' following the local regression and two thresholds methods described 
 #' in Microscopy Research and Technique 2013 (see reference).
 #'
+#' @usage afmContactPoint(afmdata, width = 1, mul1, mul2, lagdiff = width, Delta = TRUE, loessSmooth = FALSE)
 #' @param afmdata A Force-Distance curve with the afmdata structure. It should be a list with at least the 'data' field with a data frame of at least 4 columns.
 #' @param width Width of the window for the local regression (in vector position units)
 #' @param mul1 First multiplier for the first alarm threshold
@@ -29,18 +30,21 @@
 #'
 #' \code{noise} The noise of the delta signal
 #' @examples
-#' JPKexample <- paste(path.package("afmToolkit"), "force-save-JPK-3h.txt",sep = "/")
-#' data <- afmReadJPK(JPKexample)
+#' path <- path.package("afmToolkit")
+#' data <- afmReadJPK("force-save-JPK-3h.txt", path = path)
 #' width <- 20
 #' mul1 <- 1
 #' mul2 <- 10
 #' data <- afmContactPoint(data, width = width, mul1 = mul1, mul2 = mul2)
+#' \dontrun{
 #' plot(data, segment = "approach") + geom_vline(xintercept = data$CP$CP, lty = 2)
+#' }
 #' @references 
-#'  Benítez R., Moreno-Flores S., Bolós V. J. and Toca-Herrera J.L. (2013). “A 
-#'  new automatic contact point detection algorithm for AFM force curves.” 
+#'  Benitez R., Moreno-Flores S., Bolos V. J. and Toca-Herrera J.L. (2013). "A 
+#'  new automatic contact point detection algorithm for AFM force curves". 
 #'  Microscopy research and technique, \strong{76} (8), pp. 870-876.
 #' @seealso \code{\link{afmDetachPoint}}
+#' @importFrom stats loess.smooth
 #' @export
 
 

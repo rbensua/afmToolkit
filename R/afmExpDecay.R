@@ -3,7 +3,7 @@
 #'   
 #' @description Fits a viscoelastic exponential decay in a Force-Relaxation or
 #' Creep experiments as described in Nanotechnology 2010 (see references).
-#' 
+#' @usage afmExpDecay(afmdata, nexp = 2, tmax = NULL, type = c("CH","CF"), plt = TRUE, ...) 
 #' @param \code{afmdata}: An object of \code{afmdata} class with a 
 #'   \bold{Contact} segment and a \bold{Time} column in the \code{data}
 #'   dataframe.
@@ -31,8 +31,7 @@
 #'   \code{expdecayFit}: The values predicted by the fit, returned from the
 #'   \code{predict()} function.
 #' @examples 
-#' JPKexample <- paste(path.package("afmToolkit"), "force-save-JPK-3h.txt",sep = "/")
-#' data <- afmReadJPK(JPKexample)
+#' data <- afmReadJPK("force-save-JPK-3h.txt", path = path.package("afmToolkit"))
 #' width <- 20
 #' mul1 <- 1
 #' mul2 <- 10
@@ -41,10 +40,13 @@
 #' data <- afmBaselineCorrection(data)
 #' data <- afmExpDecay(data, nexp = 2, type = "CH")
 #' @references 
-#'  Susana Moreno-Flores, Rafael Benítez, María dM Vivanco and José Luis 
-#'  Toca-Herrera (2010). “Stress relaxation and creep on living cells with the atomic force 
+#'  Susana Moreno-Flores, Rafael Benitez, Maria dM Vivanco and Jose Luis 
+#'  Toca-Herrera (2010). "Stress relaxation and creep on living cells with the atomic force 
 #'  microscope: a means to calculate elastic moduli and viscosities of 
-#'  cell components.” Nanotechnology, \strong{21} (44), pp. 445101.
+#'  cell components". Nanotechnology, \strong{21} (44), pp. 445101.
+#' @import minpack.lm
+#' @import ggplot2
+#' @importFrom stats predict
 #' @export
 
 
