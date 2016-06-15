@@ -11,12 +11,16 @@ append.afmdata(afmdata, x, name = NULL, ...)
 
 \item{\code{x}:}{A list to be appended.}
 
-\item{\code{name}:}{The name of new field of the resulting afmdata object. If none is given, it is the same as \code{x}.}
+\item{\code{name}:}{The name of new field of the resulting afmdata object. If none is given,
+it is the same as \code{x}.}
 }
 \value{
 The new list of class \code{afmdata}
 }
 \description{
-This function appends a list to an existing afmdata structure.
+This function appends a list to an existing afmdata structure. 
+It is used internally by several afm* functions
+when attaching the results to the input afmdata variable.
+This function should not be used directly unless by experienced users.
 }
 

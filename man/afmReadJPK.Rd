@@ -2,10 +2,9 @@
 % Please edit documentation in R/afmReadJPK.R
 \name{afmReadJPK}
 \alias{afmReadJPK}
-\title{Read an ascii JPK file.}
+\title{Read Nanowizard JPK ascii file}
 \usage{
-afmReadJPK(filename, FColStr = "Vertical", ZColStr = "smoothed)",
-  tColStr = "Series")
+afmReadJPK(filename, path = ".", FColStr = "Vertical", ZColStr = "smoothed)", tColStr = "Series")
 }
 \arguments{
 \item{filename}{String with the name of the jpk file}
@@ -14,10 +13,12 @@ afmReadJPK(filename, FColStr = "Vertical", ZColStr = "smoothed)",
 A list containing a field 'data' which is a data frame
 }
 \description{
+Read an ascii JPK file.
+
 Reads an ascii JPK file with one to three headers.
 }
 \examples{
-afmReadJPK('testJPKfile.txt')
-
+data <- afmReadJPK("force-save-JPK-3h.txt",path = path.package("afmToolkit"))
+str(data)
 }
 

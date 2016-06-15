@@ -4,8 +4,7 @@
 \alias{afmdata}
 \title{AFM data}
 \usage{
-afmdata(data, dstr = "Z", Fstr = "Force", Segstr = "Segment",
-  params = list(SpringConstant = numeric(), curvename = NULL))
+afmdata(data, dstr = "Z", Fstr = "Force", Segstr = "Segment", params = list(SpringConstant = numeric(), curvename = NULL ))
 }
 \arguments{
 \item{\code{data}:}{A data frame consisting in 3 or 4 columns. A minimum of 

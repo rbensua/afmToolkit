@@ -4,25 +4,53 @@
 \alias{afmYoungModulus}
 \title{afmYoungModulus}
 \usage{
-afmYoungModulus(afmdata, thickness = NULL, model = "Hertz",
-  geometry = "pyramid", silent = TRUE, params)
+afmYoungModulus(afmdata, thickness = NULL, model = "Hertz", geometry = "pyramid", silent = TRUE, params)
 }
 \arguments{
 \item{\code{afmdata}:}{An \code{afmdata} object. It should be a valid afmdata
 object upon which the Contact Point, the baseline correction and the Zero
-Force Point must have been calculated first (using functions
-\code{afmContactPoint()}, \code{afmBaselineCorrection()}) and
- \code{afmZeroPointSlope()}}
+Force Point and the Indentation must have been calculated first (using functions
+\code{afmContactPoint()}, \code{afmBaselineCorrection()}, \code{afmZeroPointSlope()}, and
+\code{afmIndentation()})}
+
+\item{\code{thickness}:}{Thickness (in m) of the surface. The Force vs Indentation^2 will be done
+for values of the Indentation variable smaller than the thickness. If no value is given, it will be done 
+for all values in the curve for which the Indentation is negative.}
+
+\item{\code{model}:}{Contact mechanics model to be used. Currently only Hertz's pure elastic model is available.}
+
+\item{\code{geometry}:}{Geometry of the tip. Currently only pyramidal geometry is implemented.}
+
+\item{\code{silent}:}{Logical value. If FALSE it prints the fit model summary (via \code{summary.lm()}).}
+
+\item{\code{params}:}{A list containing different parameters of the model: e.g. nu (Poisson's ratio) 
+or alpha (internal angle, in degrees, of the pyramidal tip)}
 }
 \value{
-Returns a list with one field:
+An \code{afmdata} class variable which will consist on the original 
+input \code{afmdata} variable plus a new list named \code{YoungModulus} with the 
+following fields:
 
-\code{afmdata}: An afmdata class in which a Deformation vector is added
-in the \code{data} field
+\code{YoungModulus} The Young's modulus value (in Pa).
+
+\code{fitYM} The Force vs Indentation^2 fit as an \code{lm} object.
+
+\code{fitdata} The subset of the data used in the fit.
 }
 \description{
 This function computes the Young's Modulus of the sample
-from the approach curve using different contact models and for different
-tip geometries.
+from the approach curve using Hertz's  contact model  for a pyramidal
+tip.
+}
+\examples{
+data <- afmReadJPK("force-save-JPK-2h.txt", path = path.package("afmToolkit"))
+data <- afmContactPoint(data, width = 20, mul1 = 1, mul2 = 20)
+data <- afmDetachPoint(data, width = 40, mul1 = 3, mul2 = 40)
+data <- afmBaselineCorrection(data)
+data <- afmZeroPointSlope(data, segment = "approach")
+data <- afmIndentation(data)
+data <- afmYoungModulus(data, thickness = 1e-8, params = list(alpha = 22),
+                        silent = TRUE)
+print(data$YoungModulus$YoungModulus)
 }
 

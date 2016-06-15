@@ -2,22 +2,27 @@
 #'
 #' @description This function finds the point of zero force (real contact point)
 #' and the slope of the contact part of the Force-Distance curve.
-#'
+#' @usage afmZeroPointSlope(afmdata, segment = c("approach", "retract"))
 #' @param \code{afmdata}: An \code{afmdata} object. It should be a valid afmdata object upon
 #' which the Contact Point and the baseline correction must have been calculated first
 #' (using functions \code{afmContactPoint()} and \code{afmBaselineCorrection()})
 #' @param \code{segment}: The segment on which everything is calculated.
 #'
-#' @return Returns a list with two fields:
-#'
+#' @return An \code{afmdata} class variable which will consist on the original 
+#' input \code{afmdata} variable plus a new list named \code{Slopes} with the 
+#' following fields:
 #' \code{Z0Point}: Point of zero force.
 #' \code{Slope}: Slope of the best fit line in the contact part of the Force-Distance curve.
+#' @examples
+#' data <- afmReadJPK("force-save-JPK-2h.txt", path = path.package("afmToolkit"))
+#' data <- afmContactPoint(data, width = 20, mul1 = 1, mul2 = 20)
+#' data <- afmDetachPoint(data, width = 40, mul1 = 3, mul2 = 40)
+#' data <- afmBaselineCorrection(data)
+#' data <- afmZeroPointSlope(data, segment = "approach")
+#' \dontrun{
+#' plot(data, segment = "approach") + geom_vline(xintercept = data$Slopes$Z0Point, lty = 2)
+#' }
 #' @export
-
-
-
-
-
 afmZeroPointSlope <-
   function(afmdata, segment = c("approach", "retract")) {
     if (is.afmexperiment(afmdata)) {

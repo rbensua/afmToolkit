@@ -1,11 +1,15 @@
 #' @title Append to an \code{afmdata} list.
 #' 
 #' @description 
-#' This function appends a list to an existing afmdata structure.
+#' This function appends a list to an existing afmdata structure. 
+#' It is used internally by several afm* functions
+#' when attaching the results to the input afmdata variable.
+#' This function should not be used directly unless by experienced users.
 #' 
 #' @param \code{afmdata}: The afmdata to which the new list is going to be joined.
 #' @param \code{x}: A list to be appended.
-#' @param \code{name}: The name of new field of the resulting afmdata object. If none is given, it is the same as \code{x}.
+#' @param \code{name}: The name of new field of the resulting afmdata object. If none is given,
+#'  it is the same as \code{x}.
 #' @return The new list of class \code{afmdata} 
 #' @export
 

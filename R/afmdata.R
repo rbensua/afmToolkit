@@ -4,7 +4,8 @@
 #' This function creates an \code{afmdata} structure, which is as list with at
 #'  least one field called \code{data} which is a data frame with a valid AFM 
 #'  data, that is, at least 3 variables called "Z", "Force", and "Segment".
-#'
+#' 
+#' @usage afmdata(data, dstr = "Z", Fstr = "Force", Segstr = "Segment", params = list(SpringConstant = numeric(), curvename = NULL ))
 #' @param \code{data}: A data frame consisting in 3 or 4 columns. A minimum of 
 #' "Z" (or "distance"), "Force" and "Segment". Optionally a fourth column with 
 #' "Time" could be added.
@@ -34,6 +35,7 @@
 #'AFMcurve <- afmdata(data.frame(Z = z, Force = Force, Segment  = Segment))
 #'plot(AFMcurve)
 #' @seealso \code{\link{afmexperiment}}
+#' @export
 
 afmdata <-
   function(data, dstr = "Z", Fstr = "Force", Segstr = "Segment", 

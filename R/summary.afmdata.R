@@ -1,25 +1,36 @@
-#' @title Plot an afmdata object
+#' @title Summary of an \code{afmdata} class object.
 #' 
 #' 
 #' @description 
-#' Plots an afmdata object.
+#' This function sumarizes the main features of an afmdata object and, optionnaly plots all 
+#' segments available with all parameters estimated. 
 #' 
 #' @param \code{afmdata}: An object of \code{afmdata} class.
-#' @param \code{vs}: The variable for the x-axis. May take the values "Time" or 
-#'   "Z". It defaults to "Z", plotting thus a Force-Distance curve. If \code{vs}
-#'   is set to "Time", then it plots  a Force-Time curve.
-#' @param \code{segment}: The segment of the curve to be plotted. If
-#'   \code{segment = "all"} then all segments of the curve are plotted. Possible
-#'   values are: \code{"approach"}, \code{"contact"}, \code{"retract"} and 
-#'   \code{"all"}.
-#'   
+#' @param \code{plt}: Logical variable. If TRUE plots all available segments with all available data.
 #' 
+#' @examples
+#' path <- path.package("afmToolkit")
+#' data <- afmReadJPK("force-save-JPK-3h.txt", path = path)
+#' data <- afmContactPoint(data, width = 20, mul1 = 1, mul2 = 10)
+#' data <- afmDetachPoint(data, width = 20, mul1 = 2, mul2 = 30)
+#' data <- afmBaselineCorrection(data)
+#' data <- afmAdhesionEnergy(data, width = 20, mul = 10)
+#' data <- afmZeroPointSlope(data, segment = "approach")
+#' data <- afmIndentation(data)
+#' data <- afmYoungModulus(data, thickness = 1e-7, params = list(alpha = 22),
+#'                         silent = TRUE)
+#' data <- afmExpDecay(data, nexp = 2, type = "CH")
+#' summary(data)                        
+#' @method summary afmdata 
+#' @import grid
+#' @import gridExtra
+#' @import scales
+#' @import dplyr
 #' @export
-#' 
 
 summary.afmdata <- function(afmdata,plt = TRUE){
   if (!is.afmdata(afmdata)){
-    stop("Input should be an afmdata structure!")
+    stop("Input should be an afmdata class object!")
   }
   nfields <- length(afmdata)
   fields <- names(afmdata)

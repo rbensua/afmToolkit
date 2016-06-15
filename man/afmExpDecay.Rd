@@ -4,8 +4,7 @@
 \alias{afmExpDecay}
 \title{Exponential decay fit}
 \usage{
-afmExpDecay(afmdata, nexp = 2, tmax = NULL, type = c("CH", "CF"),
-  plt = TRUE, ...)
+afmExpDecay(afmdata, nexp = 2, tmax = NULL, type = c("CH","CF"), plt = TRUE, ...)
 }
 \arguments{
 \item{\code{afmdata}:}{An object of \code{afmdata} class with a 
@@ -46,8 +45,7 @@ Fits a viscoelastic exponential decay in a Force-Relaxation or
 Creep experiments as described in Nanotechnology 2010 (see references).
 }
 \examples{
-JPKexample <- paste(path.package("afmToolkit"), "force-save-JPK-3h.txt",sep = "/")
-data <- afmReadJPK(JPKexample)
+data <- afmReadJPK("force-save-JPK-3h.txt", path = path.package("afmToolkit"))
 width <- 20
 mul1 <- 1
 mul2 <- 10
@@ -57,9 +55,9 @@ data <- afmBaselineCorrection(data)
 data <- afmExpDecay(data, nexp = 2, type = "CH")
 }
 \references{
-Susana Moreno-Flores, Rafael Benítez, María dM Vivanco and José Luis 
- Toca-Herrera (2010). “Stress relaxation and creep on living cells with the atomic force 
+Susana Moreno-Flores, Rafael Benitez, Maria dM Vivanco and Jose Luis 
+ Toca-Herrera (2010). "Stress relaxation and creep on living cells with the atomic force 
  microscope: a means to calculate elastic moduli and viscosities of 
- cell components.” Nanotechnology, \strong{21} (44), pp. 445101.
+ cell components". Nanotechnology, \strong{21} (44), pp. 445101.
 }
 

@@ -3,7 +3,7 @@
 #' @description
 #' This function creates an \code{afmexperiment} structure, which is as list 
 #' (or an array) of elements of \code{afmdata} class.
-#'
+#' @usage afmexperiment(data, ID=NULL)
 #' @param \code{data}: A variable of  \code{afmdata} class, or a list of 
 #' elements of \code{afmdata} class.
 #' @param \code{ID}: Character string with the identifier of 
@@ -14,13 +14,13 @@
 #'
 #' @examples
 #' dataFolder <- paste(path.package("afmToolkit"), "afmexperiment",sep = "/")
-#' dataFiles <- list.files(dataFolder, pattern = "force", full.names = TRUE)
-#' curveNames <- list.files(dataFolder, pattern = "force", full.names = FALSE)
-#' data <- lapply(dataFiles, afmReadJPK)
-#' names(data) <- curveNames
+#' dataFiles <- list.files(dataFolder, pattern = "force", full.names = FALSE)
+#' data <- lapply(dataFiles, afmReadJPK, path = dataFolder)
+#' names(data) <- dataFiles
 #' data <- afmexperiment(data)
 #' plot(data[[1]])
 #' @seealso \code{\link{afmdata}}
+#' @export
 afmexperiment <-
   function(data, ID=NULL) {
     if (!is.afmexperiment(data)) {

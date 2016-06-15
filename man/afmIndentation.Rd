@@ -16,12 +16,21 @@ Force Point must have been calculated first (using functions
 \value{
 Returns a list with one field:
 
-\code{afmdata}: An afmdata class in which a Deformation vector is added 
-in the \code{data} field
+\code{afmdata}: An afmdata class in which a \code{Indentation} column is added 
+in the \code{data} field.
 }
 \description{
 This function computes the deformation of the sample from the 
 calibrated Force-Distance curve, by substracting Z to the Zero Force Point 
 calculated with afmZeroPointSlope function.
+}
+\examples{
+data <- afmReadJPK("force-save-JPK-3h.txt", path = path.package("afmToolkit"))
+data <- afmContactPoint(data, width = 20, mul1 = 1, mul2 = 20)
+data <- afmDetachPoint(data, width = 40, mul1 = 3, mul2 = 40)
+data <- afmBaselineCorrection(data)
+data <- afmZeroPointSlope(data, segment = "approach")
+data <- afmIndentation(data)
+head(data$data)
 }
 
