@@ -4,12 +4,14 @@
 \alias{summary.afmdata}
 \title{Summary of an \code{afmdata} class object.}
 \usage{
-\method{summary}{afmdata}(afmdata, plt = TRUE)
+\method{summary}{afmdata}(object, plt = TRUE, ...)
 }
 \arguments{
-\item{\code{afmdata}:}{An object of \code{afmdata} class.}
+\item{object}{An object of \code{afmdata} class.}
 
-\item{\code{plt}:}{Logical variable. If TRUE plots all available segments with all available data.}
+\item{plt}{Logical variable. If TRUE plots all available segments with all available data.}
+
+\item{...}{Additional arguments (for compatibility with \code{summary})}
 }
 \description{
 This function sumarizes the main features of an afmdata object and, optionnaly plots all 

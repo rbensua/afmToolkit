@@ -4,14 +4,14 @@
 \alias{append.afmdata}
 \title{Append to an \code{afmdata} list.}
 \usage{
-append.afmdata(afmdata, x, name = NULL, ...)
+append.afmdata(afmdata, x, name = NULL)
 }
 \arguments{
-\item{\code{afmdata}:}{The afmdata to which the new list is going to be joined.}
+\item{afmdata}{The afmdata to which the new list is going to be joined.}
 
-\item{\code{x}:}{A list to be appended.}
+\item{x}{A list to be appended.}
 
-\item{\code{name}:}{The name of new field of the resulting afmdata object. If none is given,
+\item{name}{The name of new field of the resulting afmdata object. If none is given,
 it is the same as \code{x}.}
 }
 \value{

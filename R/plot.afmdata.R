@@ -4,14 +4,16 @@
 #' @description 
 #' Plots an afmdata object.
 #' 
-#' @param \code{afmdata}: An object of \code{afmdata} class.
-#' @param \code{vs}: The variable for the x-axis. May take the values "Time" or 
+#' @param x An object of \code{afmdata} class.
+#' @param y Variable added for compatibility with \code{plot}.
+#' @param vs The variable for the x-axis. May take the values "Time" or 
 #'   "Z". It defaults to "Z", plotting thus a Force-Distance curve. If \code{vs}
 #'   is set to "Time", then it plots  a Force-Time curve.
-#' @param \code{segment}: The segment of the curve to be plotted. If
+#' @param segment The segment of the curve to be plotted. If
 #'   \code{segment = "all"} then all segments of the curve are plotted. Possible
 #'   values are: \code{"approach"}, \code{"contact"}, \code{"retract"} and 
 #'   \code{"all"}.
+#' @param ... Additional parameters to be pased to the ggplot functions.
 #'   
 #' @examples
 #' # Loading the data
@@ -32,8 +34,12 @@
 #' plot(data, segment = "contact", vs = "Time")
 #' @method plot afmdata
 #' @export
-plot.afmdata <- function(afmdata, vs = "Z", segment = "all", ...)
+plot.afmdata <- function(x, y = NULL, vs = "Z", segment = "all", ...)
 {
+  if (!is.null(y)){
+    y <- NULL
+  }
+  afmdata <- x
   if (is.afmdata(afmdata)){
     segment <- match.arg(segment, c("approach","contact","retract","all"))
     vs <- match.arg(vs, c("Z","Time"))

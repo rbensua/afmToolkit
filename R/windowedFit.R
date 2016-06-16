@@ -6,9 +6,9 @@
 #' It computes the slopes of a linear fit to the data in a window of a given radius.
 #' This function should not be used directly unless by experienced users.
 #' @usage windowedFit(X, width)
-#' @param \code{X} Least squares matrix on the form [1 z Force], 
+#' @param X Least squares matrix on the form [1 z Force], 
 #' according to input parameters in function \code{lm.fit} 
-#' @param \code{width} Width of the window for the local regression (in vector position units)
+#' @param width Width of the window for the local regression (in vector position units)
 
 #' @return \code{OUT} A vector of length \code{nrow(X)-2*width}, 
 #' containing with the slopes of the fits.

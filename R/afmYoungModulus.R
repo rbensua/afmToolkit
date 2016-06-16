@@ -4,18 +4,18 @@
 #' from the approach curve using Hertz's  contact model  for a pyramidal
 #' tip. 
 #' @usage afmYoungModulus(afmdata, thickness = NULL, model = "Hertz", geometry = "pyramid", silent = TRUE, params)
-#' @param \code{afmdata}: An \code{afmdata} object. It should be a valid afmdata
+#' @param afmdata An \code{afmdata} object. It should be a valid afmdata
 #'  object upon which the Contact Point, the baseline correction and the Zero
 #'  Force Point and the Indentation must have been calculated first (using functions
 #'  \code{afmContactPoint()}, \code{afmBaselineCorrection()}, \code{afmZeroPointSlope()}, and
 #'  \code{afmIndentation()})
-#' @param \code{thickness}: Thickness (in m) of the surface. The Force vs Indentation^2 will be done
+#' @param thickness Thickness (in m) of the surface. The Force vs Indentation^2 will be done
 #' for values of the Indentation variable smaller than the thickness. If no value is given, it will be done 
 #' for all values in the curve for which the Indentation is negative.
-#' @param \code{model}: Contact mechanics model to be used. Currently only Hertz's pure elastic model is available.
-#' @param \code{geometry}: Geometry of the tip. Currently only pyramidal geometry is implemented.
-#' @param \code{silent}: Logical value. If FALSE it prints the fit model summary (via \code{summary.lm()}).
-#' @param \code{params}: A list containing different parameters of the model: e.g. nu (Poisson's ratio) 
+#' @param model Contact mechanics model to be used. Currently only Hertz's pure elastic model is available.
+#' @param geometry Geometry of the tip. Currently only pyramidal geometry is implemented.
+#' @param silent Logical value. If FALSE it prints the fit model summary (via \code{summary.lm()}).
+#' @param params A list containing different parameters of the model: e.g. nu (Poisson's ratio) 
 #' or alpha (internal angle, in degrees, of the pyramidal tip)
 #' @return An \code{afmdata} class variable which will consist on the original 
 #' input \code{afmdata} variable plus a new list named \code{YoungModulus} with the 

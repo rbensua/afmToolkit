@@ -7,7 +7,15 @@
 afmReadJPK(filename, path = ".", FColStr = "Vertical", ZColStr = "smoothed)", tColStr = "Series")
 }
 \arguments{
-\item{filename}{String with the name of the jpk file}
+\item{filename}{String with the name of the jpk file.}
+
+\item{path}{Path to the folder where the file is.}
+
+\item{FColStr}{String with a pattern identifying the Force column.}
+
+\item{ZColStr}{String with a pattern identifying the Z column.}
+
+\item{tColStr}{String with a pattern identifying the Time column.}
 }
 \value{
 A list containing a field 'data' which is a data frame

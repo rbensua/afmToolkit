@@ -5,9 +5,9 @@
 #' This function sumarizes the main features of an afmdata object and, optionnaly plots all 
 #' segments available with all parameters estimated. 
 #' 
-#' @param \code{afmdata}: An object of \code{afmdata} class.
-#' @param \code{plt}: Logical variable. If TRUE plots all available segments with all available data.
-#' 
+#' @param object An object of \code{afmdata} class.
+#' @param plt Logical variable. If TRUE plots all available segments with all available data.
+#' @param ... Additional arguments (for compatibility with \code{summary})
 #' @examples
 #' path <- path.package("afmToolkit")
 #' data <- afmReadJPK("force-save-JPK-3h.txt", path = path)
@@ -21,14 +21,16 @@
 #'                         silent = TRUE)
 #' data <- afmExpDecay(data, nexp = 2, type = "CH")
 #' summary(data)                        
-#' @method summary afmdata 
 #' @import grid
-#' @import gridExtra
+#' @importFrom  gridExtra ttheme_default tableGrob
 #' @import scales
 #' @import dplyr
+#' @rdname summary
 #' @export
+#' @method summary afmdata
 
-summary.afmdata <- function(afmdata,plt = TRUE){
+summary.afmdata <- function(object , plt = TRUE, ...){
+  afmdata <- object
   if (!is.afmdata(afmdata)){
     stop("Input should be an afmdata class object!")
   }

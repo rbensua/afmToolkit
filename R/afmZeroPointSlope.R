@@ -3,10 +3,10 @@
 #' @description This function finds the point of zero force (real contact point)
 #' and the slope of the contact part of the Force-Distance curve.
 #' @usage afmZeroPointSlope(afmdata, segment = c("approach", "retract"))
-#' @param \code{afmdata}: An \code{afmdata} object. It should be a valid afmdata object upon
+#' @param afmdata An \code{afmdata} object. It should be a valid afmdata object upon
 #' which the Contact Point and the baseline correction must have been calculated first
 #' (using functions \code{afmContactPoint()} and \code{afmBaselineCorrection()})
-#' @param \code{segment}: The segment on which everything is calculated.
+#' @param segment The segment on which everything is calculated.
 #'
 #' @return An \code{afmdata} class variable which will consist on the original 
 #' input \code{afmdata} variable plus a new list named \code{Slopes} with the 

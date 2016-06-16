@@ -4,7 +4,7 @@
 #' calibrated Force-Distance curve, by substracting Z to the Zero Force Point 
 #' calculated with afmZeroPointSlope function. 
 #' @usage afmIndentation(afmdata)
-#' @param \code{afmdata}: An \code{afmdata} object. It should be a valid afmdata
+#' @param afmdata An \code{afmdata} object. It should be a valid afmdata
 #'  object upon which the Contact Point, the baseline correction and the Zero 
 #'  Force Point must have been calculated first (using functions 
 #'  \code{afmContactPoint()}, \code{afmBaselineCorrection()}) and

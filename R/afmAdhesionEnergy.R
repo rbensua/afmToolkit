@@ -4,14 +4,14 @@
 #' Finds the adhesion and the full detach energies from the retract segment of the AFM 
 #' F-d curve. 
 #' @usage afmAdhesionEnergy(afmdata, width = 1, lagdiff = width, mul, mdj = NULL)
-#' @param \code{afmdata} An afmdata or afmexperiment class variables. Baseline correction should
+#' @param afmdata An afmdata or afmexperiment class variables. Baseline correction should
 #'  have been done already.
-#' @param \code{width} Width of the window for the local regression (in vector position units)
-#' @param \code{lagdiff} Lag for estimating the differences in Delta (or slopes) signal. 
+#' @param width Width of the window for the local regression (in vector position units)
+#' @param lagdiff Lag for estimating the differences in Delta (or slopes) signal. 
 #' By default it takes the same value as the window with.
-#' @param \code{mul} Multiplier for the calculating the threshold inthe estimation of jumps 
+#' @param mul Multiplier for the calculating the threshold inthe estimation of jumps 
 #' and peaks in the Delta signal
-#' @param \code{mdj} Minimum distance between jumps. If none is given then it will be set equal 
+#' @param mdj Minimum distance between jumps. If none is given then it will be set equal 
 #' to \code{width}
 #' @return An \code{afmdata} class variable which will consist on the original 
 #' input \code{afmdata} variable plus a new list named \code{AdhEner} with the 

@@ -4,26 +4,26 @@
 \alias{afmdata}
 \title{AFM data}
 \usage{
-afmdata(data, dstr = "Z", Fstr = "Force", Segstr = "Segment", params = list(SpringConstant = numeric(), curvename = NULL ))
+afmdata(data, dstr = "Z", Fstr = "Force", Segstr = "Segment", tstr = "Time", params = list(SpringConstant = numeric(), curvename = NULL ))
 }
 \arguments{
-\item{\code{data}:}{A data frame consisting in 3 or 4 columns. A minimum of 
+\item{data}{A data frame consisting in 3 or 4 columns. A minimum of 
 "Z" (or "distance"), "Force" and "Segment". Optionally a fourth column with 
 "Time" could be added.}
 
-\item{\code{dstr}:}{Character string with the posible names for the distance
+\item{dstr}{Character string with the posible names for the distance
 variable.}
 
-\item{\code{Fstr}:}{Character string with the posible names for the force 
+\item{Fstr}{Character string with the posible names for the force 
 variable.}
 
-\item{\code{Segstr}:}{Character string with the posible names for the Segment
+\item{Segstr}{Character string with the posible names for the Segment
 variable.}
 
-\item{\code{tstr}:}{Character string with the posible names for the time
+\item{tstr}{Character string with the posible names for the time
 variable.}
 
-\item{\code{params}:}{A list that may contain parameters describing the F-d 
+\item{params}{A list that may contain parameters describing the F-d 
 curve. At least will contain the \code{SpringConstant} and the 
 \code{curvename}, being the former the cantilever spring constant and the 
 latter  a F-d curve ID. Function \code{afmReadJPK} will try to obtain the spring

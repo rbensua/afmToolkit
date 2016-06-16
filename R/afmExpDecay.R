@@ -4,20 +4,20 @@
 #' @description Fits a viscoelastic exponential decay in a Force-Relaxation or
 #' Creep experiments as described in Nanotechnology 2010 (see references).
 #' @usage afmExpDecay(afmdata, nexp = 2, tmax = NULL, type = c("CH","CF"), plt = TRUE, ...) 
-#' @param \code{afmdata}: An object of \code{afmdata} class with a 
+#' @param afmdata An object of \code{afmdata} class with a 
 #'   \bold{Contact} segment and a \bold{Time} column in the \code{data}
 #'   dataframe.
-#' @param \code{nexp}: Number of expontials in the Prony series to be fitted.
+#' @param nexp Number of expontials in the Prony series to be fitted.
 #'   Currently only one or two exponentials are supported. Default is 2.
-#' @param \code{tmax}: Maximum time considered in the relaxation curve. It
+#' @param tmax Maximum time considered in the relaxation curve. It
 #'   defaults to \code{Inf}, meaning that the whole contact segment is
 #'   considered.
-#' @param \code{type}: Type of the experiment. Can be either "CH" (Constant
+#' @param type Type of the experiment. Can be either "CH" (Constant
 #'   Height) for a force-relaxation experiment or "CF" (Constant Force) for a
 #'   creep experiment. Default is \code{type = "CH"}.
-#' @param \code{plt:} Logical. If TRUE (default) then a plot of the Contact
+#' @param plt Logical. If TRUE (default) then a plot of the Contact
 #'   segment with the overlay of the fit is shown.
-#' @param \code{...}: Options passed to the \code{nlsM()} function from the
+#' @param ... Options passed to the \code{nlsM()} function from the
 #'   \code{minpack.lm} package. At least should contain the starting values
 #'   (\code{start = list(...)}) for the Levenberg-Mardquart nonlinear least
 #'   square method.

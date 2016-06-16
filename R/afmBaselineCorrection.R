@@ -15,10 +15,10 @@
 #' ZPointApp = 0.7 ContactPoint + 0.3 max(Z)
 #' }
 #' @usage afmBaselineCorrection(afmdata, ZPointApp = NULL, ZPointRet = NULL)
-#' @param \code{afmdata} An \code{afmdata} structure.
-#' @param \code{ZPointApp} Point in the approach segment of the curve
+#' @param afmdata An \code{afmdata} structure.
+#' @param ZPointApp Point in the approach segment of the curve
 #' that defines the approach baseline
-#' @param \code{ZPointRet} Point in the retract segment of the curves that 
+#' @param ZPointRet Point in the retract segment of the curves that 
 #' defines the retract baseline
 #' @return \code{afmdata} An \code{afmdata} structure identical to the one in 
 #' the input, but with an additional \code{ForceCorrected} column in the

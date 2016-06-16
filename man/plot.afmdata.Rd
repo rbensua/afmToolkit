@@ -4,19 +4,23 @@
 \alias{plot.afmdata}
 \title{Plot an afmdata object}
 \usage{
-\method{plot}{afmdata}(afmdata, vs = "Z", segment = "all", ...)
+\method{plot}{afmdata}(x, y = NULL, vs = "Z", segment = "all", ...)
 }
 \arguments{
-\item{\code{afmdata}:}{An object of \code{afmdata} class.}
+\item{x}{An object of \code{afmdata} class.}
 
-\item{\code{vs}:}{The variable for the x-axis. May take the values "Time" or 
+\item{y}{Variable added for compatibility with \code{plot}.}
+
+\item{vs}{The variable for the x-axis. May take the values "Time" or 
 "Z". It defaults to "Z", plotting thus a Force-Distance curve. If \code{vs}
 is set to "Time", then it plots  a Force-Time curve.}
 
-\item{\code{segment}:}{The segment of the curve to be plotted. If
+\item{segment}{The segment of the curve to be plotted. If
 \code{segment = "all"} then all segments of the curve are plotted. Possible
 values are: \code{"approach"}, \code{"contact"}, \code{"retract"} and 
 \code{"all"}.}
+
+\item{...}{Additional parameters to be pased to the ggplot functions.}
 }
 \description{
 Plots an afmdata object.

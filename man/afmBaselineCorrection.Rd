@@ -7,12 +7,12 @@
 afmBaselineCorrection(afmdata, ZPointApp = NULL, ZPointRet = NULL)
 }
 \arguments{
-\item{\code{afmdata}}{An \code{afmdata} structure.}
+\item{afmdata}{An \code{afmdata} structure.}
 
-\item{\code{ZPointApp}}{Point in the approach segment of the curve
+\item{ZPointApp}{Point in the approach segment of the curve
 that defines the approach baseline}
 
-\item{\code{ZPointRet}}{Point in the retract segment of the curves that 
+\item{ZPointRet}{Point in the retract segment of the curves that 
 defines the retract baseline}
 }
 \value{

@@ -5,19 +5,19 @@
 #'  least one field called \code{data} which is a data frame with a valid AFM 
 #'  data, that is, at least 3 variables called "Z", "Force", and "Segment".
 #' 
-#' @usage afmdata(data, dstr = "Z", Fstr = "Force", Segstr = "Segment", params = list(SpringConstant = numeric(), curvename = NULL ))
-#' @param \code{data}: A data frame consisting in 3 or 4 columns. A minimum of 
+#' @usage afmdata(data, dstr = "Z", Fstr = "Force", Segstr = "Segment", tstr = "Time", params = list(SpringConstant = numeric(), curvename = NULL ))
+#' @param data A data frame consisting in 3 or 4 columns. A minimum of 
 #' "Z" (or "distance"), "Force" and "Segment". Optionally a fourth column with 
 #' "Time" could be added.
-#' @param \code{dstr}: Character string with the posible names for the distance
+#' @param dstr Character string with the posible names for the distance
 #'  variable.
-#' @param \code{Fstr}: Character string with the posible names for the force 
+#' @param Fstr Character string with the posible names for the force 
 #' variable.
-#' @param \code{Segstr}: Character string with the posible names for the Segment
+#' @param Segstr Character string with the posible names for the Segment
 #'  variable.
-#' @param \code{tstr}: Character string with the posible names for the time
+#' @param tstr Character string with the posible names for the time
 #'  variable.
-#' @param \code{params}: A list that may contain parameters describing the F-d 
+#' @param params A list that may contain parameters describing the F-d 
 #' curve. At least will contain the \code{SpringConstant} and the 
 #' \code{curvename}, being the former the cantilever spring constant and the 
 #' latter  a F-d curve ID. Function \code{afmReadJPK} will try to obtain the spring
@@ -38,7 +38,7 @@
 #' @export
 
 afmdata <-
-  function(data, dstr = "Z", Fstr = "Force", Segstr = "Segment", 
+  function(data, dstr = "Z", Fstr = "Force", Segstr = "Segment", tstr = "Time",
            params = list(SpringConstant = numeric(), curvename = NULL )) {
     if (!is.afmdata(data)) {
       if (is.data.frame(data)) {

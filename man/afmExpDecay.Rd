@@ -7,25 +7,25 @@
 afmExpDecay(afmdata, nexp = 2, tmax = NULL, type = c("CH","CF"), plt = TRUE, ...)
 }
 \arguments{
-\item{\code{afmdata}:}{An object of \code{afmdata} class with a 
+\item{afmdata}{An object of \code{afmdata} class with a 
 \bold{Contact} segment and a \bold{Time} column in the \code{data}
 dataframe.}
 
-\item{\code{nexp}:}{Number of expontials in the Prony series to be fitted.
+\item{nexp}{Number of expontials in the Prony series to be fitted.
 Currently only one or two exponentials are supported. Default is 2.}
 
-\item{\code{tmax}:}{Maximum time considered in the relaxation curve. It
+\item{tmax}{Maximum time considered in the relaxation curve. It
 defaults to \code{Inf}, meaning that the whole contact segment is
 considered.}
 
-\item{\code{type}:}{Type of the experiment. Can be either "CH" (Constant
+\item{type}{Type of the experiment. Can be either "CH" (Constant
 Height) for a force-relaxation experiment or "CF" (Constant Force) for a
 creep experiment. Default is \code{type = "CH"}.}
 
-\item{\code{plt:}}{Logical. If TRUE (default) then a plot of the Contact
+\item{plt}{Logical. If TRUE (default) then a plot of the Contact
 segment with the overlay of the fit is shown.}
 
-\item{\code{...}:}{Options passed to the \code{nlsM()} function from the
+\item{...}{Options passed to the \code{nlsM()} function from the
 \code{minpack.lm} package. At least should contain the starting values
 (\code{start = list(...)}) for the Levenberg-Mardquart nonlinear least
 square method.}

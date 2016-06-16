@@ -7,7 +7,7 @@
 is.afmdata(x)
 }
 \arguments{
-\item{\code{x}:}{Any \bold{R} object.}
+\item{x}{Any \bold{R} object.}
 }
 \value{
 Returns \code{TRUE} if its argument is an afmdata (that is, has "afmdata" 

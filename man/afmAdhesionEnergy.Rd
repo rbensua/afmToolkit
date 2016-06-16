@@ -7,18 +7,18 @@
 afmAdhesionEnergy(afmdata, width = 1, lagdiff = width, mul, mdj = NULL)
 }
 \arguments{
-\item{\code{afmdata}}{An afmdata or afmexperiment class variables. Baseline correction should
+\item{afmdata}{An afmdata or afmexperiment class variables. Baseline correction should
 have been done already.}
 
-\item{\code{width}}{Width of the window for the local regression (in vector position units)}
+\item{width}{Width of the window for the local regression (in vector position units)}
 
-\item{\code{lagdiff}}{Lag for estimating the differences in Delta (or slopes) signal. 
+\item{lagdiff}{Lag for estimating the differences in Delta (or slopes) signal. 
 By default it takes the same value as the window with.}
 
-\item{\code{mul}}{Multiplier for the calculating the threshold inthe estimation of jumps 
+\item{mul}{Multiplier for the calculating the threshold inthe estimation of jumps 
 and peaks in the Delta signal}
 
-\item{\code{mdj}}{Minimum distance between jumps. If none is given then it will be set equal 
+\item{mdj}{Minimum distance between jumps. If none is given then it will be set equal 
 to \code{width}}
 }
 \value{

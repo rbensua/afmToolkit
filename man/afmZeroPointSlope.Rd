@@ -7,11 +7,11 @@
 afmZeroPointSlope(afmdata, segment = c("approach", "retract"))
 }
 \arguments{
-\item{\code{afmdata}:}{An \code{afmdata} object. It should be a valid afmdata object upon
+\item{afmdata}{An \code{afmdata} object. It should be a valid afmdata object upon
 which the Contact Point and the baseline correction must have been calculated first
 (using functions \code{afmContactPoint()} and \code{afmBaselineCorrection()})}
 
-\item{\code{segment}:}{The segment on which everything is calculated.}
+\item{segment}{The segment on which everything is calculated.}
 }
 \value{
 An \code{afmdata} class variable which will consist on the original 
