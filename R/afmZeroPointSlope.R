@@ -50,17 +50,22 @@ afmZeroPointSlope <-
       Fmin <- min(ForceCorrected)
       
       if (segment == "approach") {
+        #indicesSlope <-
+        #  which(ForceCorrected > 0 & Z < min(afmdata$CP$CP, Zmin))
         indicesSlope <-
-          which(ForceCorrected > 0 & Z < min(afmdata$CP$CP, Zmin))
-        i1 <- min(indicesSlope)
-        i0 <- i1 - 1
-        if (abs(Zmin) < abs(afmdata$CP$CP)) {
-          Z0Point <- Z[i0] - ForceCorrected[i0] * (Z[i1] - Z[i0]) /
-            (ForceCorrected[i1] - ForceCorrected[i0])
-        } else {
-          Z0Point <- afmdata$CP$CP
-        }
+          which(ForceCorrected < 0 & Z <  Zmin)
         
+        i1 <- max(indicesSlope)
+        #i0 <- i1 - 1
+        i0 <- i1+1
+        # if (abs(Zmin) < abs(afmdata$CP$CP)) {
+        #   Z0Point <- Z[i0] - ForceCorrected[i0] * (Z[i1] - Z[i0]) /
+        #     (ForceCorrected[i1] - ForceCorrected[i0])
+        # } else {
+        #   Z0Point <- afmdata$CP$CP
+        # }
+        Z0Point <- Z[i0] - ForceCorrected[i0] * (Z[i1] - Z[i0]) /
+          (ForceCorrected[i1] - ForceCorrected[i0])
       } else {
         indicesSlope <-
           which(ForceCorrected > 0 & Z < min(afmdata$DP$DP, Zmin))
