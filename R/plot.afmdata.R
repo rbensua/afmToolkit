@@ -11,7 +11,7 @@
 #'   is set to "Time", then it plots  a Force-Time curve.
 #' @param segment The segment of the curve to be plotted. If
 #'   \code{segment = "all"} then all segments of the curve are plotted. Possible
-#'   values are: \code{"approach"}, \code{"contact"}, \code{"retract"} and 
+#'   values are: \code{"approach"}, \code{"pause"}, \code{"retract"} and 
 #'   \code{"all"}.
 #' @param ... Additional parameters to be pased to the ggplot functions.
 #'   
@@ -30,8 +30,8 @@
 #' plot(data)
 #' # Plotting only retract segment
 #' plot(data, segment = "retract")
-#' # Plotting the contact segment: Force vs Time
-#' plot(data, segment = "contact", vs = "Time")
+#' # Plotting the pause segment: Force vs Time
+#' plot(data, segment = "pause", vs = "Time")
 #' @method plot afmdata
 #' @export
 plot.afmdata <- function(x, y = NULL, vs = "Z", segment = "all", ...)
@@ -41,7 +41,7 @@ plot.afmdata <- function(x, y = NULL, vs = "Z", segment = "all", ...)
   }
   afmdata <- x
   if (is.afmdata(afmdata)){
-    segment <- match.arg(segment, c("approach","contact","retract","all"))
+    segment <- match.arg(segment, c("approach","pause","retract","all"))
     vs <- match.arg(vs, c("Z","Time"))
   if (vs == "Time") {
     if (!("Time" %in% colnames(afmdata$data))) {
@@ -65,7 +65,7 @@ plot.afmdata <- function(x, y = NULL, vs = "Z", segment = "all", ...)
         theme_bw()
     }
     if ("ForceCorrected" %in% names(afmdata$data) &
-        segment != "contact") {
+        segment != "pause") {
       plt +
         geom_hline(yintercept = 0,lty = 2)
     } else{
@@ -90,7 +90,7 @@ plot.afmdata <- function(x, y = NULL, vs = "Z", segment = "all", ...)
         theme_bw()
     }
     if ("ForceCorrected" %in% names(afmdata$data) &
-        segment != "contact") {
+        segment != "pause") {
       plt +
         geom_hline(yintercept = 0,lty = 2)
     } else{

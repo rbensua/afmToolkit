@@ -17,7 +17,7 @@ is set to "Time", then it plots  a Force-Time curve.}
 
 \item{segment}{The segment of the curve to be plotted. If
 \code{segment = "all"} then all segments of the curve are plotted. Possible
-values are: \code{"approach"}, \code{"contact"}, \code{"retract"} and 
+values are: \code{"approach"}, \code{"pause"}, \code{"retract"} and 
 \code{"all"}.}
 
 \item{...}{Additional parameters to be pased to the ggplot functions.}
@@ -40,7 +40,7 @@ data <- afmBaselineCorrection(data)
 plot(data)
 # Plotting only retract segment
 plot(data, segment = "retract")
-# Plotting the contact segment: Force vs Time
-plot(data, segment = "contact", vs = "Time")
+# Plotting the pause segment: Force vs Time
+plot(data, segment = "pause", vs = "Time")
 }
 

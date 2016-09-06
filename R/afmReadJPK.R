@@ -85,19 +85,19 @@ afmReadJPK <-
       afmExperiment <- rbind(approach, retract)
     }
     else{
-      contact <- fullData[(headerEnds[2] + 1):(headerStarts[3] - 2)]
-      contact <-  matrix(as.numeric(unlist(strsplit(contact, " "))),
+      pause <- fullData[(headerEnds[2] + 1):(headerStarts[3] - 2)]
+      pause <-  matrix(as.numeric(unlist(strsplit(pause, " "))),
                          ncol = ncolumns,
                          byrow = TRUE)
       retract <- fullData[(headerEnds[3] + 1):N]
       retract <-  matrix(as.numeric(unlist(strsplit(retract, " "))),
                          ncol = ncolumns,
                          byrow = TRUE)
-      contact <- data.frame(
-        Z = contact[, Zcol],
-        Force = contact[, Fcol],
-        Time = contact[, tcol],
-        Segment = "contact"
+      pause <- data.frame(
+        Z = pause[, Zcol],
+        Force = pause[, Fcol],
+        Time = pause[, tcol],
+        Segment = "pause"
       )
       retract <- data.frame(
         Z = retract[, Zcol],
@@ -109,7 +109,7 @@ afmReadJPK <-
         retract$Z <- rev(retract$Z)
         retract$Force <- rev(retract$Force)
       }
-      afmExperiment <- rbind(approach, contact, retract)
+      afmExperiment <- rbind(approach, pause, retract)
     }
     cat(sprintf(
       "JPK file %s loaded. %d headers found.\n",

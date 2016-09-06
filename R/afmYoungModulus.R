@@ -13,10 +13,10 @@
 #' for values of the Indentation variable smaller than the thickness. If no value is given, it will be done 
 #' for all values in the curve for which the Indentation is negative.
 #' @param model Contact mechanics model to be used. Currently only Hertz's pure elastic model is available.
-#' @param geometry Geometry of the tip. Currently only pyramidal geometry is implemented.
+#' @param geometry Geometry of the tip. Currently only pyramidal and paraboloid geometries are implemented.
 #' @param silent Logical value. If FALSE it prints the fit model summary (via \code{summary.lm()}).
 #' @param params A list containing different parameters of the model: e.g. nu (Poisson's ratio) 
-#' or alpha (internal angle, in degrees, of the pyramidal tip)
+#' or alpha (internal angle, in degrees, of the pyramidal tip) or R (tip radius, in the paraboloid geometry)
 #' @return An \code{afmdata} class variable which will consist on the original 
 #' input \code{afmdata} variable plus a new list named \code{YoungModulus} with the 
 #' following fields:
@@ -44,7 +44,7 @@ afmYoungModulus <-
   function(afmdata,
            thickness = NULL,
            model = "Hertz",
-           geometry = "pyramid",
+           geometry = c("pyramid","paraboloid"),
            silent = TRUE,
            params) {
     if (is.afmexperiment(afmdata)) {
@@ -78,12 +78,12 @@ afmYoungModulus <-
       if (is.null(thickness)) {
         fitdata <-
           subset(afmdata$data,
-                 Segment == "approach" & Indentation < 0)
+                 Segment == "approach" & Indentation <= 0)
       } else{
         fitdata <-
           subset(
             afmdata$data,
-            Segment == "approach" & Indentation < 0 &
+            Segment == "approach" & Indentation <= 0 &
               abs(Indentation) < thickness
           )
       }
@@ -92,7 +92,8 @@ afmYoungModulus <-
         fitdata$Indentation - fitdata$Indentation[1]
       fitdata$ForceCorrected <-
         fitdata$ForceCorrected - fitdata$ForceCorrected[1]
-   
+      geometry <- match.arg(geometry)
+      if (geometry == "pyramid"){
       fitYM <- lm(ForceCorrected ~ I(Indentation ^ 2) - 1, data = fitdata)
    
       predYM <-  predict(fitYM, newdata =
@@ -108,6 +109,24 @@ afmYoungModulus <-
       YM <-
         as.numeric(slope * sqrt(2) * (1 - params$nu ^ 2) / tan(params$alpha * pi /
                                                                  180))
+      }else {
+        fitdata$Indentation <- -fitdata$Indentation
+        fitdata <- subset(fitdata, Indentation>=0)
+        fitYM <- lm(ForceCorrected ~ I(Indentation ^ 1.5) - 1, data = fitdata)
+        
+        predYM <-  predict(fitYM, newdata =
+                             data.frame(Indentation = fitdata$Indentation))
+        
+        slope <- coef(fitYM)
+        if (!silent) {
+          print(summary(fitYM))
+        }
+        if (is.null(params$nu)) {
+          params$nu <- 0.5
+        }
+        YM <-
+          as.numeric(slope * 0.75 * (1 - params$nu ^ 2) / sqrt(params$R))
+      }
       YoungModulus <- list(YoungModulus = YM,
                            fitYM = fitYM,
                            fitdata = subset(fitdata, 

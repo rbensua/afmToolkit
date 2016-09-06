@@ -8,21 +8,21 @@ afmExpDecay(afmdata, nexp = 2, tmax = NULL, type = c("CH","CF"), plt = TRUE, ...
 }
 \arguments{
 \item{afmdata}{An object of \code{afmdata} class with a 
-\bold{Contact} segment and a \bold{Time} column in the \code{data}
+\bold{pause} segment and a \bold{Time} column in the \code{data}
 dataframe.}
 
 \item{nexp}{Number of expontials in the Prony series to be fitted.
 Currently only one or two exponentials are supported. Default is 2.}
 
 \item{tmax}{Maximum time considered in the relaxation curve. It
-defaults to \code{Inf}, meaning that the whole contact segment is
+defaults to \code{Inf}, meaning that the whole pause segment is
 considered.}
 
 \item{type}{Type of the experiment. Can be either "CH" (Constant
 Height) for a force-relaxation experiment or "CF" (Constant Force) for a
 creep experiment. Default is \code{type = "CH"}.}
 
-\item{plt}{Logical. If TRUE (default) then a plot of the Contact
+\item{plt}{Logical. If TRUE (default) then a plot of the pause
 segment with the overlay of the fit is shown.}
 
 \item{...}{Options passed to the \code{nlsM()} function from the

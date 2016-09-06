@@ -137,8 +137,8 @@ summary.afmdata <- function(object , plt = TRUE, ...){
     applt <- applt + geom_point(data = YMfitdata, aes(x = Z, y = ForceCorrected),
                                 colour = "red")
     inset <- ggplot(data = afmdata$YoungModulus$fitdata, 
-                    aes(x = -Indentation, y = ForceCorrected)) + geom_point()
-    inset <- inset + geom_line(aes(x = -Indentation, 
+                    aes(x = abs(Indentation), y = ForceCorrected)) + geom_point()
+    inset <- inset + geom_line(aes(x = abs(Indentation), 
                                    y = afmdata$YoungModulus$fitYM$fitted.values), 
                                colour = "red", lwd = 1) + theme_bw()+
       scale_x_continuous(name = "Indentation") + #,labels = fancy_scientific)+
@@ -153,18 +153,18 @@ summary.afmdata <- function(object , plt = TRUE, ...){
                               ymin = yini + 0.2*yrange)
     }
     print(applt)
-    if ("contact" %in% levels(afmdata$data$Segment)){
-     ctc1 <- plot(afmdata, segment = "contact", vs = "Time") + xlab(NULL) + 
+    if ("pause" %in% levels(afmdata$data$Segment)){
+     ctc1 <- plot(afmdata, segment = "pause", vs = "Time") + xlab(NULL) + 
        scale_x_continuous(labels = NULL)+
        #scale_y_continuous(labels = fancy_scientific) +
-       ggtitle("Contact segment")
-     ctc2 <- ggplot(data = subset(afmdata$data, Segment == "contact"),
+       ggtitle("Pause segment")
+     ctc2 <- ggplot(data = subset(afmdata$data, Segment == "pause"),
                     aes(x = Time, y = Z)) + geom_line() +
        #scale_y_continuous(labels = fancy_scientific)+
        theme_bw()
      if ("ExpFit" %in% names(afmdata)){
        times <- subset(afmdata$data, 
-                       Segment == "contact")$Time[seq_along(afmdata$ExpFit$expdecayFit)]
+                       Segment == "pause")$Time[seq_along(afmdata$ExpFit$expdecayFit)]
        fitcoef <- summary(afmdata$ExpFit$expdecayModel)$coefficients[,1:2]
        fitcoef <- format(fitcoef, digits = 2)
        xrange <- layer_scales(ctc2)$x$range$range[2] -

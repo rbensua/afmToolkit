@@ -6,6 +6,8 @@
 #' @param afmdata An \code{afmdata} object. It should be a valid afmdata object upon
 #' which the Contact Point and the baseline correction must have been calculated first
 #' (using functions \code{afmContactPoint()} and \code{afmBaselineCorrection()})
+#' @fstar Value such that fstar * sd is to be considered as zero Force, where sd is the standard deviation 
+#' of Force at the basline. It takes fstar = 0 as default value, meaning that zero force is actually zero. 
 #' @param segment The segment on which everything is calculated.
 #'
 #' @return An \code{afmdata} class variable which will consist on the original 
@@ -24,7 +26,7 @@
 #' }
 #' @export
 afmZeroPointSlope <-
-  function(afmdata, segment = c("approach", "retract")) {
+  function(afmdata, fstar = 0, segment = c("approach", "retract")) {
     if (is.afmexperiment(afmdata)) {
       afmdata <-
         lapply(afmdata, function(x){
@@ -48,12 +50,15 @@ afmZeroPointSlope <-
         subset(afmdata$data, Segment == segment)$ForceCorrected
       Zmin <- Z[which.min(ForceCorrected)]
       Fmin <- min(ForceCorrected)
-      
+
       if (segment == "approach") {
+        # Computing the standard deviation in the baseline
+        stddev <- sd(ForceCorrected[which(Z > afmdata$CP$CP)])
+        zerovalue <- 2*stddev;
         #indicesSlope <-
         #  which(ForceCorrected > 0 & Z < min(afmdata$CP$CP, Zmin))
         indicesSlope <-
-          which(ForceCorrected < 0 & Z <  Zmin)
+          which(ForceCorrected < zerovalue & Z <  Zmin)
         
         i1 <- max(indicesSlope)
         #i0 <- i1 - 1

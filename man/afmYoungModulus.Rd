@@ -19,12 +19,12 @@ for all values in the curve for which the Indentation is negative.}
 
 \item{model}{Contact mechanics model to be used. Currently only Hertz's pure elastic model is available.}
 
-\item{geometry}{Geometry of the tip. Currently only pyramidal geometry is implemented.}
+\item{geometry}{Geometry of the tip. Currently only pyramidal and paraboloid geometries are implemented.}
 
 \item{silent}{Logical value. If FALSE it prints the fit model summary (via \code{summary.lm()}).}
 
 \item{params}{A list containing different parameters of the model: e.g. nu (Poisson's ratio) 
-or alpha (internal angle, in degrees, of the pyramidal tip)}
+or alpha (internal angle, in degrees, of the pyramidal tip) or R (tip radius, in the paraboloid geometry)}
 }
 \value{
 An \code{afmdata} class variable which will consist on the original 

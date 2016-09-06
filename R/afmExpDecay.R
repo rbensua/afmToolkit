@@ -5,17 +5,17 @@
 #' Creep experiments as described in Nanotechnology 2010 (see references).
 #' @usage afmExpDecay(afmdata, nexp = 2, tmax = NULL, type = c("CH","CF"), plt = TRUE, ...) 
 #' @param afmdata An object of \code{afmdata} class with a 
-#'   \bold{Contact} segment and a \bold{Time} column in the \code{data}
+#'   \bold{pause} segment and a \bold{Time} column in the \code{data}
 #'   dataframe.
 #' @param nexp Number of expontials in the Prony series to be fitted.
 #'   Currently only one or two exponentials are supported. Default is 2.
 #' @param tmax Maximum time considered in the relaxation curve. It
-#'   defaults to \code{Inf}, meaning that the whole contact segment is
+#'   defaults to \code{Inf}, meaning that the whole pause segment is
 #'   considered.
 #' @param type Type of the experiment. Can be either "CH" (Constant
 #'   Height) for a force-relaxation experiment or "CF" (Constant Force) for a
 #'   creep experiment. Default is \code{type = "CH"}.
-#' @param plt Logical. If TRUE (default) then a plot of the Contact
+#' @param plt Logical. If TRUE (default) then a plot of the pause
 #'   segment with the overlay of the fit is shown.
 #' @param ... Options passed to the \code{nlsM()} function from the
 #'   \code{minpack.lm} package. At least should contain the starting values
@@ -67,15 +67,15 @@ afmExpDecay <- function(afmdata, nexp = 2, tmax = NULL,
   }else if (!is.afmdata(afmdata)) {
     stop("Input must be an afmdata or an afmexperiment object!")
   }else{
-  if (!"contact" %in% levels(afmdata$data$Segment)) {
-    stop("A contact segment must be present!")
+  if (!"pause" %in% levels(afmdata$data$Segment)) {
+    stop("A pause segment must be present!")
   }
   if (is.null(tmax)) {
     tmax <- Inf
   }
   if (type == "CF") {
     decay <-
-      subset(afmdata$data, Segment == "contact" &
+      subset(afmdata$data, Segment == "pause" &
                Time <= tmax, select = c("Z", "Time"))
     decay$Time <- decay$Time - min(decay$Time)
     if (nexp == 1) {
@@ -92,7 +92,7 @@ afmExpDecay <- function(afmdata, nexp = 2, tmax = NULL,
       predict(expdecayModel, data.frame(Time = decay$Time))
   }else if (type == "CH") {
     decay <- subset(
-      afmdata$data, Segment == "contact" & Time <= tmax,
+      afmdata$data, Segment == "pause" & Time <= tmax,
       select = c("ForceCorrected", "Time")
     )
     decay$Time <- decay$Time - min(decay$Time)
@@ -114,19 +114,19 @@ afmExpDecay <- function(afmdata, nexp = 2, tmax = NULL,
   } else
     stop("type should be either 'CF' or 'CH'!")
   if (plt) {
-    df <- subset(afmdata$data, Segment == "contact" & Time <= tmax,
+    df <- subset(afmdata$data, Segment == "pause" & Time <= tmax,
                  select = c("Time"))
     if (type == "CH"){
     print(
-      plot(afmdata, vs = "Time", segment = "contact") +
+      plot(afmdata, vs = "Time", segment = "pause") +
         geom_line(
           data = data.frame(Time = df, Force = expdecayFit),
           aes(x = Time, y = Force), col = "green", size = 1.5
         )
     )
     } else{
-      contact <- subset(afmdata$data, Segment == "contact")
-        print(ggplot(data = contact, aes(x = Time, y = Z)) + 
+      pause <- subset(afmdata$data, Segment == "pause")
+        print(ggplot(data = pause, aes(x = Time, y = Z)) + 
           geom_line() + 
           geom_line(
             data = data.frame(Time = df, Z = expdecayFit),

@@ -106,12 +106,12 @@ afmBaselineCorrection <-
         afmdata$data$ForceCorrected <- c(F.corrected.approach,
                                          F.corrected.retract)
       } else{
-        F.corrected.contact <-
-          subset(afmdata$data, Segment == "contact")$Force -
+        F.corrected.pause <-
+          subset(afmdata$data, Segment == "pause")$Force -
           predict(fit.approach, data.frame(Z = subset(afmdata$data,
-                                                      Segment == "contact")$Z))
+                                                      Segment == "pause")$Z))
         afmdata$data$ForceCorrected <- c(F.corrected.approach,
-                                         F.corrected.contact,
+                                         F.corrected.pause,
                                          F.corrected.retract)
       }
       }
