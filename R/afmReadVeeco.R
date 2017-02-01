@@ -14,7 +14,7 @@
 #' @return A list containing a field 'data' which is a data frame
 #'
 #' @examples
-#' data <- afmReadJPK("force-save-JPK-3h.txt",path = path.package("afmToolkit"))
+#' data <- afmReadVeeco("force-save-JPK-3h.txt",path = path.package("afmToolkit"))
 #' str(data)
 #' @importFrom stats coef lm
 #' @export
