@@ -23,7 +23,7 @@ afmReadJPK <-
   function(filename, path = ".",
            FColStr = "Vertical",
            ZColStr = "Height (measured & smoothed)",
-           tColStr = "Series") {
+           tColStr = "Segment Time") {
     fullfilename <- file.path(path,filename)
     fullData <- readLines(fullfilename)
     fullData <- fullData[sapply(fullData, nchar) > 0]
@@ -37,6 +37,9 @@ afmReadJPK <-
     numberOfHeader <- as.integer(sum(diff(headerLines) != 1) + 1)
     N <- length(fullData)
     Nhead <- length(headerLines)
+    if (Nhead>3){
+      stop("Currently only up to three segments are supported!")
+    }
     headerStarts <- c(1, headerLines[which(diff(headerLines) != 1) + 1])
     headerEnds <-
       c(headerLines[which(diff(headerLines) != 1)], headerLines[Nhead])
