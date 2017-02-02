@@ -13,24 +13,92 @@
 #' str(data)
 #' @export
 #' 
-afmExtract <- function(afmexperiment, params = list("YM", "AE", "ED")){
-  if (is.afmexperiment(afmexperiment)){
+afmExtract <- function(afmexperiment, params = list("YM", "AE", "ED"), opt.param = NULL){
+  if (!is.afmexperiment(afmexperiment)){
    stop("Data should be of afmexperiment class!") 
   }
-  extractedData <- data.frame(cuve = names(afmexperiment))
+  extractedData <- data.frame(curve = names(afmexperiment))
+  if (!is.null(opt.param)){
+    extractedData[,eval(quote(opt.param))] <- sapply(afmexperiment, function(x) get(opt.param, x$params))
+  }
   if ("YM" %in% params){
-    lapply(afmexperiment, function(x){ YM <- get("YoungModulus",get("YoungModulus",x))
-    return(data.frame(YM = YM))})
+    YM <- lapply(afmexperiment, function(x){ YM <- get("YoungModulus",get("YoungModulus",x))})
     YM <- as.data.frame(do.call(rbind, YM), rownames = NULL)
+    colnames(YM) <- "YM"
     extractedData <- cbind(extractedData, YM)
+    row.names(extractedData) <- NULL
   }
   if ("AE" %in% params){
     AE <- lapply(data, function(x){AE <- get("Energies", get("AdhEner",x))})
     AE <- as.data.frame(do.call(rbind, AE), rownames = NULL)
     extractedData <- cbind(extractedData, AE)
+    row.names(extractedData) <- NULL
   }
   if ("ED" %in% params){
-    stop("Not yet!")
+    expDecay <- lapply(afmexperiment, function(x){
+      temp <- as.data.frame(coefficients(
+        summary(x$ExpFit$expdecayModel))[,1:2])
+      temp$parameter <- rownames(temp)
+      if (!is.null(opt.param)){
+        temp[,eval(quote(opt.param))]  <- get(opt.param, x$params)
+      }
+      return(temp)
+    })
+    expDecay <- do.call("rbind", expDecay)
+    expDecay$curve <- as.factor(grep("force",
+                                    unlist(strsplit(rownames(expDecay), ".txt.")),
+                                    value = T))
+    expDecay$parameter <- as.factor(expDecay$parameter)
+    expDecayOrdered <- data.frame(curve = c(),Estimate = c(), StdError = c(), 
+                                  parameter = c())
+    if (!is.null(opt.param)){
+      expDecayOrdered[,eval(quote(opt.param))] <- c()
+    }
+    for (cv in levels(expDecay$curve)){
+      temp <- subset(expDecay, curve == cv)
+      tau1 <- temp$Estimate[temp$parameter == "tau1"]
+      tau2 <- temp$Estimate[temp$parameter == "tau2"]
+      a1 <- temp$Estimate[temp$parameter == "a1"]
+      a2 <- temp$Estimate[temp$parameter == "a2"]
+      a0 <- temp$Estimate[temp$parameter == "a0"]
+      tau1se <- temp$'Std. Error'[temp$parameter == "tau1"]
+      tau2se <- temp$'Std. Error'[temp$parameter == "tau2"]
+      a1se <- temp$'Std. Error'[temp$parameter == "a1"]
+      a2se <- temp$'Std. Error'[temp$parameter == "a2"]
+      a0se <- temp$'Std. Error'[temp$parameter == "a0"]
+      if (!is.null(opt.param)){
+        op <- get(opt.param, temp)
+      }
+      if (tau1 > tau2){
+        temptau <- tau1
+        tempc <- a1
+        temptause <- tau1se
+        tempcse <- a1se
+        tau1 <- tau2
+        tau2 <- temptau
+        a1 <- a2
+        a2 <- tempc
+        tau1se <- tau2se
+        tau2se <- temptause
+        a1se <- a2se
+        a2se <- tempcse
+      }
+      estimates <- c(a0,a1,tau1,a2,tau2)
+      StdError <- c(a0se,a1se,tau1se,a2se,tau2se)
+      parameter <- c("a0","a1","tau1","a2","tau2")
+      if (is.null(opt.param)){
+      expDecayOrdered <- rbind(expDecayOrdered,
+                               data.frame(curve = cv,
+                                          Estimate = estimates,
+                                          StdError = StdError,
+                                          parameter = parameter))
+      }else{
+        tempdf <- data.frame(curve = cv, Estimate = estimates,StdError = StdError,parameter = parameter)
+        tempdf[,eval(quote(opt.param))] <- op
+        expDecayOrdered <- rbind(expDecayOrdered,tempdf)
+      }
+    }
+    extractedData <- list(General = extractedData, ExpDecay = expDecayOrdered)
   }
   return(extractedData)
 }

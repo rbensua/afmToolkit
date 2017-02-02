@@ -35,11 +35,12 @@ afmReadJPK <-
     params = list(SpringConstant = SpringConstant, curvename = filename)
     # Obtaining the number of headers
     numberOfHeader <- as.integer(sum(diff(headerLines) != 1) + 1)
-    N <- length(fullData)
-    Nhead <- length(headerLines)
-    if (Nhead>3){
+    if (numberOfHeader>3){
       stop("Currently only up to three segments are supported!")
     }
+    N <- length(fullData)
+    Nhead <- length(headerLines)
+    
     headerStarts <- c(1, headerLines[which(diff(headerLines) != 1) + 1])
     headerEnds <-
       c(headerLines[which(diff(headerLines) != 1)], headerLines[Nhead])
