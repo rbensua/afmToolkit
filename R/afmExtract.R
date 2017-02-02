@@ -29,7 +29,7 @@ afmExtract <- function(afmexperiment, params = list("YM", "AE", "ED"), opt.param
     row.names(extractedData) <- NULL
   }
   if ("AE" %in% params){
-    AE <- lapply(data, function(x){AE <- get("Energies", get("AdhEner",x))})
+    AE <- lapply(afmexperiment, function(x){AE <- get("Energies", get("AdhEner",x))})
     AE <- as.data.frame(do.call(rbind, AE), rownames = NULL)
     extractedData <- cbind(extractedData, AE)
     row.names(extractedData) <- NULL
