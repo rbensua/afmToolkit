@@ -56,8 +56,8 @@ afmReadJPK <-
     NcolumnNames <- grep("fancy", fullData)[1]
     columnNames <- fullData[NcolumnNames]
     Fcol <- grep(FColStr , unlist(strsplit(columnNames, " \""))) - 1
- #   Zcol <- grep(ZColStr , unlist(strsplit(columnNames, " \""))) - 1
-    Zcol <- which(ZColStr == unlist(strsplit(columnNames, "\"")))-1
+#   Zcol <- grep(ZColStr , unlist(strsplit(columnNames, " \""))) - 1
+    Zcol <- which(ZColStr == gsub("\"","",unlist(strsplit(columnNames, " \""))))-1
     tcol <- grep(tColStr, unlist(strsplit(columnNames, " \""))) - 1
     cnames <- c("Z", "F", "t")
     approach <- data.frame(

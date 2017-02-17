@@ -11,7 +11,7 @@
 #' @return An \code{afmexperiment} class data structure with all F-d curves. 
 #'
 #' @examples
-#' folder <- paste(path.package("afmToolkit"), "afmexperiment",sep = "/")
+#' folder <- paste(path.package("afmToolkit"), "veecoFolder",sep = "/")
 #' data <- afmReadVeecoFolder(folder = folder)
 #' str(data)
 #' @export

@@ -19,7 +19,7 @@ Read all Veeco ascii files in a given folder. It searches for all files containi
 the \code{afmReadJPJ} function.
 }
 \examples{
-folder <- paste(path.package("afmToolkit"), "afmexperiment",sep = "/")
+folder <- paste(path.package("afmToolkit"), "veecoFolder",sep = "/")
 data <- afmReadVeecoFolder(folder = folder)
 str(data)
 }

@@ -26,7 +26,7 @@ Read an ascii Veeco file.
 Reads an ascii Veeco file with one or two segments.
 }
 \examples{
-data <- afmReadVeeco("force-save-JPK-3h.txt",path = path.package("afmToolkit"))
+data <- afmReadVeeco("veeco_file.txt",path = path.package("afmToolkit"))
 str(data)
 }
 
