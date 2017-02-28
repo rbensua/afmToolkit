@@ -20,7 +20,7 @@
 #' @export
 
 afmReadVeeco <-
-  function(filename, path = ".") {
+  function(filename, path = "") {
     fullfilename <- file.path(path,filename)
     fullData <- readLines(fullfilename)
     fullData <- fullData[sapply(fullData, nchar) > 0]
