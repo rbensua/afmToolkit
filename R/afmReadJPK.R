@@ -20,7 +20,7 @@
 #' @export
 
 afmReadJPK <-
-  function(filename, path = ".",
+  function(filename, path = "",
            FColStr = "Vertical",
            ZColStr = "Height (measured & smoothed)",
            tColStr = "Segment Time") {
