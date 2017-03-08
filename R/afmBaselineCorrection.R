@@ -40,7 +40,8 @@
 afmBaselineCorrection <-
   function(afmdata,
            ZPointApp = NULL,
-           ZPointRet = NULL) {
+           ZPointRet = NULL, fitpause = c("approach","retract")) {
+    fitpause <- match.arg(fitpause)
     if (is.afmexperiment(afmdata)){
       data <- lapply(afmdata, function(x) afmBaselineCorrection(x,
                                                                 ZPointApp = ZPointApp,
@@ -106,10 +107,17 @@ afmBaselineCorrection <-
         afmdata$data$ForceCorrected <- c(F.corrected.approach,
                                          F.corrected.retract)
       } else{
+        if (fitpause == "approach"){
         F.corrected.pause <-
           subset(afmdata$data, Segment == "pause")$Force -
           predict(fit.approach, data.frame(Z = subset(afmdata$data,
                                                       Segment == "pause")$Z))
+        }else if (fitpause == "retract"){
+          F.corrected.pause <-
+            subset(afmdata$data, Segment == "pause")$Force -
+            predict(fit.retract, data.frame(Z = subset(afmdata$data,
+                                                        Segment == "pause")$Z))
+        }
         afmdata$data$ForceCorrected <- c(F.corrected.approach,
                                          F.corrected.pause,
                                          F.corrected.retract)
