@@ -10,6 +10,8 @@ afmExtract(afmexperiment, params = list("YM", "AE", "ED"))
 \item{afmexperiment}{Data of afmexperiment class.}
 
 \item{params}{List of parameters to extract from the data.}
+
+\item{opt.param}{Optional parameter or factor in the params field of the afmdata list to add to the data extraction.}
 }
 \value{
 A data frame with the name of the curve and the corresponding values of the parameters extacted.
@@ -18,7 +20,9 @@ A data frame with the name of the curve and the corresponding values of the para
 Extracts some parameters from an afmexperiment for an easy further analysis.
 }
 \examples{
-data <- afmReadJPK("force-save-JPK-3h.txt",path = path.package("afmToolkit"))
-str(data)
+
+TODO
+ADD EXAMPLES
+
 }
 
