@@ -40,9 +40,8 @@
 afmBaselineCorrection <-
   function(afmdata,
            ZPointApp = NULL,
-           ZPointRet = NULL) {
-#    fitpause = c("approach","retract")
- #   fitpause <- match.arg(fitpause)
+           ZPointRet = NULL, fitpause = c("approach","retract","none"), vsTime = FALSE) {
+    fitpause <- match.arg(fitpause)
     if (is.afmexperiment(afmdata)){
       data <- lapply(afmdata, function(x) afmBaselineCorrection(x,
                                                                 ZPointApp = ZPointApp,
@@ -70,8 +69,15 @@ afmBaselineCorrection <-
     data.approach <- subset(afmdata$data,
                             Segment == "approach" &
                               Z > ZPointApp,
-                            select = c("Z", "Force"))
-    fit.approach <- lm(Force ~ Z, data = data.approach)
+                            select = c("Z", "Force","Time"))
+    
+    if(vsTime){
+    fit.approach.time <- lm(Force  ~ Time, data = data.approach)
+    afmdata$data$ForceCorrected <-
+      afmdata$data$Force -
+      predict(fit.approach.time, data.frame(Time = afmdata$data$Time))
+    }else{
+    fit.approach <- lm(Force ~ Z, data = data.approach)  
     F.corrected.approach <-
       subset(afmdata$data, Segment == "approach")$Force -
       predict(fit.approach, data.frame(Z = subset(afmdata$data,
@@ -108,29 +114,32 @@ afmBaselineCorrection <-
         afmdata$data$ForceCorrected <- c(F.corrected.approach,
                                          F.corrected.retract)
       } else{
-        a <- F.corrected.approach[length(F.corrected.approach)]
-        b <- F.corrected.retract[1]
-        t_pause <- subset(afmdata$data, Segment == "pause")$Time
-        lambda <- (t_pause - t_pause[1])/(t_pause[length(t_pause)]-t_pause[1])
-        F.corrected.pause <- subset(afmdata$data, Segment == "pause")$Force - 
-          (1-lambda)*a-lambda*b
-        # if (fitpause == "approach"){
-        # F.corrected.pause <-
-        #   subset(afmdata$data, Segment == "pause")$Force -
-        #   predict(fit.approach, data.frame(Z = subset(afmdata$data,
-        #                                               Segment == "pause")$Z))
-        # }else if (fitpause == "retract"){
-        #   F.corrected.pause <-
-        #     subset(afmdata$data, Segment == "pause")$Force -
-        #     predict(fit.retract, data.frame(Z = subset(afmdata$data,
-        #                                                 Segment == "pause")$Z))
-        # }
+        # a <- F.corrected.approach[length(F.corrected.approach)]
+        # b <- F.corrected.retract[1]
+        # t_pause <- subset(afmdata$data, Segment == "pause")$Time
+        # lambda <- (t_pause - t_pause[1])/(t_pause[length(t_pause)]-t_pause[1])
+        # Fpause <- subset(afmdata$data, Segment == "pause")$Force
+        # F.corrected.pause <- Fpause - ((1-lambda)*(Fpause[1] - a) + lambda*(Fpause[length(Fpause)]- b))
+        if (fitpause == "approach"){
+        F.corrected.pause <-
+          subset(afmdata$data, Segment == "pause")$Force -
+          predict(fit.approach, data.frame(Z = subset(afmdata$data,
+                                                      Segment == "pause")$Z))
+        }else if (fitpause == "retract"){
+          F.corrected.pause <-
+            subset(afmdata$data, Segment == "pause")$Force -
+            predict(fit.retract, data.frame(Z = subset(afmdata$data,
+                                                        Segment == "pause")$Z))
+        }else{
+          F.corrected.pause <- 
+            subset(afmdata$data, Segment == "pause")$Force
+        }
         afmdata$data$ForceCorrected <- c(F.corrected.approach,
                                          F.corrected.pause,
                                          F.corrected.retract)
       }
       }
-    
+    }
     return(afmdata(afmdata))
       }else{
     stop("input is not a valid afmdata or afmexperiment.")

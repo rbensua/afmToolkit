@@ -17,10 +17,10 @@
 #' @export
 #' 
 
-afmReadJPKFolder <- function(folder, pattern = ".txt"){
+afmReadJPKFolder <- function(folder, pattern = ".txt",...){
   if (dir.exists(folder)){
   dataFiles <- list.files(folder, pattern = pattern, full.names = FALSE)
-  data <- lapply(dataFiles, afmReadJPK, path = folder)
+  data <- lapply(dataFiles, afmReadJPK, path = folder,...)
   names(data) <- dataFiles
   return(afmexperiment(data))
   }else{
