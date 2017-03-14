@@ -6,7 +6,7 @@
 #' @param afmdata An \code{afmdata} object. It should be a valid afmdata object upon
 #' which the Contact Point and the baseline correction must have been calculated first
 #' (using functions \code{afmContactPoint()} and \code{afmBaselineCorrection()})
-#' @fstar Value such that fstar * sd is to be considered as zero Force, where sd is the standard deviation 
+#' @param fstar Value such that fstar * sd is to be considered as zero Force, where sd is the standard deviation 
 #' of Force at the basline. It takes fstar = 0 as default value, meaning that zero force is actually zero. 
 #' @param segment The segment on which everything is calculated.
 #'

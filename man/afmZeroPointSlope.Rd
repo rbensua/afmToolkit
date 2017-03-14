@@ -11,6 +11,9 @@ afmZeroPointSlope(afmdata, segment = c("approach", "retract"))
 which the Contact Point and the baseline correction must have been calculated first
 (using functions \code{afmContactPoint()} and \code{afmBaselineCorrection()})}
 
+\item{fstar}{Value such that fstar * sd is to be considered as zero Force, where sd is the standard deviation 
+of Force at the basline. It takes fstar = 0 as default value, meaning that zero force is actually zero.}
+
 \item{segment}{The segment on which everything is calculated.}
 }
 \value{
