@@ -1,7 +1,7 @@
 Package: afmToolkit
 Title: Functions for AFM force-distance curves analysis
 Version: 0.0.1
-Author: Rafael Benitez <rabesua@uv.es>
+Author: Rafael Benitez <rabesua@uv.es>, Vicente Jose Bolos, Jose-Luis Toca-Herrera
 Maintainer: Rafael Benitez <rabesua@uv.es>
 Description: Set of functions for analyzing Atomic Force Microscope (AFM) force-distance curves. It allows to obtain the contact and unbinding points, perform the baseline correction, estimate the Young's modulus, fit up to two exponential decay function to a stress-relaxation / creep experiment, obtain adhesion energies. These operations can be done either over a single F-d curve or over a set of F-d curves in batch  mode.
 Depends:
