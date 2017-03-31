@@ -14,7 +14,10 @@ Imports:
     grid,
     gridExtra,
     scales,
-    dplyr
+    dplyr,
+    DBI,
+    assertthat,
+    tibble
 License: GPL
 LazyData: true
 RoxygenNote: 5.0.1
