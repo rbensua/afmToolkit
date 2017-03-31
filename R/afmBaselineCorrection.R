@@ -14,33 +14,48 @@
 #' \deqn{
 #' ZPointApp = 0.7 ContactPoint + 0.3 max(Z)
 #' }
-#' @usage afmBaselineCorrection(afmdata, ZPointApp = NULL, ZPointRet = NULL)
+#' @usage afmBaselineCorrection(afmdata, ZPointApp = NULL, ZPointRet = NULL,
+#' fitpause = c("approach","retract","none"), vsTime = FALSE)
 #' @param afmdata An \code{afmdata} structure.
 #' @param ZPointApp Point in the approach segment of the curve
 #' that defines the approach baseline
 #' @param ZPointRet Point in the retract segment of the curves that 
 #' defines the retract baseline
+#' @param fitpause Behaviour for the baseline correction at the pause segment: if "approach" (default), 
+#' the pause segment is correted using the best line fit done on the approach segment, 
+#' if "retract" the best line fit of the retract segment is used, if "none", no baseline correction 
+#' is done on the pause segment. 
+#' @param vsTime Logical. If TRUE then the baseline correction is performed following the Force vs time approach 
+#' described by S. Moreno-Flores (\cite{Moreno Flores (2016)}). 
 #' @return \code{afmdata} An \code{afmdata} structure identical to the one in 
 #' the input, but with an additional \code{ForceCorrected} column in the
 #'  \code{data} dataframe of the \code{afmdata} structure.
 #' @importFrom stats lm predict
 #' @examples
-#' AFMcurve <- afmReadJPK("force-save-JPK-2h.txt", path = path.package("afmToolkit"))
+#' AFMcurve <- afmReadJPK("force-save-JPK-2h.txt.gz", path = path.package("afmToolkit"))
 #' ZPointApp <- 6.43e-6
 #' ZPointRet <- 6.45e-6
 #' AFMcurve <- afmBaselineCorrection(AFMcurve,ZPointApp = ZPointApp,ZPointRet = ZPointRet)
 #' plot(AFMcurve)
 #'
 #' # Without providing ZPointApp
-#' AFMcurve <- afmReadJPK("force-save-JPK-3h.txt", path = path.package("afmToolkit"))
-#' AFMcurve <- afmContactPoint(AFMcurve,width = 10,mul1 = 1,mul2 = 20, loessSmooth = FALSE)
+#' AFMcurve <- afmReadJPK("force-save-JPK-3h.txt.gz", path = path.package("afmToolkit"))
+#' AFMcurve <- afmContactPoint(AFMcurve,width = 10,mul1 = 1,mul2 = 20, 
+#'                              loessSmooth = FALSE)
 #' AFMcurve <- afmBaselineCorrection(AFMcurve)
 #' plot(AFMcurve)
+#' 
+#' @section References: 
+#' Moreno Flores (2016). 
+#' Baseline correction of AFM force curves in the force-time representation.
+#' Microscopy Research and Technique, 79, (11), pp. 1045-1049.
+#' 
 #' @export
 afmBaselineCorrection <-
   function(afmdata,
            ZPointApp = NULL,
            ZPointRet = NULL, fitpause = c("approach","retract","none"), vsTime = FALSE) {
+    Segment <- Z <- NULL
     fitpause <- match.arg(fitpause)
     if (is.afmexperiment(afmdata)){
       data <- lapply(afmdata, function(x) afmBaselineCorrection(x,
@@ -53,7 +68,7 @@ afmBaselineCorrection <-
     
     
     N <- nlevels(afmdata$data$Segment)
-    Zapp <- subset(afmdata$data, Segment = "approach")$Z
+    Zapp <- subset(afmdata$data, Segment == "approach")$Z
     if (is.null(ZPointApp)) {
       if ("CP" %in% names(afmdata)) {
         ZPointApp <- 0.3 * max(Zapp) + 0.7 * afmdata$CP[["CP"]]
@@ -88,7 +103,7 @@ afmBaselineCorrection <-
       afmdata$data$ForceCorrected <- c(F.corrected.approach)
     } else if (N == 2 | N == 3) {
       # If N = 2 there are approach and retract segments.
-      Zret <- subset(afmdata$data, Segment = "retract")$Z
+      Zret <- subset(afmdata$data, Segment == "retract")$Z
       if (is.null(ZPointRet)) {
         if ("DP" %in% names(afmdata)) {
           ZPointRet <- 0.3 * max(Zret) + 0.7 * afmdata$DP[["DP"]]
@@ -119,7 +134,8 @@ afmBaselineCorrection <-
         # t_pause <- subset(afmdata$data, Segment == "pause")$Time
         # lambda <- (t_pause - t_pause[1])/(t_pause[length(t_pause)]-t_pause[1])
         # Fpause <- subset(afmdata$data, Segment == "pause")$Force
-        # F.corrected.pause <- Fpause - ((1-lambda)*(Fpause[1] - a) + lambda*(Fpause[length(Fpause)]- b))
+        # F.corrected.pause <- Fpause - ((1-lambda)*(Fpause[1] - a) + 
+        # lambda*(Fpause[length(Fpause)]- b))
         if (fitpause == "approach"){
         F.corrected.pause <-
           subset(afmdata$data, Segment == "pause")$Force -

@@ -10,8 +10,8 @@ is.afmexperiment(x)
 \item{x}{Any \bold{R} object.}
 }
 \value{
-Returns \code{TRUE} if its argument is an afmdata (that is, has "afmexperiment" 
-amongst its classes) and \code{FALSE} otherwise.
+Returns \code{TRUE} if its argument is an afmdata (that is, has "afmexperiment"
+  amongst its classes) and \code{FALSE} otherwise.
 }
 \description{
 Checks wether an R object is an afmexperiment or not.

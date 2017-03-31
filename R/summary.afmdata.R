@@ -1,16 +1,16 @@
 #' @title Summary of an \code{afmdata} class object.
-#' 
-#' 
-#' @description 
-#' This function sumarizes the main features of an afmdata object and, optionnaly plots all 
-#' segments available with all parameters estimated. 
+#'   
+#'   
+#' @description This function sumarizes the main features of an afmdata object and,
+#' optionnaly plots all segments available with all parameters estimated.
 #' 
 #' @param object An object of \code{afmdata} class.
-#' @param plt Logical variable. If TRUE plots all available segments with all available data.
+#' @param plt Logical variable. If TRUE plots all available segments with all available
+#'   data.
 #' @param ... Additional arguments (for compatibility with \code{summary})
 #' @examples
 #' path <- path.package("afmToolkit")
-#' data <- afmReadJPK("force-save-JPK-3h.txt", path = path)
+#' data <- afmReadJPK("force-save-JPK-3h.txt.gz", path = path)
 #' data <- afmContactPoint(data, width = 20, mul1 = 1, mul2 = 10)
 #' data <- afmDetachPoint(data, width = 20, mul1 = 2, mul2 = 30)
 #' data <- afmBaselineCorrection(data)
@@ -25,11 +25,15 @@
 #' @importFrom  gridExtra ttheme_default tableGrob
 #' @import scales
 #' @import dplyr
+#' @importFrom graphics curve plot
+#' @importFrom stats coefficients complete.cases
+#' @importFrom utils read.table
 #' @rdname summary
 #' @export
 #' @method summary afmdata
 
 summary.afmdata <- function(object , plt = TRUE, ...){
+  Indentation <- Time <- Force <- Segment <- Z <- ForceCorrected <- NULL
   afmdata <- object
   if (!is.afmdata(afmdata)){
     stop("Input should be an afmdata class object!")
@@ -129,7 +133,7 @@ summary.afmdata <- function(object , plt = TRUE, ...){
       ggtitle('Approach segment')
     
     if ("YoungModulus" %in% names(afmdata)){
-    # AÑADIR inset con la gráfica del ajuste de YM
+    # add inset with plot of YM fit
     N <- nrow(afmdata$YoungModulus$fitdata)
     YMfitdata <- subset(afmdata$data, Segment == "approach" &
                           Z <= afmdata$Slopes$Z0Point, select = c(Z,ForceCorrected))

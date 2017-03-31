@@ -4,31 +4,31 @@
 \alias{afmZeroPointSlope}
 \title{Zero Force Point and Slope}
 \usage{
-afmZeroPointSlope(afmdata, segment = c("approach", "retract"))
+afmZeroPointSlope(afmdata, fstar = 0, segment = c("approach", "retract"))
 }
 \arguments{
-\item{afmdata}{An \code{afmdata} object. It should be a valid afmdata object upon
-which the Contact Point and the baseline correction must have been calculated first
-(using functions \code{afmContactPoint()} and \code{afmBaselineCorrection()})}
+\item{afmdata}{An \code{afmdata} object. It should be a valid afmdata object upon which
+the Contact Point and the baseline correction must have been calculated first (using
+functions \code{afmContactPoint()} and \code{afmBaselineCorrection()})}
 
-\item{fstar}{Value such that fstar * sd is to be considered as zero Force, where sd is the standard deviation 
-of Force at the basline. It takes fstar = 0 as default value, meaning that zero force is actually zero.}
+\item{fstar}{Value such that fstar * sd is to be considered as zero Force, where sd is
+the standard deviation of Force at the basline. It takes fstar = 0 as default value,
+meaning that zero force is actually zero.}
 
 \item{segment}{The segment on which everything is calculated.}
 }
 \value{
-An \code{afmdata} class variable which will consist on the original 
-input \code{afmdata} variable plus a new list named \code{Slopes} with the 
-following fields:
-\code{Z0Point}: Point of zero force.
-\code{Slope}: Slope of the best fit line in the contact part of the Force-Distance curve.
+An \code{afmdata} class variable which will consist on the original input
+  \code{afmdata} variable plus a new list named \code{Slopes} with the following
+  fields: \code{Z0Point}: Point of zero force. \code{Slope}: Slope of the best fit line
+  in the contact part of the Force-Distance curve.
 }
 \description{
-This function finds the point of zero force (real contact point)
-and the slope of the contact part of the Force-Distance curve.
+This function finds the point of zero force (real contact point) and the
+  slope of the contact part of the Force-Distance curve.
 }
 \examples{
-data <- afmReadJPK("force-save-JPK-2h.txt", path = path.package("afmToolkit"))
+data <- afmReadJPK("force-save-JPK-2h.txt.gz", path = path.package("afmToolkit"))
 data <- afmContactPoint(data, width = 20, mul1 = 1, mul2 = 20)
 data <- afmDetachPoint(data, width = 40, mul1 = 3, mul2 = 40)
 data <- afmBaselineCorrection(data)

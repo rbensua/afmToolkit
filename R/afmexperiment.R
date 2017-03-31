@@ -1,17 +1,15 @@
 #' @title AFM experiment
-#'
-#' @description
-#' This function creates an \code{afmexperiment} structure, which is as list 
+#'   
+#' @description This function creates an \code{afmexperiment} structure, which is as list 
 #' (or an array) of elements of \code{afmdata} class.
 #' @usage afmexperiment(data, ID=NULL)
-#' @param data A variable of  \code{afmdata} class, or a list of 
-#' elements of \code{afmdata} class.
-#' @param ID Character string with the identifier of 
-#' the \code{data} variable or a string array in case \code{data} is a 
-#' list of \code{afmdata} variables. 
-#' 
+#' @param data A variable of  \code{afmdata} class, or a list of elements of
+#'   \code{afmdata} class.
+#' @param ID Character string with the identifier of the \code{data} variable or a string
+#'   array in case \code{data} is a list of \code{afmdata} variables.
+#'   
 #' @return An object of class \code{afmexp}.
-#'
+#'   
 #' @examples
 #' dataFolder <- paste(path.package("afmToolkit"), "afmexperiment",sep = "/")
 #' dataFiles <- list.files(dataFolder, pattern = "force", full.names = FALSE)

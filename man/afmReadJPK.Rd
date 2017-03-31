@@ -4,7 +4,8 @@
 \alias{afmReadJPK}
 \title{Read Nanowizard JPK ascii file}
 \usage{
-afmReadJPK(filename, path = ".", FColStr = "Vertical", ZColStr = "smoothed)", tColStr = "Series")
+afmReadJPK(filename, path = "", FColStr = "Vertical", 
+ZColStr = "Height (measured & smoothed)", tColStr = "Segment Time")
 }
 \arguments{
 \item{filename}{String with the name of the jpk file.}
@@ -26,7 +27,7 @@ Read an ascii JPK file.
 Reads an ascii JPK file with one to three headers.
 }
 \examples{
-data <- afmReadJPK("force-save-JPK-3h.txt",path = path.package("afmToolkit"))
+data <- afmReadJPK("force-save-JPK-3h.txt.gz",path = path.package("afmToolkit"))
 str(data)
 }
 

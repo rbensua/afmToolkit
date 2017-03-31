@@ -1,20 +1,20 @@
 #' @title Read Nanowizard JPK ascii file
-#'
-#' @description
-#' Read an ascii JPK file.
-#'
+#'   
+#' @description Read an ascii JPK file.
+#' 
 #' Reads an ascii JPK file with one to three headers.
-#' @usage afmReadJPK(filename, path = ".", FColStr = "Vertical", ZColStr = "smoothed)", tColStr = "Series")
+#' @usage afmReadJPK(filename, path = "", FColStr = "Vertical", 
+#' ZColStr = "Height (measured & smoothed)", tColStr = "Segment Time")
 #' @param filename String with the name of the jpk file.
 #' @param path Path to the folder where the file is.
 #' @param FColStr String with a pattern identifying the Force column.
 #' @param ZColStr String with a pattern identifying the Z column.
 #' @param tColStr String with a pattern identifying the Time column.
-#'
+#'   
 #' @return A list containing a field 'data' which is a data frame
-#'
+#'   
 #' @examples
-#' data <- afmReadJPK("force-save-JPK-3h.txt",path = path.package("afmToolkit"))
+#' data <- afmReadJPK("force-save-JPK-3h.txt.gz",path = path.package("afmToolkit"))
 #' str(data)
 #' @importFrom stats coef lm
 #' @export

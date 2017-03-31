@@ -4,7 +4,8 @@
 \alias{afmBaselineCorrection}
 \title{Performs a baseline correction to an AFM F-z curve}
 \usage{
-afmBaselineCorrection(afmdata, ZPointApp = NULL, ZPointRet = NULL)
+afmBaselineCorrection(afmdata, ZPointApp = NULL, ZPointRet = NULL,
+fitpause = c("approach","retract","none"), vsTime = FALSE)
 }
 \arguments{
 \item{afmdata}{An \code{afmdata} structure.}
@@ -14,6 +15,14 @@ that defines the approach baseline}
 
 \item{ZPointRet}{Point in the retract segment of the curves that 
 defines the retract baseline}
+
+\item{fitpause}{Behaviour for the baseline correction at the pause segment: if "approach" (default), 
+the pause segment is correted using the best line fit done on the approach segment, 
+if "retract" the best line fit of the retract segment is used, if "none", no baseline correction 
+is done on the pause segment.}
+
+\item{vsTime}{Logical. If TRUE then the baseline correction is performed following the Force vs time approach 
+described by S. Moreno-Flores (\cite{Moreno Flores (2016)}).}
 }
 \value{
 \code{afmdata} An \code{afmdata} structure identical to the one in 
@@ -35,17 +44,25 @@ If no ZPointApp is given and the contact point has been already estimated
 ZPointApp = 0.7 ContactPoint + 0.3 max(Z)
 }
 }
+\section{References}{
+ 
+Moreno Flores (2016). 
+Baseline correction of AFM force curves in the force-time representation.
+Microscopy Research and Technique, 79, (11), pp. 1045-1049.
+}
 \examples{
-AFMcurve <- afmReadJPK("force-save-JPK-2h.txt", path = path.package("afmToolkit"))
+AFMcurve <- afmReadJPK("force-save-JPK-2h.txt.gz", path = path.package("afmToolkit"))
 ZPointApp <- 6.43e-6
 ZPointRet <- 6.45e-6
 AFMcurve <- afmBaselineCorrection(AFMcurve,ZPointApp = ZPointApp,ZPointRet = ZPointRet)
 plot(AFMcurve)
 
 # Without providing ZPointApp
-AFMcurve <- afmReadJPK("force-save-JPK-3h.txt", path = path.package("afmToolkit"))
-AFMcurve <- afmContactPoint(AFMcurve,width = 10,mul1 = 1,mul2 = 20, loessSmooth = FALSE)
+AFMcurve <- afmReadJPK("force-save-JPK-3h.txt.gz", path = path.package("afmToolkit"))
+AFMcurve <- afmContactPoint(AFMcurve,width = 10,mul1 = 1,mul2 = 20, 
+                             loessSmooth = FALSE)
 AFMcurve <- afmBaselineCorrection(AFMcurve)
 plot(AFMcurve)
+
 }
 

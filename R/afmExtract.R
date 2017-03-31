@@ -1,17 +1,37 @@
 #' @title Extract computed parameters from an afmexperiment
-#'
-#' @description
-#' Extracts some parameters from an afmexperiment for an easy further analysis.
-#' @usage afmExtract(afmexperiment, params = list("YM", "AE", "ED"))
+#'   
+#' @description Extracts some parameters from an afmexperiment for an easy further
+#' analysis.
+#' @usage afmExtract(afmexperiment, params = list("YM", "AE", "ED"), opt.param = NULL)
 #' @param afmexperiment Data of afmexperiment class.
 #' @param params List of parameters to extract from the data.
-#' @param opt.param Optional parameter or factor in the params field of the afmdata list to add to the data extraction.
-#' @return A data frame with the name of the curve and the corresponding values of the parameters extacted.
-#'
+#' @param opt.param Optional parameter or factor in the params field of the afmdata list 
+#'   to add to the data extraction.
+#' @return A data frame with the name of the curve and the corresponding values of the 
+#'   parameters extacted.
+#'   
 #' @examples
+#' require(dplyr) # Not really necessary
 #' 
-#' TODO
-#' ADD EXAMPLES
+#' # Load the data
+#' data(batchExperiment)
+#' 
+#' # Process the afmexperiment
+#' data <- afmContactPoint(batchExperiment, width = 50, mul1 = 1, mul2 = 10)
+#' data <- afmDetachPoint(data, width = 50, mul1 = 1, mul2 = 10)
+#' data <- afmBaselineCorrection(data)
+#' data <- afmZeroPointSlope(data)
+#' data <- afmIndentation(data)
+#' data <- afmYoungModulus(data, thickness = 2e-7, params = list(alpha = 22))
+#' data <- afmExpDecay(data, plt = FALSE)
+#' data <- afmAdhesionEnergy(data, mul = 7)
+#' 
+#' # Extract the values of the parameters obtained in the analysis
+#' afmExpParams <- afmExtract(data, opt.param = "type")
+#' 
+#' # Plotting the Young's Modulus
+#' afmExpParams[[1]] %>% ggplot(aes(x = type, y = YM)) + geom_boxplot() 
+#' ylab("Young's Modulus  (Pa)")
 #' 
 #' @export
 #' 
@@ -21,10 +41,12 @@ afmExtract <- function(afmexperiment, params = list("YM", "AE", "ED"), opt.param
   }
   extractedData <- data.frame(curve = names(afmexperiment))
   if (!is.null(opt.param)){
-    extractedData[,eval(quote(opt.param))] <- sapply(afmexperiment, function(x) get(opt.param, x$params))
+    extractedData[,eval(quote(opt.param))] <- sapply(afmexperiment, function(x) 
+      get(opt.param, x$params))
   }
   if ("YM" %in% params){
-    YM <- lapply(afmexperiment, function(x){ YM <- get("YoungModulus",get("YoungModulus",x))})
+    YM <- lapply(afmexperiment, function(x){ YM <- get("YoungModulus",
+                                                       get("YoungModulus",x))})
     YM <- as.data.frame(do.call(rbind, YM), rownames = NULL)
     colnames(YM) <- "YM"
     extractedData <- cbind(extractedData, YM)

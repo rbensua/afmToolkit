@@ -4,23 +4,25 @@
 #' Find the contact point in for the Force-Distance curve
 #' following the local regression and two thresholds methods described 
 #' in Microscopy Research and Technique 2013 (see reference).
-#'
-#' @usage afmContactPoint(afmdata, width = 1, mul1, mul2, lagdiff = width, Delta = TRUE, loessSmooth = FALSE)
-#' @param afmdata A Force-Distance curve with the afmdata structure. It should be a list with at least the 'data' field with a data frame of at least 4 columns.
+#' 
+#' @usage afmContactPoint(afmdata, width = 1, mul1, mul2, lagdiff = width, Delta = TRUE,
+#'   loessSmooth = FALSE)
+#' @param afmdata A Force-Distance curve with the afmdata structure. It should be a list
+#'   with at least the 'data' field with a data frame of at least 4 columns.
 #' @param width Width of the window for the local regression (in vector position units)
 #' @param mul1 First multiplier for the first alarm threshold
 #' @param mul2 Second multiplier for the second alarm threshold
-#' @param lagdiff Lag for estimating the differences in Delta (or slopes) signal. 
-#' By default it takes the same value as the window with.
-#' @param Delta Logical. If TRUE, then the statistic for determining the contact point is the
-#' differences between two consecutive values of the slope of the local regression line.
-#' If FALSE then the slope itself is used.
-#' @param loessSmooth Logical If TRUE, a loess smoothing (via loess.smooth()) is done prior to
-#' the determination of the contact point. The span of the  smoothing is 0.05 (5%), the degree is 2 and the
-#' number of points equals the number of points in the approach segment.
-#' @return An \code{afmdata} class variable which will consist on the original 
-#' input \code{afmdata} variable plus a new list named \code{CP} with the 
-#' following fields:
+#' @param lagdiff Lag for estimating the differences in Delta (or slopes) signal. By
+#'   default it takes the same value as the window with.
+#' @param Delta Logical. If TRUE, then the statistic for determining the contact point is
+#'   the differences between two consecutive values of the slope of the local regression
+#'   line. If FALSE then the slope itself is used.
+#' @param loessSmooth Logical If TRUE, a loess smoothing (via loess.smooth()) is done
+#'   prior to the determination of the contact point. The span of the  smoothing is 0.05
+#'   (5%), the degree is 2 and the number of points equals the number of points in the
+#'   approach segment.
+#' @return An \code{afmdata} class variable which will consist on the original input
+#'   \code{afmdata} variable plus a new list named \code{CP} with the following fields:
 #'
 #' \code{CP} The contact point value.
 #'
@@ -31,7 +33,7 @@
 #' \code{noise} The noise of the delta signal
 #' @examples
 #' path <- path.package("afmToolkit")
-#' data <- afmReadJPK("force-save-JPK-3h.txt", path = path)
+#' data <- afmReadJPK("force-save-JPK-3h.txt.gz", path = path)
 #' width <- 20
 #' mul1 <- 1
 #' mul2 <- 10
@@ -57,6 +59,7 @@ afmContactPoint <-
            lagdiff = width,
            Delta = TRUE,
            loessSmooth = FALSE) {
+    Segment <- NULL
     if(is.afmexperiment(afmdata)) {
       afmexperiment <- lapply(afmdata, function(x) {
         if (!is.null(x$params$curvename)) {

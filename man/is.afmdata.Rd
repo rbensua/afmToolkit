@@ -11,7 +11,7 @@ is.afmdata(x)
 }
 \value{
 Returns \code{TRUE} if its argument is an afmdata (that is, has "afmdata" 
-amongst its classes) and \code{FALSE} otherwise.
+  amongst its classes) and \code{FALSE} otherwise.
 }
 \description{
 Checks wether an R object is an afmdata or not.

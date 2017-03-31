@@ -1,37 +1,35 @@
 #' @title Exponential decay fit
 #'   
 #'   
-#' @description Fits a viscoelastic exponential decay in a Force-Relaxation or
-#' Creep experiments as described in Nanotechnology 2010 (see references).
-#' @usage afmExpDecay(afmdata, nexp = 2, tmax = NULL, type = c("CH","CF"), plt = TRUE, ...) 
-#' @param afmdata An object of \code{afmdata} class with a 
-#'   \bold{pause} segment and a \bold{Time} column in the \code{data}
-#'   dataframe.
-#' @param nexp Number of expontials in the Prony series to be fitted.
-#'   Currently only one or two exponentials are supported. Default is 2.
-#' @param tmax Maximum time considered in the relaxation curve. It
-#'   defaults to \code{Inf}, meaning that the whole pause segment is
-#'   considered.
-#' @param type Type of the experiment. Can be either "CH" (Constant
-#'   Height) for a force-relaxation experiment or "CF" (Constant Force) for a
-#'   creep experiment. Default is \code{type = "CH"}.
-#' @param plt Logical. If TRUE (default) then a plot of the pause
-#'   segment with the overlay of the fit is shown.
-#' @param ... Options passed to the \code{nlsM()} function from the
-#'   \code{minpack.lm} package. At least should contain the starting values
-#'   (\code{start = list(...)}) for the Levenberg-Mardquart nonlinear least
-#'   square method.
+#' @description Fits a viscoelastic exponential decay in a Force-Relaxation or Creep
+#'   experiments as described in Nanotechnology 2010 (see references).
+#' @usage afmExpDecay(afmdata, nexp = 2, tmax = NULL, type = c("CH","CF"), plt = TRUE,
+#'   ...)
+#' @param afmdata An object of \code{afmdata} class with a \bold{pause} segment and a
+#'   \bold{Time} column in the \code{data} dataframe.
+#' @param nexp Number of expontials in the Prony series to be fitted. Currently only one
+#'   or two exponentials are supported. Default is 2.
+#' @param tmax Maximum time considered in the relaxation curve. It defaults to \code{Inf},
+#'   meaning that the whole pause segment is considered.
+#' @param type Type of the experiment. Can be either "CH" (Constant Height) for a
+#'   force-relaxation experiment or "CF" (Constant Force) for a creep experiment. Default
+#'   is \code{type = "CH"}.
+#' @param plt Logical. If TRUE (default) then a plot of the pause segment with the overlay
+#'   of the fit is shown.
+#' @param ... Options passed to the \code{nlsM()} function from the \code{minpack.lm}
+#'   package. At least should contain the starting values (\code{start = list(...)}) for
+#'   the Levenberg-Mardquart nonlinear least square method.
 #'   
-#' @return An \code{afmdata} class variable which will consist on the original 
-#' input \code{afmdata} variable plus a new list named \code{ExpFit} with the 
-#' following fields:
+#' @return An \code{afmdata} class variable which will consist on the original input
+#'   \code{afmdata} variable plus a new list named \code{ExpFit} with the following
+#'   fields:
 #'   
 #'   \code{expdecayModel}: A nls object returned from  \code{nlsM()} function.
 #'   
-#'   \code{expdecayFit}: The values predicted by the fit, returned from the
+#'   \code{expdecayFit}: The values predicted by the fit, returned from the 
 #'   \code{predict()} function.
 #' @examples 
-#' data <- afmReadJPK("force-save-JPK-3h.txt", path = path.package("afmToolkit"))
+#' data <- afmReadJPK("force-save-JPK-3h.txt.gz", path = path.package("afmToolkit"))
 #' width <- 20
 #' mul1 <- 1
 #' mul2 <- 10
@@ -39,11 +37,10 @@
 #' data <- afmDetachPoint(data, width = width, mul1 = mul1, mul2 = mul2)
 #' data <- afmBaselineCorrection(data)
 #' data <- afmExpDecay(data, nexp = 2, type = "CH")
-#' @references 
-#'  Susana Moreno-Flores, Rafael Benitez, Maria dM Vivanco and Jose Luis 
-#'  Toca-Herrera (2010). "Stress relaxation and creep on living cells with the atomic force 
-#'  microscope: a means to calculate elastic moduli and viscosities of 
-#'  cell components". Nanotechnology, \strong{21} (44), pp. 445101.
+#' @references Susana Moreno-Flores, Rafael Benitez, Maria dM Vivanco and Jose Luis 
+#' Toca-Herrera (2010). "Stress relaxation and creep on living cells with the atomic force
+#' microscope: a means to calculate elastic moduli and viscosities of cell components".
+#' Nanotechnology, \strong{21} (44), pp. 445101.
 #' @import minpack.lm
 #' @import ggplot2
 #' @importFrom stats predict
@@ -54,7 +51,7 @@
 
 afmExpDecay <- function(afmdata, nexp = 2, tmax = NULL,
                         type = c("CH","CF"), plt = TRUE, ...) {
-  
+  Segment <- Time <- Force <- Z <- NULL
   type <- match.arg(type)
   if (is.afmexperiment(afmdata)){
     afmdata <- lapply(afmdata, function(x){

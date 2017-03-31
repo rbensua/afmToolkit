@@ -4,25 +4,46 @@
 \alias{afmExtract}
 \title{Extract computed parameters from an afmexperiment}
 \usage{
-afmExtract(afmexperiment, params = list("YM", "AE", "ED"))
+afmExtract(afmexperiment, params = list("YM", "AE", "ED"), opt.param = NULL)
 }
 \arguments{
 \item{afmexperiment}{Data of afmexperiment class.}
 
 \item{params}{List of parameters to extract from the data.}
 
-\item{opt.param}{Optional parameter or factor in the params field of the afmdata list to add to the data extraction.}
+\item{opt.param}{Optional parameter or factor in the params field of the afmdata list 
+to add to the data extraction.}
 }
 \value{
-A data frame with the name of the curve and the corresponding values of the parameters extacted.
+A data frame with the name of the curve and the corresponding values of the 
+  parameters extacted.
 }
 \description{
-Extracts some parameters from an afmexperiment for an easy further analysis.
+Extracts some parameters from an afmexperiment for an easy further
+analysis.
 }
 \examples{
+require(dplyr) # Not really necessary
 
-TODO
-ADD EXAMPLES
+# Load the data
+data(batchExperiment)
+
+# Process the afmexperiment
+data <- afmContactPoint(batchExperiment, width = 50, mul1 = 1, mul2 = 10)
+data <- afmDetachPoint(data, width = 50, mul1 = 1, mul2 = 10)
+data <- afmBaselineCorrection(data)
+data <- afmZeroPointSlope(data)
+data <- afmIndentation(data)
+data <- afmYoungModulus(data, thickness = 2e-7, params = list(alpha = 22))
+data <- afmExpDecay(data, plt = FALSE)
+data <- afmAdhesionEnergy(data, mul = 7)
+
+# Extract the values of the parameters obtained in the analysis
+afmExpParams <- afmExtract(data, opt.param = "type")
+
+# Plotting the Young's Modulus
+afmExpParams[[1]] \%>\% ggplot(aes(x = type, y = YM)) + geom_boxplot() 
+ylab("Young's Modulus  (Pa)")
 
 }
 

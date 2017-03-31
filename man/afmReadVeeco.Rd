@@ -4,18 +4,12 @@
 \alias{afmReadVeeco}
 \title{Read Bruke Nanoscope Veeco ascii file}
 \usage{
-afmReadVeeco(filename, path = ".", FColStr = "Vertical", ZColStr = "smoothed)", tColStr = "Series")
+afmReadVeeco(filename, path = "")
 }
 \arguments{
 \item{filename}{String with the name of the jpk file.}
 
 \item{path}{Path to the folder where the file is.}
-
-\item{FColStr}{String with a pattern identifying the Force column.}
-
-\item{ZColStr}{String with a pattern identifying the Z column.}
-
-\item{tColStr}{String with a pattern identifying the Time column.}
 }
 \value{
 A list containing a field 'data' which is a data frame
@@ -26,7 +20,7 @@ Read an ascii Veeco file.
 Reads an ascii Veeco file with one or two segments.
 }
 \examples{
-data <- afmReadVeeco("veeco_file.txt",path = path.package("afmToolkit"))
+data <- afmReadVeeco("veeco_file.txt.gz",path = path.package("afmToolkit"))
 str(data)
 }
 

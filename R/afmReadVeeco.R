@@ -1,20 +1,15 @@
 #' @title Read Bruke Nanoscope Veeco ascii file
-#'
-#' @description
-#' Read an ascii Veeco file.
-#'
+#'   
+#' @description Read an ascii Veeco file.
+#' 
 #' Reads an ascii Veeco file with one or two segments.
-#' @usage afmReadVeeco(filename, path = ".", FColStr = "Vertical", ZColStr = "smoothed)", tColStr = "Series")
+#' @usage afmReadVeeco(filename, path = "")
 #' @param filename String with the name of the jpk file.
 #' @param path Path to the folder where the file is.
-#' @param FColStr String with a pattern identifying the Force column.
-#' @param ZColStr String with a pattern identifying the Z column.
-#' @param tColStr String with a pattern identifying the Time column.
-#'
 #' @return A list containing a field 'data' which is a data frame
-#'
+#'   
 #' @examples
-#' data <- afmReadVeeco("veeco_file.txt",path = path.package("afmToolkit"))
+#' data <- afmReadVeeco("veeco_file.txt.gz",path = path.package("afmToolkit"))
 #' str(data)
 #' @importFrom stats coef lm
 #' @export

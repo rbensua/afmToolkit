@@ -4,19 +4,21 @@
 \alias{afmReadJPKFolder}
 \title{Read all Nanowizard JPK ascii files in a folder}
 \usage{
-afmReadJPKFolder(folder, pattern = ".txt")
+afmReadJPKFolder(folder, pattern = ".txt", ...)
 }
 \arguments{
 \item{folder}{Name of the  folder containing the jpk files.}
 
 \item{pattern}{Pattern that will identify the jok files (".txt" by default).}
+
+\item{...}{Other parameters passed to afmReadJPK function.}
 }
 \value{
 An \code{afmexperiment} class data structure with all F-d curves.
 }
 \description{
-Read all JPK ascii files in a given folder. It searches for all files containing a given patter (".txt" by default) and uses
-the \code{afmReadJPJ} function.
+Read all JPK ascii files in a given folder. It searches for all files containing a 
+given patter (".txt" by default) and uses the \code{afmReadJPJ} function.
 }
 \examples{
 folder <- paste(path.package("afmToolkit"), "afmexperiment",sep = "/")

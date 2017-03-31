@@ -4,10 +4,10 @@
 \alias{afmReadVeecoFolder}
 \title{Read all Bruke Nanoscope Veeco ascii files in a folder}
 \usage{
-afmReadJPKFolder(folder, pattern = ".txt")
+afmReadVeecoFolder(folder, pattern = ".txt")
 }
 \arguments{
-\item{folder}{Name of the  folder containing the jpk files.}
+\item{folder}{Name of the  folder containing the Veeco files.}
 
 \item{pattern}{Pattern that will identify the Veeco files (".txt" by default).}
 }
@@ -15,8 +15,8 @@ afmReadJPKFolder(folder, pattern = ".txt")
 An \code{afmexperiment} class data structure with all F-d curves.
 }
 \description{
-Read all Veeco ascii files in a given folder. It searches for all files containing a given patter (".txt" by default) and uses
-the \code{afmReadJPJ} function.
+Read all Veeco ascii files in a given folder. It searches for all files containing a 
+given patter (".txt" by default) and uses the \code{afmReadVeeco} function.
 }
 \examples{
 folder <- paste(path.package("afmToolkit"), "veecoFolder",sep = "/")

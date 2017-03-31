@@ -7,12 +7,11 @@
 afmexperiment(data, ID=NULL)
 }
 \arguments{
-\item{data}{A variable of  \code{afmdata} class, or a list of 
-elements of \code{afmdata} class.}
+\item{data}{A variable of  \code{afmdata} class, or a list of elements of
+\code{afmdata} class.}
 
-\item{ID}{Character string with the identifier of 
-the \code{data} variable or a string array in case \code{data} is a 
-list of \code{afmdata} variables.}
+\item{ID}{Character string with the identifier of the \code{data} variable or a string
+array in case \code{data} is a list of \code{afmdata} variables.}
 }
 \value{
 An object of class \code{afmexp}.

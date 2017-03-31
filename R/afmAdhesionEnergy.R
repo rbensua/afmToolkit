@@ -17,16 +17,16 @@
 #' input \code{afmdata} variable plus a new list named \code{AdhEner} with the 
 #' following fields:
 #'
-#' \code{Points} Array containing the indices of the retract segment where the adhesion begins, 
-#' the unbinding event takes place and the adhesion ends.
+#' \code{Points} Array containing the indices of the retract segment where the adhesion 
+#' begins, the unbinding event takes place and the adhesion ends.
 #'
-#' \code{Energies} Data frame with three columns: \code{E1adh}, \code{E2adh} and \code{Etotal}, 
-#' being the first one the energy from the begining of the adhesion until the unbinding event,
-#' then second one the energy from the unbinding event until the full detachment of the 
-#' tip, and the third one, the sum of them.
+#' \code{Energies} Data frame with three columns: \code{E1adh}, \code{E2adh} and 
+#' \code{Etotal}, being the first one the energy from the begining of the adhesion until
+#' the unbinding event, then second one the energy from the unbinding event until the full
+#' detachment of the tip, and the third one, the sum of them.
 #' @examples
 #' path <- path.package("afmToolkit")
-#' data <- afmReadJPK("force-save-JPK-3h.txt", path = path)
+#' data <- afmReadJPK("force-save-JPK-3h.txt.gz", path = path)
 #' data <- afmContactPoint(data, width = 20, mul1 = 1, mul2 = 10)
 #' data <- afmDetachPoint(data, width = 20, mul1 = 2, mul2 = 30)
 #' data <- afmBaselineCorrection(data)
@@ -42,6 +42,7 @@ afmAdhesionEnergy <-
            mul,
            mdj = NULL) {
     # Extract the retract segment from the afmdata
+    Segment <- NULL
     if (is.afmexperiment(afmdata)) {
       afmexperiment <-
         lapply(afmdata, function(x) {

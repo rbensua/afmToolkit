@@ -11,14 +11,13 @@
 
 \item{y}{Variable added for compatibility with \code{plot}.}
 
-\item{vs}{The variable for the x-axis. May take the values "Time" or 
-"Z". It defaults to "Z", plotting thus a Force-Distance curve. If \code{vs}
-is set to "Time", then it plots  a Force-Time curve.}
+\item{vs}{The variable for the x-axis. May take the values "Time" or "Z". It defaults
+to "Z", plotting thus a Force-Distance curve. If \code{vs} is set to "Time", then it
+plots  a Force-Time curve.}
 
-\item{segment}{The segment of the curve to be plotted. If
-\code{segment = "all"} then all segments of the curve are plotted. Possible
-values are: \code{"approach"}, \code{"pause"}, \code{"retract"} and 
-\code{"all"}.}
+\item{segment}{The segment of the curve to be plotted. If \code{segment = "all"} then
+all segments of the curve are plotted. Possible values are: \code{"approach"},
+\code{"pause"}, \code{"retract"} and \code{"all"}.}
 
 \item{...}{Additional parameters to be pased to the ggplot functions.}
 }
@@ -28,7 +27,7 @@ Plots an afmdata object.
 \examples{
 # Loading the data
 path <- path.package("afmToolkit")
-data <- afmReadJPK("force-save-JPK-3h.txt", path = path)
+data <- afmReadJPK("force-save-JPK-3h.txt.gz", path = path)
 # Standard plot (out of the box)
 plot(data)
 # Computing the contact and detach points

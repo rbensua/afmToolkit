@@ -1,38 +1,39 @@
 #' @title Detach point
-#'
-#' @description
-#' Find the detach point (or unbinding point) for the Force-Distance curve
-#' following the local regression and two thresholds methods described 
-#' in Microscopy Research and Technique 2013 (see reference).
+#'   
+#' @description Find the detach point (or unbinding point) for the Force-Distance curve 
+#' following the local regression and two thresholds methods described in Microscopy
+#' Research and Technique 2013 (see reference).
 #' 
-#' The procedure is similar to the one used by the \code{afmContactPoint()} 
-#' function for obtaining the contact point. 
-#' @usage afmDetachPoint(afmdata,width=1,mul1,mul2, lagdiff = width, Delta=TRUE, loessSmooth = FALSE)
-#' @param afmdata A Force-Distance curve with the afmdata structure. It should be a list with at least the 'data' field with a data frame of at least 4 columns.
+#' The procedure is similar to the one used by the \code{afmContactPoint()} function for
+#' obtaining the contact point.
+#' @usage afmDetachPoint(afmdata,width=1,mul1,mul2, lagdiff = width, Delta=TRUE,
+#'   loessSmooth = FALSE)
+#' @param afmdata A Force-Distance curve with the afmdata structure. It should be a list
+#'   with at least the 'data' field with a data frame of at least 4 columns.
 #' @param width Width of the window for the local regression (in vector position units)
 #' @param mul1 First multiplier for the first alarm threshold
 #' @param mul2 Second multiplier for the second alarm threshold
-#' @param lagdiff Lag for estimating the differences in Delta (or slopes) signal. 
-#' By default it takes the same value as the window with.
-#' @param Delta Logical. If TRUE, then the statistic for determining the contact point is the
-#' differences between two consecutive values of the slope of the local regression line.
-#' If FALSE then the slope itself is used.
-#' @param loessSmooth Logical If TRUE, a loess smoothing (via loess.smooth()) is done prior to
-#' the determination of the contact point. The span of the  smoothing is 0.05 (5%), the degree is 2 and the
-#' number of points equals the number of points in the approach segment.
-#' @return An \code{afmdata} class variable which will consist on the original 
-#' input \code{afmdata} variable plus a new list named \code{DP} with the 
-#' following fields:
-#'
-#' \code{DP} The detach point value.
-#'
-#' \code{iDP} The position in the array for the detach point value.
-#'
-#' \code{delta} The delta signal.
-#'
-#' \code{noise} The noise of the delta signal
+#' @param lagdiff Lag for estimating the differences in Delta (or slopes) signal. By
+#'   default it takes the same value as the window with.
+#' @param Delta Logical. If TRUE, then the statistic for determining the contact point is
+#'   the differences between two consecutive values of the slope of the local regression
+#'   line. If FALSE then the slope itself is used.
+#' @param loessSmooth Logical If TRUE, a loess smoothing (via loess.smooth()) is done
+#'   prior to the determination of the contact point. The span of the  smoothing is 0.05
+#'   (5%), the degree is 2 and the number of points equals the number of points in the
+#'   approach segment.
+#' @return An \code{afmdata} class variable which will consist on the original input
+#'   \code{afmdata} variable plus a new list named \code{DP} with the following fields:
+#'   
+#'   \code{DP} The detach point value.
+#'   
+#'   \code{iDP} The position in the array for the detach point value.
+#'   
+#'   \code{delta} The delta signal.
+#'   
+#'   \code{noise} The noise of the delta signal
 #' @examples
-#' data <- afmReadJPK("force-save-JPK-3h.txt", path = path.package("afmToolkit"))
+#' data <- afmReadJPK("force-save-JPK-3h.txt.gz", path = path.package("afmToolkit"))
 #' width <- 10
 #' mul1 <- 2
 #' mul2 <- 40
@@ -40,15 +41,15 @@
 #' \dontrun{
 #' plot(data, segment = "retract") + geom_vline(xintercept = data$DP$DP, lty = 2)
 #' }
-#' @references 
-#'  Benitez R., Moreno-Flores S., Bolos V. J. and Toca-Herrera J.L. (2013). "A 
-#'  new automatic contact point detection algorithm for AFM force curves". 
-#'  Microscopy research and technique, \strong{76} (8), pp. 870-876.
+#' @references Benitez R., Moreno-Flores S., Bolos V. J. and Toca-Herrera J.L. (2013). "A 
+#' new automatic contact point detection algorithm for AFM force curves". Microscopy
+#' research and technique, \strong{76} (8), pp. 870-876.
 #' @seealso \code{\link{afmContactPoint}}
 #' @importFrom stats loess.smooth
 #' @export
 afmDetachPoint <- function(afmdata,width=1,mul1,mul2, lagdiff = width, 
                             Delta=TRUE, loessSmooth = FALSE){
+  Segment <- NULL
   if (is.afmexperiment(afmdata)){
     afmexperiment <- lapply(afmdata, function(x) {
       if(!is.null(x$params$curvename)){
