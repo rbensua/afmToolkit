@@ -42,4 +42,3 @@ plot(data, segment = "retract")
 # Plotting the pause segment: Force vs Time
 plot(data, segment = "pause", vs = "Time")
 }
-

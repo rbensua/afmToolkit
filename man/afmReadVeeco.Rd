@@ -23,4 +23,3 @@ Reads an ascii Veeco file with one or two segments.
 data <- afmReadVeeco("veeco_file.txt.gz",path = path.package("afmToolkit"))
 str(data)
 }
-

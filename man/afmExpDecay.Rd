@@ -58,4 +58,3 @@ Toca-Herrera (2010). "Stress relaxation and creep on living cells with the atomi
 microscope: a means to calculate elastic moduli and viscosities of cell components".
 Nanotechnology, \strong{21} (44), pp. 445101.
 }
-

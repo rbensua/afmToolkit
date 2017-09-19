@@ -16,4 +16,3 @@ Returns \code{TRUE} if its argument is an afmdata (that is, has "afmdata"
 \description{
 Checks wether an R object is an afmdata or not.
 }
-

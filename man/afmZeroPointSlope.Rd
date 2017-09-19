@@ -37,4 +37,3 @@ data <- afmZeroPointSlope(data, segment = "approach")
 plot(data, segment = "approach") + geom_vline(xintercept = data$Slopes$Z0Point, lty = 2)
 }
 }
-

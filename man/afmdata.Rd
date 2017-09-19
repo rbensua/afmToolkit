@@ -47,4 +47,3 @@ plot(AFMcurve)
 \seealso{
 \code{\link{afmexperiment}}
 }
-

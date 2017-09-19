@@ -25,4 +25,3 @@ folder <- paste(path.package("afmToolkit"), "afmexperiment",sep = "/")
 data <- afmReadJPKFolder(folder = folder)
 str(data)
 }
-

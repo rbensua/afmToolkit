@@ -33,4 +33,3 @@ data <- afmZeroPointSlope(data, segment = "approach")
 data <- afmIndentation(data)
 head(data$data)
 }
-

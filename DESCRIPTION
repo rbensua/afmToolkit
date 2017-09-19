@@ -1,5 +1,5 @@
 Package: afmToolkit
-Title: Functions for AFM force-distance curves analysis
+Title: Functions for Atomic Force Microscope Force-Distance Curves Analysis
 Version: 0.0.1
 Author: Rafael Benitez <rabesua@uv.es>, Vicente Jose Bolos, Jose-Luis Toca-Herrera
 Maintainer: Rafael Benitez <rabesua@uv.es>
@@ -20,4 +20,4 @@ Imports:
     tibble
 License: GPL
 LazyData: true
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1

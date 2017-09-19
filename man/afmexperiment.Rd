@@ -31,4 +31,3 @@ plot(data[[1]])
 \seealso{
 \code{\link{afmdata}}
 }
-

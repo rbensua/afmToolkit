@@ -47,4 +47,3 @@ data <- afmBaselineCorrection(data)
 data <- afmAdhesionEnergy(data, width = 20, mul = 10)
 str(data$AdhEner)
 }
-

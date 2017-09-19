@@ -65,4 +65,3 @@ Benitez R., Moreno-Flores S., Bolos V. J. and Toca-Herrera J.L. (2013). "A
 \seealso{
 \code{\link{afmDetachPoint}}
 }
-

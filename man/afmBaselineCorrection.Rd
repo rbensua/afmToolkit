@@ -50,6 +50,7 @@ Moreno Flores (2016).
 Baseline correction of AFM force curves in the force-time representation.
 Microscopy Research and Technique, 79, (11), pp. 1045-1049.
 }
+
 \examples{
 AFMcurve <- afmReadJPK("force-save-JPK-2h.txt.gz", path = path.package("afmToolkit"))
 ZPointApp <- 6.43e-6
@@ -65,4 +66,3 @@ AFMcurve <- afmBaselineCorrection(AFMcurve)
 plot(AFMcurve)
 
 }
-

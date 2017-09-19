@@ -33,4 +33,3 @@ plot(x[(width+1):(n-width)],b,xlab = "x",ylab = "y",type = "l")
 lines(x,y,col = "red")
 legend("bottomleft",c("Slopes","Signal"),col = c(1,2),lty = 1)
 }
-

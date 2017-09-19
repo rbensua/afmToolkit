@@ -23,6 +23,7 @@ Extracts some parameters from an afmexperiment for an easy further
 analysis.
 }
 \examples{
+\dontrun{
 require(dplyr) # Not really necessary
 
 # Load the data
@@ -44,6 +45,5 @@ afmExpParams <- afmExtract(data, opt.param = "type")
 # Plotting the Young's Modulus
 afmExpParams[[1]] \%>\% ggplot(aes(x = type, y = YM)) + geom_boxplot() 
 ylab("Young's Modulus  (Pa)")
-
 }
-
+}

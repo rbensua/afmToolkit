@@ -34,4 +34,3 @@ depending on the  covering of the sample ("CHI" for Chitosan, and "PAH" for
 Polyallylamine hydrochloride).
 }
 \keyword{datasets}
-

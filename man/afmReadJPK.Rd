@@ -30,4 +30,3 @@ Reads an ascii JPK file with one to three headers.
 data <- afmReadJPK("force-save-JPK-3h.txt.gz",path = path.package("afmToolkit"))
 str(data)
 }
-

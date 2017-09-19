@@ -11,6 +11,7 @@
 #'   parameters extacted.
 #'   
 #' @examples
+#' \dontrun{
 #' require(dplyr) # Not really necessary
 #' 
 #' # Load the data
@@ -32,7 +33,7 @@
 #' # Plotting the Young's Modulus
 #' afmExpParams[[1]] %>% ggplot(aes(x = type, y = YM)) + geom_boxplot() 
 #' ylab("Young's Modulus  (Pa)")
-#' 
+#' }
 #' @export
 #' 
 afmExtract <- function(afmexperiment, params = list("YM", "AE", "ED"), opt.param = NULL){

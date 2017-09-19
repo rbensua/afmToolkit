@@ -23,4 +23,3 @@ folder <- paste(path.package("afmToolkit"), "veecoFolder",sep = "/")
 data <- afmReadVeecoFolder(folder = folder)
 str(data)
 }
-

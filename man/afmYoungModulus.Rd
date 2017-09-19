@@ -58,4 +58,3 @@ data <- afmYoungModulus(data, thickness = 1e-8, params = list(alpha = 22),
                         silent = TRUE)
 print(data$YoungModulus$YoungModulus)
 }
-

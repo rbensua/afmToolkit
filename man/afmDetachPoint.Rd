@@ -67,4 +67,3 @@ research and technique, \strong{76} (8), pp. 870-876.
 \seealso{
 \code{\link{afmContactPoint}}
 }
-

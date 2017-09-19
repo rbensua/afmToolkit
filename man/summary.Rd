@@ -19,7 +19,7 @@ This function sumarizes the main features of an afmdata object and,
 optionnaly plots all segments available with all parameters estimated.
 }
 \examples{
-path <- path.package("afmToolkit")
+\dontrun{path <- path.package("afmToolkit")
 data <- afmReadJPK("force-save-JPK-3h.txt.gz", path = path)
 data <- afmContactPoint(data, width = 20, mul1 = 1, mul2 = 10)
 data <- afmDetachPoint(data, width = 20, mul1 = 2, mul2 = 30)
@@ -30,6 +30,5 @@ data <- afmIndentation(data)
 data <- afmYoungModulus(data, thickness = 1e-7, params = list(alpha = 22),
                         silent = TRUE)
 data <- afmExpDecay(data, nexp = 2, type = "CH")
-summary(data)                        
+summary(data)}                        
 }
-

@@ -84,7 +84,7 @@ afmBaselineCorrection <-
     data.approach <- subset(afmdata$data,
                             Segment == "approach" &
                               Z > ZPointApp,
-                            select = c("Z", "Force","Time"))
+                            select = -Segment)
     
     if(vsTime){
     fit.approach.time <- lm(Force  ~ Time, data = data.approach)
@@ -119,7 +119,7 @@ afmBaselineCorrection <-
       data.retract <- subset(afmdata$data,
                              Segment == "retract" &
                                Z > ZPointRet,
-                             select = c("Z", "Force"))
+                             select = -Segment)
       fit.retract <- lm(Force ~ Z, data = data.retract)
       F.corrected.retract <-
         subset(afmdata$data, Segment == "retract")$Force -

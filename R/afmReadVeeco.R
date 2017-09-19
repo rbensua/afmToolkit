@@ -15,7 +15,9 @@
 #' @export
 
 afmReadVeeco <-
-  function(filename, path = "") {
+  function(filename, path = "", FColStr = "pN",
+           ZColStr = "Ramp",
+           tColStr = "Time", TimeCol = TRUE) {
     fullfilename <- file.path(path,filename)
     fullData <- readLines(fullfilename)
     fullData <- fullData[sapply(fullData, nchar) > 0]
@@ -27,32 +29,53 @@ afmReadVeeco <-
     Data <- grep("\"",fullData,invert = TRUE, value = TRUE)
     DataDF <- read.table(text = Data, sep ="\t", header = T)
     cnames <- colnames(DataDF)
+    # Getting the approach segment columns (Extent)
     appCols  <- grep("Ex",cnames, value = "T")
-    appTime <- grep("Time",appCols, value = "T")
-    appZ <- grep("Ramp", appCols, value = "T")
-    appForce <- grep("pN", appCols, value = "T")
+    if (TimeCol){
+    appTime <- grep(tColStr,appCols, value = "T")
     appTime <- grep(appTime, cnames)
+    }
+    appZ <- grep(ZColStr, appCols, value = "T")
+    appForce <- grep(FColStr, appCols, value = "T")
     appZ <- grep(appZ, cnames)
     appForce <- grep(appForce, cnames)
+    if(TimeCol){
     appSegment <- data.frame(Time = DataDF[,appTime], 
                              Z = DataDF[,appZ]*1e-9, 
                              Force = DataDF[,appForce]*1e-12,
                              Segment = "approach")
+    } else{
+      appSegment <- data.frame(Z = DataDF[,appZ]*1e-9, 
+                               Force = DataDF[,appForce]*1e-12,
+                               Segment = "approach")
+    }
     appSegment <- appSegment[complete.cases(appSegment),]
     
+    
+    # Getting the retract segment columns (Retract)
     retCols  <- grep("Rt",cnames, value = "T")
-  retTime <- grep("Time",retCols, value = "T")
-    retZ <- grep("Ramp", retCols, value = "T")
-    retForce <- grep("pN", retCols, value = "T")
-  retTime <- grep(retTime, cnames)
+    if(TimeCol){
+    retTime <- grep(tColStr,retCols, value = "T")
+    retTime <- grep(retTime, cnames)
+    }
+    retZ <- grep(ZColStr, retCols, value = "T")
+    retForce <- grep(FColStr, retCols, value = "T")
     retZ <- grep(retZ, cnames)
     retForce <- grep(retForce, cnames)
+    if(TimeCol){
     retSegment <- data.frame(Time = DataDF[,retTime], 
                              Z = DataDF[,retZ]*1e-9, 
                              Force = DataDF[,retForce]*1e-12,
                              Segment = "retract")
+    }else{
+      retSegment <- data.frame(Z = DataDF[,retZ]*1e-9, 
+                               Force = DataDF[,retForce]*1e-12,
+                               Segment = "retract")
+    }
     retSegment <- retSegment[complete.cases(retSegment),]
-    if (diff(appSegment$Z)[1]>0)
+    napp <- nrow(appSegment)
+    applinefit <- lm(Z ~ n, data = data.frame(Z = appSegment$Z, n = 1:napp))
+    if (coefficients(applinefit)["n"]>0)
     {
       retSegment$Z <- rev(retSegment$Z)
       appSegment$Z <- rev(appSegment$Z)

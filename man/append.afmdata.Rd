@@ -22,4 +22,3 @@ This function appends a list to an existing afmdata structure. It is used
 internally by several afm* functions when attaching the results to the input afmdata
 variable. This function should not be used directly unless by experienced users.
 }
-
