@@ -11,7 +11,9 @@
 #' @param ZColStr String with a pattern identifying the Z column.
 #' @param tColStr String with a pattern identifying the Time column.
 #'   
-#' @return A list containing a field 'data' which is a data frame
+#' @return A afmdata structure list containing a field 'data' which is a data frame with 
+#' variables Force, Z, Time (if aplicable) and Segment ("approach", "retract" and/or "pause") and 
+#' a field 'params' which is a list with the fields 'curvename' and 'SpringConstant'.
 #'   
 #' @examples
 #' data <- afmReadJPK("force-save-JPK-3h.txt.gz",path = path.package("afmToolkit"))

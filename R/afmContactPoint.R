@@ -123,16 +123,16 @@ afmContactPoint <-
     
     idxGrTol2 <- which(abs(delta) > tol2)
     idxSmTol1 <- which(abs(delta) < tol1)
-    if (length(idxGrTol2 > tol2) == 0) {
-      cat("mul2 is too large. Set a smaller value for mul2\n")
-      return(list(
-        CP = NA,
-        iCP = NA,
-        delta = delta,
-        noise = noise
-      ))
+    # if (length(idxGrTol2) == 0) {
+    #   cat("mul2 is too large. Set a smaller value for mul2\n")
+    #   return(list(
+    #     CP = NA,
+    #     iCP = NA,
+    #     delta = delta,
+    #     noise = noise
+    #   ))
       
-    } else{
+    #} else{
       j <- max(idxSmTol1[idxSmTol1 < min(idxGrTol2)])#+1
       
       if ((j > 1) & (delta[j] != 0)) {
@@ -153,7 +153,7 @@ afmContactPoint <-
         noise = noise
       )
       return(append.afmdata(afmdata,CP))
-    }
+    #}
     }else{
       stop("No afmdata class input provided.")
     }

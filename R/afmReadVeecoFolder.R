@@ -7,6 +7,7 @@
 #' @usage afmReadVeecoFolder(folder, pattern = ".txt")
 #' @param folder Name of the  folder containing the Veeco files.
 #' @param pattern Pattern that will identify the Veeco files (".txt" by default).
+#' @param ... Parameters to be passed to the afmReadVeeco() function.
 
 #' @return An \code{afmexperiment} class data structure with all F-d curves. 
 #'
@@ -17,10 +18,10 @@
 #' @export
 #' 
 
-afmReadVeecoFolder <- function(folder, pattern = ".txt"){
+afmReadVeecoFolder <- function(folder, pattern = ".txt",...){
   if (dir.exists(folder)){
     dataFiles <- list.files(folder, pattern = pattern, full.names = FALSE)
-    data <- lapply(dataFiles, afmReadVeeco, path = folder)
+    data <- lapply(dataFiles, afmReadVeeco, path = folder,...)
     names(data) <- dataFiles
     return(afmexperiment(data))
   }else{

@@ -19,7 +19,9 @@ ZColStr = "Height (measured & smoothed)", tColStr = "Segment Time")
 \item{tColStr}{String with a pattern identifying the Time column.}
 }
 \value{
-A list containing a field 'data' which is a data frame
+A afmdata structure list containing a field 'data' which is a data frame with 
+variables Force, Z, Time (if aplicable) and Segment ("approach", "retract" and/or "pause") and 
+a field 'params' which is a list with the fields 'curvename' and 'SpringConstant'.
 }
 \description{
 Read an ascii JPK file.

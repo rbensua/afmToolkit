@@ -6,8 +6,15 @@
 #' @usage afmReadVeeco(filename, path = "")
 #' @param filename String with the name of the jpk file.
 #' @param path Path to the folder where the file is.
-#' @return A list containing a field 'data' which is a data frame
-#'   
+#' @param FColStr String pattern identifying the Force columns (defaults to "pN")
+#' @param ZColStr String pattern identifying the Z columns (defaults to "Ramp")
+#' @param tColStr String pattern identifying the Time columns (defaults to "Time")
+#' @param TimeCol Logical value. If TRUE (default) there is a Time column.
+#' 
+#' @return A afmdata structure list containing a field 'data' which is a data frame with 
+#' variables Force, Z, Time (if aplicable) and Segment ("approach", "retract" and/or "pause") and 
+#' a field 'params' which is a list with the fields 'curvename' and 'SpringConstant'.
+#'  
 #' @examples
 #' data <- afmReadVeeco("veeco_file.txt.gz",path = path.package("afmToolkit"))
 #' str(data)

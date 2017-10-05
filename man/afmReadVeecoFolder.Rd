@@ -10,6 +10,8 @@ afmReadVeecoFolder(folder, pattern = ".txt")
 \item{folder}{Name of the  folder containing the Veeco files.}
 
 \item{pattern}{Pattern that will identify the Veeco files (".txt" by default).}
+
+\item{...}{Parameters to be passed to the afmReadVeeco() function.}
 }
 \value{
 An \code{afmexperiment} class data structure with all F-d curves.

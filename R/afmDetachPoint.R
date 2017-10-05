@@ -112,11 +112,11 @@ afmDetachPoint <- function(afmdata,width=1,mul1,mul2, lagdiff = width,
   
   idxGrTol2 <- which(abs(delta)>tol2)
   idxSmTol1 <- which(abs(delta)<tol1)
-  if (length(idxGrTol2>tol2) ==0){
-    cat("mul2 is too large. Set a smaller value for mul2\n")
-    return(list(CP=NA,iCP=NA,delta=delta,noise=noise))
-    
-  } else{
+  # if (length(idxGrTol2>tol2) ==0){
+  #   cat("mul2 is too large. Set a smaller value for mul2\n")
+  #   return(list(CP=NA,iCP=NA,delta=delta,noise=noise))
+  #   
+  # } else{
     j <- max(idxSmTol1[idxSmTol1<min(idxGrTol2)])#+1  
     
     if ((j > 1) & (delta[j] != 0)){
@@ -130,7 +130,7 @@ afmDetachPoint <- function(afmdata,width=1,mul1,mul2, lagdiff = width,
     z_detach = as.numeric(z_detach+eps*(Z[i_detach+1]-z_detach));  
     DP <- list(DP=z_detach, iDP=i_detach,delta=delta,noise=noise)
     return(append.afmdata(afmdata,DP))
-  }
+#  }
   }else{
     stop("Error: Input is not a valid afmdata or afmexperiment.")
   }
