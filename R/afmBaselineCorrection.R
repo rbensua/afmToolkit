@@ -75,8 +75,7 @@ afmBaselineCorrection <-
       } else {
         stop(
           'ZPointApp should be given or, otherwise afmContactPoint() function
-          should have been run first and results appended to the afmdata structure
-          (see append.afmdata())'
+          should have been run first.'
         )
       }
       }

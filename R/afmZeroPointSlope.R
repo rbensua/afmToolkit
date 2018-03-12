@@ -55,7 +55,7 @@ afmZeroPointSlope <-
       if (segment == "approach") {
         # Computing the standard deviation in the baseline
         stddev <- sd(ForceCorrected[which(Z > afmdata$CP$CP)])
-        zerovalue <- 2*stddev;
+        zerovalue <- fstar*stddev;
         #indicesSlope <-
         #  which(ForceCorrected > 0 & Z < min(afmdata$CP$CP, Zmin))
         indicesSlope <-
