@@ -42,8 +42,8 @@ afmExtract <- function(afmexperiment, params = list("YM", "AE", "ED"), opt.param
   }
   extractedData <- data.frame(curve = names(afmexperiment))
   if (!is.null(opt.param)){
-    extractedData[,eval(quote(opt.param))] <- sapply(afmexperiment, function(x) 
-      get(opt.param, x$params))
+    extractedData <- cbind(extractedData,do.call("rbind",lapply(afmexperiment, function(x) 
+    as.data.frame(lapply(opt.param,function(p) get(p,x$params)), col.names = opt.param))))
   }
   if ("YM" %in% params){
     YM <- lapply(afmexperiment, function(x){ YM <- get("YoungModulus",

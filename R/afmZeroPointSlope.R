@@ -34,7 +34,7 @@ afmZeroPointSlope <-
           if(!is.null(x$params$curvename)){
             print(paste("Processing curve: ",x$params$curvename), sep = " ")
           }
-          afmZeroPointSlope(x, segment = segment)
+          afmZeroPointSlope(x, fstar = fstar, segment = segment)
           })
       return(afmexperiment(afmdata))
     } else if (is.afmdata(afmdata)) {
