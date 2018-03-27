@@ -26,12 +26,12 @@
 #' }
 #' @export
 afmZeroPointSlope <-
-  function(afmdata, fstar = 0, segment = c("approach", "retract")) {
+  function(afmdata, fstar = 0, segment = c("approach", "retract"), silent = FALSE) {
     Segment <- NULL
     if (is.afmexperiment(afmdata)) {
       afmdata <-
         lapply(afmdata, function(x){
-          if(!is.null(x$params$curvename)){
+          if(!is.null(x$params$curvename)& !silent){
             print(paste("Processing curve: ",x$params$curvename), sep = " ")
           }
           afmZeroPointSlope(x, fstar = fstar, segment = segment)
@@ -70,7 +70,7 @@ afmZeroPointSlope <-
         # } else {
         #   Z0Point <- afmdata$CP$CP
         # }
-        Z0Point <- Z[i0] - ForceCorrected[i0] * (Z[i1] - Z[i0]) /
+        Z0Point <- Z[i0] + (zerovalue - ForceCorrected[i0]) * (Z[i1] - Z[i0]) /
           (ForceCorrected[i1] - ForceCorrected[i0])
       } else {
         indicesSlope <-
