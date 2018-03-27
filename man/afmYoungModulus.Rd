@@ -25,12 +25,15 @@ model is available.}
 \item{geometry}{Geometry of the tip. Currently only pyramidal (default) and paraboloid
 geometries are implemented.}
 
-\item{silent}{Logical value. If FALSE it prints the fit model summary (via 
-\code{summary.lm()}). Default value is TRUE}
+\item{showfit}{Logical value. If FALSE it prints the fit model summary (via 
+\code{summary.lm()}). Default value is FALSE}
 
 \item{params}{A list containing different parameters of the model: e.g. nu (Poisson's 
 ratio) or alpha (internal angle, in degrees, of the pyramidal tip) or R (tip radius, 
 in the paraboloid geometry)}
+
+\item{silent}{Logical value. If TRUE supresses the message indicating the name of the curve being processed
+(useful for batch-processing large number of curves). Defaults to FALSE}
 }
 \value{
 An \code{afmdata} class variable which will consist on the original input 

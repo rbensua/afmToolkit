@@ -48,11 +48,11 @@
 #' @importFrom stats loess.smooth
 #' @export
 afmDetachPoint <- function(afmdata,width=1,mul1,mul2, lagdiff = width, 
-                            Delta=TRUE, loessSmooth = FALSE){
+                            Delta=TRUE, loessSmooth = FALSE, silent = FALSE){
   Segment <- NULL
   if (is.afmexperiment(afmdata)){
     afmexperiment <- lapply(afmdata, function(x) {
-      if(!is.null(x$params$curvename)){
+      if(!is.null(x$params$curvename) & !silent){
         print(paste("Processing curve: ",x$params$curvename), sep = " ")
       }
       afmDetachPoint(

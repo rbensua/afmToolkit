@@ -22,10 +22,14 @@
 #' @export
 
 afmReadVeeco <-
-  function(filename, path = "", FColStr = "pN",
+  function(filename, path = ".", FColStr = "pN",
            ZColStr = "Ramp",
-           tColStr = "Time", TimeCol = TRUE) {
+           tColStr = "Time", TimeCol = TRUE, silent = FALSE) {
+    if (path == ""){
+      fullfilename <- filename
+    } else{
     fullfilename <- file.path(path,filename)
+    }
     fullData <- readLines(fullfilename)
     fullData <- fullData[sapply(fullData, nchar) > 0]
     # Obtaining the spring constant
@@ -88,10 +92,12 @@ afmReadVeeco <-
       appSegment$Z <- rev(appSegment$Z)
     }
     afmExperiment <- rbind(appSegment,retSegment)
-    cat(sprintf(
+    if(!silent){
+      cat(sprintf(
       "Veeco file %s loaded.\n",
       filename
     ))
+    }
     afmExperiment$Segment <- as.factor(afmExperiment$Segment)
     afmExperiment <- afmdata(afmExperiment, params = params)
     return(afmExperiment)

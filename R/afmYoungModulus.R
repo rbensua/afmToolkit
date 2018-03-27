@@ -17,11 +17,13 @@
 #'   model is available.
 #' @param geometry Geometry of the tip. Currently only pyramidal (default) and paraboloid
 #'   geometries are implemented.
-#' @param silent Logical value. If FALSE it prints the fit model summary (via 
-#'   \code{summary.lm()}). Default value is TRUE
+#' @param showfit Logical value. If FALSE it prints the fit model summary (via 
+#'   \code{summary.lm()}). Default value is FALSE
 #' @param params A list containing different parameters of the model: e.g. nu (Poisson's 
 #'   ratio) or alpha (internal angle, in degrees, of the pyramidal tip) or R (tip radius, 
 #'   in the paraboloid geometry)
+#' @param silent Logical value. If TRUE supresses the message indicating the name of the curve being processed
+#' (useful for batch-processing large number of curves). Defaults to FALSE
 #' @return An \code{afmdata} class variable which will consist on the original input 
 #'   \code{afmdata} variable plus a new list named \code{YoungModulus} with the following 
 #'   fields:
@@ -50,13 +52,13 @@ afmYoungModulus <-
            thickness = NULL,
            model = "Hertz",
            geometry = c("pyramid","paraboloid"),
-           silent = TRUE,
-           params) {
+           showfit = FALSE,
+           params, silent = FALSE) {
     Segment <- Indentation <- ForceCorrected <- NULL
     if (is.afmexperiment(afmdata)) {
       afmexperiment <-
         lapply(afmdata, function(x){
-          if(!is.null(x$params$curvename)){
+          if(!is.null(x$params$curvename)& !silent){
             print(paste("Processing curve: ",x$params$curvename), sep = " ")
           }
           afmYoungModulus(
@@ -65,6 +67,7 @@ afmYoungModulus <-
             model = model,
             geometry = geometry,
             params = params,
+            showfit = showfit,
             silent = silent)
           })
       return(afmexperiment(afmexperiment))
@@ -106,7 +109,7 @@ afmYoungModulus <-
                            data.frame(Indentation = fitdata$Indentation))
       
       slope <- coef(fitYM)
-      if (!silent) {
+      if (showfit) {
         print(summary(fitYM))
       }
       if (is.null(params$nu)) {
