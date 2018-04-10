@@ -26,7 +26,11 @@ afmReadJPK <-
            FColStr = "Vertical",
            ZColStr = "Height (measured & smoothed)",
            tColStr = "Segment Time") {
-    fullfilename <- file.path(path,filename)
+    if (path == ""){
+      fullfilename <- filename
+    } else{
+      fullfilename <- file.path(path,filename)
+    }
     fullData <- readLines(fullfilename)
     fullData <- fullData[sapply(fullData, nchar) > 0]
     headerLines <- grep("#", fullData)

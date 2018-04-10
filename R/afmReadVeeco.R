@@ -25,78 +25,82 @@ afmReadVeeco <-
   function(filename, path = ".", FColStr = "pN",
            ZColStr = "Ramp",
            tColStr = "Time", TimeCol = TRUE, silent = FALSE) {
-    if (path == ""){
+    if (path == "") {
       fullfilename <- filename
     } else{
-    fullfilename <- file.path(path,filename)
+      fullfilename <- file.path(path, filename)
     }
     fullData <- readLines(fullfilename)
     fullData <- fullData[sapply(fullData, nchar) > 0]
     # Obtaining the spring constant
     springLine <- grep("Spring", fullData, value = T)[1]
-    SpringConstant <- as.numeric(sub("\"","",unlist(strsplit(springLine, ":"))[2]))
+    SpringConstant <-
+      as.numeric(sub("\"", "", unlist(strsplit(springLine, ":"))[2]))
     params = list(SpringConstant = SpringConstant, curvename = filename)
     # Obtaining the number of headers
-    Data <- grep("\"",fullData,invert = TRUE, value = TRUE)
-    DataDF <- read.table(text = Data, sep ="\t", header = T)
+    Data <- grep("\"", fullData, invert = TRUE, value = TRUE)
+    #DataDF <- read.table(text = Data, sep ="\t", header = T)
+    DataDF <- read.table(text = Data, header = T)
     cnames <- colnames(DataDF)
     # Getting the approach segment columns (Extent)
-    appCols  <- grep("Ex",cnames, value = "T")
-    if (TimeCol){
-    appTime <- grep(tColStr,appCols, value = "T")
-    appTime <- grep(appTime, cnames)
+    appCols  <- grep("Ex", cnames, value = "T")
+    if (TimeCol) {
+      appTime <- grep(tColStr, appCols, value = "T")
+      appTime <- grep(appTime, cnames)
     }
     appZ <- grep(ZColStr, appCols, value = "T")
     appForce <- grep(FColStr, appCols, value = "T")
     appZ <- grep(appZ, cnames)
     appForce <- grep(appForce, cnames)
-    if(TimeCol){
-    appSegment <- data.frame(Time = DataDF[,appTime], 
-                             Z = DataDF[,appZ]*1e-9, 
-                             Force = DataDF[,appForce]*1e-12,
-                             Segment = "approach")
+    if (TimeCol) {
+      appSegment <- data.frame(
+        Time = DataDF[, appTime],
+        Z = DataDF[, appZ] * 1e-9,
+        Force = DataDF[, appForce] * 1e-12,
+        Segment = "approach"
+      )
     } else{
-      appSegment <- data.frame(Z = DataDF[,appZ]*1e-9, 
-                               Force = DataDF[,appForce]*1e-12,
+      appSegment <- data.frame(Z = DataDF[, appZ] * 1e-9,
+                               Force = DataDF[, appForce] * 1e-12,
                                Segment = "approach")
     }
-    appSegment <- appSegment[complete.cases(appSegment),]
+    appSegment <- appSegment[complete.cases(appSegment), ]
     
     
     # Getting the retract segment columns (Retract)
-    retCols  <- grep("Rt",cnames, value = "T")
-    if(TimeCol){
-    retTime <- grep(tColStr,retCols, value = "T")
-    retTime <- grep(retTime, cnames)
+    retCols  <- grep("Rt", cnames, value = "T")
+    if (TimeCol) {
+      retTime <- grep(tColStr, retCols, value = "T")
+      retTime <- grep(retTime, cnames)
     }
     retZ <- grep(ZColStr, retCols, value = "T")
     retForce <- grep(FColStr, retCols, value = "T")
     retZ <- grep(retZ, cnames)
     retForce <- grep(retForce, cnames)
-    if(TimeCol){
-    retSegment <- data.frame(Time = DataDF[,retTime], 
-                             Z = DataDF[,retZ]*1e-9, 
-                             Force = DataDF[,retForce]*1e-12,
-                             Segment = "retract")
-    }else{
-      retSegment <- data.frame(Z = DataDF[,retZ]*1e-9, 
-                               Force = DataDF[,retForce]*1e-12,
+    if(TimeCol) {
+      retSegment <- data.frame(
+        Time = DataDF[, retTime],
+        Z = DataDF[, retZ] * 1e-9,
+        Force = DataDF[, retForce] * 1e-12,
+        Segment = "retract"
+      )
+    } else{
+      retSegment <- data.frame(Z = DataDF[, retZ] * 1e-9,
+                               Force = DataDF[, retForce] * 1e-12,
                                Segment = "retract")
     }
-    retSegment <- retSegment[complete.cases(retSegment),]
+    retSegment <- retSegment[complete.cases(retSegment), ]
     napp <- nrow(appSegment)
     applinefit <- lm(Z ~ n, data = data.frame(Z = appSegment$Z, n = 1:napp))
-    if (coefficients(applinefit)["n"]>0)
+    if (coefficients(applinefit)["n"] > 0)
     {
       retSegment$Z <- rev(retSegment$Z)
       appSegment$Z <- rev(appSegment$Z)
     }
-    afmExperiment <- rbind(appSegment,retSegment)
-    if(!silent){
-      cat(sprintf(
-      "Veeco file %s loaded.\n",
-      filename
-    ))
+    afmExperiment <- rbind(appSegment, retSegment)
+    if (!silent) {
+      cat(sprintf("Veeco file %s loaded.\n",
+                  filename))
     }
     afmExperiment$Segment <- as.factor(afmExperiment$Segment)
     afmExperiment <- afmdata(afmExperiment, params = params)
