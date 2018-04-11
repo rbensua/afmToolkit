@@ -4,7 +4,7 @@
 \alias{afmReadVeecoFolder}
 \title{Read all Bruke Nanoscope Veeco ascii files in a folder}
 \usage{
-afmReadVeecoFolder(folder, pattern = ".txt")
+afmReadVeecoFolder(folder, pattern = ".txt", ...)
 }
 \arguments{
 \item{folder}{Name of the  folder containing the Veeco files.}
