@@ -14,5 +14,5 @@ Returns \code{TRUE} if its argument is an afmdata (that is, has "afmdata"
   amongst its classes) and \code{FALSE} otherwise.
 }
 \description{
-Checks wether an R object is an afmdata or not.
+Checks whether an R object is an afmdata or not.
 }

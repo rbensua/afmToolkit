@@ -25,7 +25,7 @@ afmReadJPK <-
   function(filename, path = "",
            FColStr = "Vertical",
            ZColStr = "Height (measured & smoothed)",
-           tColStr = "Segment Time") {
+           tColStr = "Segment Time", silent = FALSE) {
     if (path == ""){
       fullfilename <- filename
     } else{
@@ -41,9 +41,9 @@ afmReadJPK <-
     params = list(SpringConstant = SpringConstant, curvename = filename)
     # Obtaining the number of headers
     numberOfHeader <- as.integer(sum(diff(headerLines) != 1) + 1)
-    if (numberOfHeader>3){
-      stop("Currently only up to three segments are supported!")
-    }
+#    if (numberOfHeader>3){
+#      stop("Currently only up to three segments are supported!")
+#    }
     N <- length(fullData)
     Nhead <- length(headerLines)
     
@@ -100,7 +100,14 @@ afmReadJPK <-
       pause <-  matrix(as.numeric(unlist(strsplit(pause, " "))),
                          ncol = ncolumns,
                          byrow = TRUE)
-      retract <- fullData[(headerEnds[3] + 1):N]
+      if( numberOfHeader > 3){
+        if(!silent){
+        print("More than 3 headers found, considering only the first 3!")
+        }
+        retract <- fullData[(headerEnds[3] + 1):(headerStarts[4] - 2)]
+      } else{
+        retract <- fullData[(headerEnds[3] + 1):N]
+      }
       retract <-  matrix(as.numeric(unlist(strsplit(retract, " "))),
                          ncol = ncolumns,
                          byrow = TRUE)
@@ -122,12 +129,13 @@ afmReadJPK <-
       }
       afmExperiment <- rbind(approach, pause, retract)
     }
+    if(!silent){
     cat(sprintf(
       "JPK file %s loaded. %d headers found.\n",
       filename,
       numberOfHeader
     ))
-    
+    }
     afmExperiment$Segment <- factor(afmExperiment$Segment)
     
     afmExperiment <- afmdata(data = afmExperiment, params = params)
