@@ -49,8 +49,13 @@ afmExtract <- function(afmexperiment, params = list("YM", "AE", "ED"), opt.param
     YM <- lapply(afmexperiment, function(x){ YM <- get("YoungModulus",
                                                        get("YoungModulus",x))})
     YM <- as.data.frame(do.call(rbind, YM), rownames = NULL)
+    R2 <- sapply(afmexperiment, function(x){
+      temp <- summary(x$YoungModulus$fitYM)
+      return(temp$r.squared)
+    })
+    R2 <- data.frame(r.squared = R2, row.names = NULL)
     colnames(YM) <- "YM"
-    extractedData <- cbind(extractedData, YM)
+    extractedData <- cbind(extractedData, YM,R2)
     row.names(extractedData) <- NULL
   }
   if ("AE" %in% params){
