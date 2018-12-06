@@ -54,7 +54,8 @@
 afmBaselineCorrection <-
   function(afmdata,
            ZPointApp = NULL,
-           ZPointRet = NULL, fitpause = c("approach","retract","none"), vsTime = FALSE) {
+           ZPointRet = NULL, fitpause = c("approach","retract","none"), vsTime = FALSE,
+           sinusoidal = FALSE) {
     Segment <- Z <- NULL
     fitpause <- match.arg(fitpause)
     if (is.afmexperiment(afmdata)){
@@ -86,10 +87,20 @@ afmBaselineCorrection <-
                             select = -Segment)
     
     if(vsTime){
+      if (!sinusoidal){
     fit.approach.time <- lm(Force  ~ Time, data = data.approach)
     afmdata$data$ForceCorrected <-
       afmdata$data$Force -
       predict(fit.approach.time, data.frame(Time = afmdata$data$Time))
+      }else{
+        print("Doing sinus")
+       fit.approach.time <-nls(Force ~ a0 + a1*Time + b * cos(w*Time+phi), 
+                               data = data.approach, 
+                               start = list(a0 = -0.5, a1 = -0.001, b = 0.001, w = 0.2/(2*pi), phi = pi/4))
+       afmdata$data$ForceCorrected <-
+         afmdata$data$Force -
+         predict(fit.approach.time, data.frame(Time = afmdata$data$Time))
+      }
     }else{
     fit.approach <- lm(Force ~ Z, data = data.approach)  
     F.corrected.approach <-

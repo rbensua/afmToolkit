@@ -59,7 +59,7 @@ afmZeroPointSlope <-
         #indicesSlope <-
         #  which(ForceCorrected > 0 & Z < min(afmdata$CP$CP, Zmin))
         indicesSlope <-
-          which(ForceCorrected < zerovalue & Z <  Zmin)
+          which(ForceCorrected <= zerovalue & Z <=  Zmin)
         
         i1 <- max(indicesSlope)
         #i0 <- i1 - 1
@@ -84,9 +84,10 @@ afmZeroPointSlope <-
         #   Z0Point <- afmdata$DP$DP
         #  }
       }
-      
-      Zslope <- Z[indicesSlope]
-      Fslope <- ForceCorrected[indicesSlope]
+      indicesSlope2 <-
+        which(Z <=  Zmin)
+      Zslope <- Z[indicesSlope2]
+      Fslope <- ForceCorrected[indicesSlope2]
       FitSlope <- lm(Fslope ~ Zslope)
       slope <- coef(FitSlope)[2] # Second coefficient of the fit
       Slopes <- list(Z0Point = Z0Point, Slope = slope)
