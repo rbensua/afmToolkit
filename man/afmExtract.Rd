@@ -4,7 +4,7 @@
 \alias{afmExtract}
 \title{Extract computed parameters from an afmexperiment}
 \usage{
-afmExtract(afmexperiment, params = list("YM", "AE", "ED"), opt.param = NULL)
+afmExtract(afmexperiment, params = list("YM", "AE", "ED","AF","IF"), opt.param = NULL)
 }
 \arguments{
 \item{afmexperiment}{Data of afmexperiment class.}
@@ -13,6 +13,9 @@ afmExtract(afmexperiment, params = list("YM", "AE", "ED"), opt.param = NULL)
 
 \item{opt.param}{Optional parameter or factor in the params field of the afmdata list 
 to add to the data extraction.}
+
+\item{forces}{A numerical vector with the forces for computing indentations.
+If NULL (default) a single indentation will be computed ranging from the zero force point to the last point in the  approach segment.}
 }
 \value{
 A data frame with the name of the curve and the corresponding values of the 
@@ -20,7 +23,8 @@ A data frame with the name of the curve and the corresponding values of the
 }
 \description{
 Extracts some parameters from an afmexperiment for an easy further
-analysis.
+analysis. YM = Young's modulus, AE = "Adhesion Energy", ED = Exponential decay, AF = "Adhesion Force", 
+IF = Indentation at a given force.
 }
 \examples{
 \dontrun{

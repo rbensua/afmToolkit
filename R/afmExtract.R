@@ -1,10 +1,13 @@
 #' @title Extract computed parameters from an afmexperiment
 #'   
 #' @description Extracts some parameters from an afmexperiment for an easy further
-#' analysis.
-#' @usage afmExtract(afmexperiment, params = list("YM", "AE", "ED"), opt.param = NULL)
+#' analysis. YM = Young's modulus, AE = "Adhesion Energy", ED = Exponential decay, AF = "Adhesion Force", 
+#' IF = Indentation at a given force.
+#' @usage afmExtract(afmexperiment, params = list("YM", "AE", "ED","AF","IF"), opt.param = NULL)
 #' @param afmexperiment Data of afmexperiment class.
 #' @param params List of parameters to extract from the data.
+#' @param forces A numerical vector with the forces for computing indentations.
+#'  If NULL (default) a single indentation will be computed ranging from the zero force point to the last point in the  approach segment.
 #' @param opt.param Optional parameter or factor in the params field of the afmdata list 
 #'   to add to the data extraction.
 #' @return A data frame with the name of the curve and the corresponding values of the 
@@ -36,7 +39,8 @@
 #' }
 #' @export
 #' 
-afmExtract <- function(afmexperiment, params = list("YM", "AE", "ED"), opt.param = NULL){
+afmExtract <- function(afmexperiment, params = list("YM", "AE", "ED","AF","IF"),
+                       opt.param = NULL,forces = NULL){
   if (!is.afmexperiment(afmexperiment)){
    stop("Data should be of afmexperiment class!") 
   }
@@ -64,6 +68,40 @@ afmExtract <- function(afmexperiment, params = list("YM", "AE", "ED"), opt.param
     extractedData <- cbind(extractedData, AE)
     row.names(extractedData) <- NULL
   }
+  if ("AF" %in% params){
+    adhPos <- sapply(afmexperiment, function(x){
+      ret <- subset(x$data, Segment == "retract")
+      
+      forceMinidx <- which.min(ret$ForceCorrected)
+      adhPos <- ret$Indentation[forceMinidx] - ret$Indentation[1]
+    })
+    forceMin <- sapply(afmexperiment, function(x){
+      ret <- subset(x$data, Segment == "retract")
+      forceMin <- abs(min(ret$ForceCorrected))
+    })
+    dfres <- data.frame(Min.Force = forceMin, Adh.Pos = adhPos, row.names = NULL)
+    extractedData <- cbind(extractedData, dfres)
+  }
+  if ("IF" %in% params){
+    
+    indforces <- sapply(afmexperiment, function(x){
+      app <- subset(x$data, Segment == "approach")
+      if(is.null(forces)){
+        forces <- max(app$ForceCorrected)
+      }
+      z0 <- x$Slopes$Z0Point
+      idx <- sapply(seq_along(forces), function(i) max(which(app$ForceCorrected <= forces[i])))
+      
+      indforces <- abs(app$Indentation[idx])
+      return(indforces)
+    })
+    A <- matrix(indforces, nrow = length(afmexperiment), ncol = length(forces), 
+                byrow = TRUE,
+           dimnames = list(names(afmexperiment), paste("Ind",seq_along(forces), sep = ".")))
+    extractedData <- cbind(extractedData, data.frame(A, row.names = NULL))
+    
+    
+  }
   if ("ED" %in% params){
     expDecay <- lapply(afmexperiment, function(x){
       temp <- as.data.frame(coefficients(
@@ -76,8 +114,8 @@ afmExtract <- function(afmexperiment, params = list("YM", "AE", "ED"), opt.param
     })
     expDecay <- do.call("rbind", expDecay)
     expDecay$curve <- as.factor(grep("force",
-                                    unlist(strsplit(rownames(expDecay), ".txt.")),
-                                    value = T))
+                                     unlist(strsplit(rownames(expDecay), ".txt.")),
+                                     value = T))
     expDecay$parameter <- as.factor(expDecay$parameter)
     expDecayOrdered <- data.frame(curve = c(),Estimate = c(), StdError = c(), 
                                   parameter = c())
@@ -278,7 +316,7 @@ afmExtract <- function(afmexperiment, params = list("YM", "AE", "ED"), opt.param
       }
       
     }
-
+    
     extractedData <- list(General = extractedData, ExpDecay = expDecayOrdered)
   }
   return(extractedData)
