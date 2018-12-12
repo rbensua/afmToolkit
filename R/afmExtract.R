@@ -95,9 +95,11 @@ afmExtract <- function(afmexperiment, params = list("YM", "AE", "ED","AF","IF"),
       indforces <- abs(app$Indentation[idx])
       return(indforces)
     })
-    A <- matrix(indforces, nrow = length(afmexperiment), ncol = length(forces), 
+    nforces <- max(length(forces), 1)
+    
+    A <- matrix(indforces, nrow = length(afmexperiment), ncol = nforces, 
                 byrow = TRUE,
-           dimnames = list(names(afmexperiment), paste("Ind",seq_along(forces), sep = ".")))
+           dimnames = list(names(afmexperiment), paste("Ind",seq_len(nforces), sep = ".")))
     extractedData <- cbind(extractedData, data.frame(A, row.names = NULL))
     
     
