@@ -47,11 +47,15 @@ afmZeroPointSlope <-
       }
       segment <- match.arg(segment)
       Z <- subset(afmdata$data, Segment == segment)$Z
+      isTime <- "Time" %in% colnames(afmdata$data)
+      
+      if (isTime) {
+        Time <- subset(afmdata$data, Segment == segment)$Time  
+      }
       ForceCorrected <-
         subset(afmdata$data, Segment == segment)$ForceCorrected
       Zmin <- Z[which.min(ForceCorrected)]
       Fmin <- min(ForceCorrected)
-
       if (segment == "approach") {
         # Computing the standard deviation in the baseline
         stddev <- sd(ForceCorrected[which(Z > afmdata$CP$CP)])
@@ -72,6 +76,13 @@ afmZeroPointSlope <-
         # }
         Z0Point <- Z[i0] + (zerovalue - ForceCorrected[i0]) * (Z[i1] - Z[i0]) /
           (ForceCorrected[i1] - ForceCorrected[i0])
+        if (isTime){
+          t0Point <- Time[i0] + (zerovalue - ForceCorrected[i0]) * (Time[i1] - Time[i0]) /
+            (ForceCorrected[i1] - ForceCorrected[i0])
+        } else{
+          t0Point <- NULL
+        }
+        
       } else {
         indicesSlope <-
           which(ForceCorrected > 0 & Z < min(afmdata$DP$DP, Zmin))
@@ -80,6 +91,13 @@ afmZeroPointSlope <-
         #  if (Zmin < afmdata$DP$DP){
         Z0Point <- Z[i0] - ForceCorrected[i0] * (Z[i1] - Z[i0]) /
           (ForceCorrected[i1] - ForceCorrected[i0])
+        if (isTime){
+          t0Point <- Time[i0] - ForceCorrected[i0] * (Time[i1] - Time[i0]) /
+            (ForceCorrected[i1] - ForceCorrected[i0])
+        } else{
+          t0Point <- NULL
+        }
+        
         # } else {
         #   Z0Point <- afmdata$DP$DP
         #  }
@@ -90,7 +108,7 @@ afmZeroPointSlope <-
       Fslope <- ForceCorrected[indicesSlope2]
       FitSlope <- lm(Fslope ~ Zslope)
       slope <- coef(FitSlope)[2] # Second coefficient of the fit
-      Slopes <- list(Z0Point = Z0Point, Slope = slope)
+      Slopes <- list(Z0Point = Z0Point, t0Point = t0Point, Slope = slope)
       return(append.afmdata(afmdata,Slopes))
     } else{
       stop("Error: input is not a valid afmdata or afmexperiment.")

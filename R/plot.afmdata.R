@@ -41,17 +41,17 @@ plot.afmdata <- function(x, y = NULL, vs = "Z", segment = "all", ...)
   afmdata <- x
   if (is.afmdata(afmdata)){
     segment <- match.arg(segment, c("approach","pause","retract","all"))
-    vs <- match.arg(vs, c("Z","Time"))
+   # vs <- match.arg(vs, c("Z","Time"))
   if (vs == "Time") {
     if (!("Time" %in% colnames(afmdata$data))) {
       stop("There is no column 'Time'")
     }
     if ("ForceCorrected" %in% names(afmdata$data)) {
       data <-
-        subset(afmdata$data, select = c(Time,ForceCorrected,Segment))
+        subset(afmdata$data, select = c(vs,"ForceCorrected","Segment"))
       colnames(data) <- c("x","y","Segment")
     } else {
-      data <- subset(afmdata$data, select = c(Time,Force,Segment))
+      data <- subset(afmdata$data, select = c(vs,"Force","Segment"))
       colnames(data) <- c("x","y","Segment")
     }
     if (segment == "all") {

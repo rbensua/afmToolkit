@@ -103,38 +103,48 @@ afmYoungModulus <-
         fitdata$ForceCorrected - fitdata$ForceCorrected[1]
       geometry <- match.arg(geometry)
       if (geometry == "pyramid"){
-      fitYM <- lm(ForceCorrected ~ I(Indentation ^ 2) - 1, data = fitdata)
-   
-      predYM <-  predict(fitYM, newdata =
-                           data.frame(Indentation = fitdata$Indentation))
-      
-      slope <- coef(fitYM)
-      if (showfit) {
-        print(summary(fitYM))
-      }
-      if (is.null(params$nu)) {
-        params$nu <- 0.5
-      }
-      YM <-
-        as.numeric(slope * sqrt(2) * (1 - params$nu ^ 2) / tan(params$alpha * pi /
-                                                                 180))
+        if ( nrow(fitdata) > 3 ){
+          fitYM <- lm(ForceCorrected ~ I(Indentation ^ 2) - 1, data = fitdata)
+          
+          predYM <-  predict(fitYM, newdata =
+                               data.frame(Indentation = fitdata$Indentation))
+          
+          slope <- coef(fitYM)
+          if (showfit) {
+            print(summary(fitYM))
+          }
+          if (is.null(params$nu)) {
+            params$nu <- 0.5
+          }
+          YM <-
+            as.numeric(slope * sqrt(2) * (1 - params$nu ^ 2) / tan(params$alpha * pi /
+                                                                     180))
+        } else {
+          YM <- NA
+          fitYM <- NA
+        }
       }else {
         fitdata$Indentation <- -fitdata$Indentation
         fitdata <- subset(fitdata, Indentation>=0)
-        fitYM <- lm(ForceCorrected ~ I(Indentation ^ 1.5) - 1, data = fitdata)
-        
-        predYM <-  predict(fitYM, newdata =
-                             data.frame(Indentation = fitdata$Indentation))
-        
-        slope <- coef(fitYM)
-        if (!silent) {
-          print(summary(fitYM))
+        if (nrow(fitdata) > 3){
+          fitYM <- lm(ForceCorrected ~ I(Indentation ^ 1.5) - 1, data = fitdata)
+          
+          predYM <-  predict(fitYM, newdata =
+                               data.frame(Indentation = fitdata$Indentation))
+          
+          slope <- coef(fitYM)
+          if (!silent) {
+            print(summary(fitYM))
+          }
+          if (is.null(params$nu)) {
+            params$nu <- 0.5
+          }
+          YM <-
+            as.numeric(slope * 0.75 * (1 - params$nu ^ 2) / sqrt(params$R))
+        } else {
+        YM <- NA
+        fitYM <- NA
         }
-        if (is.null(params$nu)) {
-          params$nu <- 0.5
-        }
-        YM <-
-          as.numeric(slope * 0.75 * (1 - params$nu ^ 2) / sqrt(params$R))
       }
       YoungModulus <- list(YoungModulus = YM,
                            fitYM = fitYM,

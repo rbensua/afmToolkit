@@ -138,6 +138,29 @@ afmReadJPK <-
     }
     afmExperiment$Segment <- factor(afmExperiment$Segment)
     
+    ## Finding the speeds
+    if ("Time" %in% colnames(afmExperiment)){
+    speeds <- list()
+    for (segment in levels(afmExperiment$Segment)){
+      curve <- subset(afmExperiment, Segment == segment, select = c(Time,Z))
+      speed <- coefficients(lm(Z ~ Time, curve))[2]
+      speeds <- append(speeds, speed)
+    }
+    names(speeds) <- levels(afmExperiment$Segment)
+    } else{
+      speeds <- NULL
+    }
+    
+    # Finding index position xpos and ypos
+    indexLine <- grep("index", fullData, value = T)[1]
+    Index <- as.numeric(unlist(strsplit(indexLine, ":"))[2])
+    xposLine <- grep("xPosition", fullData, value = T)[1]
+    xpos <- as.numeric(unlist(strsplit(xposLine, ":"))[2])
+    yposLine <- grep("yPosition", fullData, value = T)[1]
+    ypos <- as.numeric(unlist(strsplit(yposLine, ":"))[2])
+    
+    
+    params <- append(params, list(speeds = speeds, Index = Index, xpos = xpos, ypos = ypos))
     afmExperiment <- afmdata(data = afmExperiment, params = params)
     return(afmExperiment)
   }
