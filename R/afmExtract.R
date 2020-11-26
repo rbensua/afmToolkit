@@ -2,7 +2,7 @@
 #'   
 #' @description Extracts some parameters from an afmexperiment for an easy further
 #' analysis.
-#' @usage afmExtract(afmexperiment, params = list("YM", "AE", "RE", "HY"), opt.param = NULL)
+#' @usage afmExtract(afmexperiment, params = list("YM", "AE", "RE", "HY","AF","IF"), opt.param = NULL)
 #' @param afmexperiment Data of afmexperiment class.
 #' @param params List of parameters to extract from the data.
 #' @param opt.param Optional parameter or factor in the params field of the afmdata list 
@@ -36,30 +36,46 @@
 #' }
 #' @export
 #' 
-afmExtract <- function(afmexperiment, params = list("YM", "AE", "RE","HY"), opt.param = NULL){
+afmExtract <- function(afmexperiment, params = list("YM", "AE", "RE","HY","AF","IF"), opt.param = NULL, forces = NULL){
   if (!is.afmexperiment(afmexperiment)){
    stop("Data should be of afmexperiment class!") 
   }
   extractedData <- data.frame(curve = names(afmexperiment))
-  if (!is.null(opt.param)){
+
+## Extract optional parameters --------------
+  
+    if (!is.null(opt.param)){
     extractedData <- cbind(extractedData,do.call("rbind",lapply(afmexperiment, function(x) 
     as.data.frame(lapply(opt.param,function(p) get(p,x$params)), col.names = opt.param))))
   }
+  
+## Young modulus ---------------
+  
+  
   if ("YM" %in% params){
     YM <- lapply(afmexperiment, function(x){ YM <- get("YoungModulus",
                                                        get("YoungModulus",x))})
     YM <- as.data.frame(do.call(rbind, YM), rownames = NULL)
     colnames(YM) <- "YM"
-    extractedData <- cbind(extractedData, YM)
+    R2 <- sapply(afmexperiment, function(x){
+      temp <- summary(x$YoungModulus$fitYM)
+      return(temp$r.squared)
+    })
+    R2 <- data.frame(r.squared = R2, row.names = NULL)
+    extractedData <- cbind(extractedData, YM,R2)
     row.names(extractedData) <- NULL
   }
+  
+## Adhesion energy --------------
   if ("AE" %in% params){
     AE <- lapply(afmexperiment, function(x){AE <- get("Energies", get("AdhEner",x))})
     AE <- as.data.frame(do.call(rbind, AE), rownames = NULL)
     extractedData <- cbind(extractedData, AE)
     row.names(extractedData) <- NULL
   }
+## Relaxation parameters ---------------- 
   if ("RE" %in% params){
+    # Exponential decay models ----------------------
     if (afmexperiment[[1]]$Relax$model == "exp") {
     relax <- lapply(afmexperiment, function(x){
       temp <- as.data.frame(coefficients(
@@ -276,14 +292,75 @@ afmExtract <- function(afmexperiment, params = list("YM", "AE", "RE","HY"), opt.
     }
 
     extractedData <- list(General = extractedData, Relax = relaxOrdered)
-  }
+    } else { 
+    # Power law decay models ---------------------
+      relax <- lapply(afmexperiment, function(x){
+        temp <- as.data.frame(coefficients(
+          summary(x$Relax$relaxModel))[,1:2])
+        temp[1,1] <- exp(temp[1,1])
+        temp[1,2] <- temp[1,1]*temp[1,2]
+        temp$parameter <- c("A","beta")
+        if (!is.null(opt.param)){
+          dfparam <- as.data.frame(lapply(opt.param,function(p) get(p,x$params)),
+                                   col.names = opt.param)
+          temp <- cbind(temp,dfparam)
+        }
+        return(temp)
+      })
+      relax <- do.call("rbind", relax)
+      relax$curve <- as.factor(grep("force",
+                                    unlist(strsplit(rownames(relax), ".txt.")),
+                                    value = T))
+
+      rownames(relax) <- NULL
+      relax <- relax[,c(ncol(relax), 1:(ncol(relax)-1))]
+      extractedData <- list(General = extractedData, Relax = relax)
     }
-  
+    }
+
+## Hysteresis ------------------    
   if ("HY" %in% params){
     HY <-as.data.frame(do.call(rbind,lapply(afmexperiment, function(x) x$Hysteresis$Hysteresis)), rownames = NULL)
     colnames(HY) <- "Hysteresis"
     extractedData <- cbind(extractedData, HY)
     row.names(extractedData) <- NULL
   }
+# Adhesion Pos...? -------------------  
+  if ("AF" %in% params){
+    adhPos <- sapply(afmexperiment, function(x){
+      ret <- subset(x$data, Segment == "retract")
+      
+      forceMinidx <- which.min(ret$ForceCorrected)
+      adhPos <- ret$Indentation[forceMinidx] - ret$Indentation[1]
+    })
+    forceMin <- sapply(afmexperiment, function(x){
+      ret <- subset(x$data, Segment == "retract")
+      forceMin <- abs(min(ret$ForceCorrected))
+    })
+    dfres <- data.frame(Min.Force = forceMin, Adh.Pos = adhPos, row.names = NULL)
+    extractedData <- cbind(extractedData, dfres)
+  }
+# Indentation Forces ----------------------  
+  if ("IF" %in% params){
+    
+    indforces <- sapply(afmexperiment, function(x){
+      app <- subset(x$data, Segment == "approach")
+      if(is.null(forces)){
+        forces <- max(app$ForceCorrected)
+      }
+      z0 <- x$Slopes$Z0Point
+      idx <- sapply(seq_along(forces), function(i) max(which(app$ForceCorrected <= forces[i])))
+      
+      indforces <- abs(app$Indentation[idx])
+      return(indforces)
+    })
+    A <- matrix(indforces, nrow = length(afmexperiment), ncol = length(forces), 
+                byrow = TRUE,
+                dimnames = list(names(afmexperiment), paste("Ind",seq_along(forces), sep = ".")))
+    extractedData <- cbind(extractedData, data.frame(A, row.names = NULL))
+  }
+    
+  
+  
   return(extractedData)
 }

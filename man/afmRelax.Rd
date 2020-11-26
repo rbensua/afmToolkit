@@ -55,7 +55,7 @@ mul2 <- 10
 data <- afmContactPoint(data, width = width, mul1 = mul1, mul2 = mul2)
 data <- afmDetachPoint(data, width = width, mul1 = mul1, mul2 = mul2)
 data <- afmBaselineCorrection(data)
-data <- afmExpDecay(data, nexp = 2, type = "CH")
+data <- afmRelax(data, model = "exp", nexp = 2, type = "CH")
 }
 \references{
 Susana Moreno-Flores, Rafael Benitez, Maria dM Vivanco and Jose Luis 

@@ -4,8 +4,7 @@
 \alias{afmContactPoint}
 \title{Contact point}
 \usage{
-afmContactPoint(afmdata, width = 1, mul1, mul2, lagdiff = width, Delta = TRUE,
-  loessSmooth = FALSE)
+afmContactPoint(afmdata, width = 1, mul1, mul2, lagdiff = width, Delta = TRUE, loessSmooth = FALSE, silent = FALSE)
 }
 \arguments{
 \item{afmdata}{A Force-Distance curve with the afmdata structure. It should be a list
@@ -28,6 +27,9 @@ line. If FALSE then the slope itself is used.}
 prior to the determination of the contact point. The span of the  smoothing is 0.05
 (5%), the degree is 2 and the number of points equals the number of points in the
 approach segment.}
+
+\item{silent}{Logical. If TRUE supresses a message showing which curve is being processing
+(use it when processing a high number of curves). Defaults to FALSE.}
 }
 \value{
 An \code{afmdata} class variable which will consist on the original input

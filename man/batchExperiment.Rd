@@ -4,7 +4,8 @@
 \name{batchExperiment}
 \alias{batchExperiment}
 \title{Example of an afmexperiment data class.}
-\format{An afmexperiment class consisting on a list of 14 afmdata class elements each 
+\format{
+An afmexperiment class consisting on a list of 14 afmdata class elements each 
 one having the following fields:
 \describe{
   \item{data}{Data frame with the data itself with a variable number of rows (between 4692 and 6142)
@@ -23,7 +24,8 @@ one having the following fields:
 Polyallylamine hydrochloride}
   }
   }
-}}
+}
+}
 \usage{
 batchExperiment
 }

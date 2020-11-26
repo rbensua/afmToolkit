@@ -6,8 +6,7 @@
 #' 
 #' The procedure is similar to the one used by the \code{afmContactPoint()} function for
 #' obtaining the contact point.
-#' @usage afmDetachPoint(afmdata,width=1,mul1,mul2, lagdiff = width, Delta=TRUE,
-#'   loessSmooth = FALSE)
+#' @usage afmDetachPoint(afmdata,width=1,mul1,mul2, lagdiff = width, Delta=TRUE, loessSmooth = FALSE, silent = FALSE)
 #' @param afmdata A Force-Distance curve with the afmdata structure. It should be a list
 #'   with at least the 'data' field with a data frame of at least 4 columns.
 #' @param width Width of the window for the local regression (in vector position units)
@@ -22,6 +21,8 @@
 #'   prior to the determination of the contact point. The span of the  smoothing is 0.05
 #'   (5%), the degree is 2 and the number of points equals the number of points in the
 #'   approach segment.
+#' @param silent Logical. If TRUE supresses a message showing which curve is being processing
+#'  (use it when processing a high number of curves). Defaults to FALSE.
 #' @return An \code{afmdata} class variable which will consist on the original input
 #'   \code{afmdata} variable plus a new list named \code{DP} with the following fields:
 #'   

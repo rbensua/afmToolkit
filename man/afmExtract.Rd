@@ -4,7 +4,7 @@
 \alias{afmExtract}
 \title{Extract computed parameters from an afmexperiment}
 \usage{
-afmExtract(afmexperiment, params = list("YM", "AE", "RE", "HY"), opt.param = NULL)
+afmExtract(afmexperiment, params = list("YM", "AE", "RE", "HY","AF","IF"), opt.param = NULL)
 }
 \arguments{
 \item{afmexperiment}{Data of afmexperiment class.}

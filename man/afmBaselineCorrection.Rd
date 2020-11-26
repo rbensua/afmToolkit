@@ -4,8 +4,7 @@
 \alias{afmBaselineCorrection}
 \title{Performs a baseline correction to an AFM F-z curve}
 \usage{
-afmBaselineCorrection(afmdata, ZPointApp = NULL, ZPointRet = NULL,
-fitpause = c("approach","retract","none"), vsTime = FALSE)
+afmBaselineCorrection(afmdata, ZPointApp = NULL, ZPointRet = NULL, fitpause = c("approach","retract","none"), vsTime = FALSE, sinusoidal = FALSE)
 }
 \arguments{
 \item{afmdata}{An \code{afmdata} structure.}
@@ -23,6 +22,8 @@ is done on the pause segment.}
 
 \item{vsTime}{Logical. If TRUE then the baseline correction is performed following the Force vs time approach 
 described by S. Moreno-Flores (\cite{Moreno Flores (2016)}).}
+
+\item{sinusoidal}{Logical. If TRUE, then a pure harmonic is added to the fit of the baseline in order to remove possible periodical noise. Defaults to FALSE.}
 }
 \value{
 \code{afmdata} An \code{afmdata} structure identical to the one in 

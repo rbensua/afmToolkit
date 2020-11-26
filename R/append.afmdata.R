@@ -12,6 +12,7 @@
 #' @export
 
 append.afmdata <- function(afmdata,x, name = NULL){
+  classes <- class(afmdata)
   if (is.null(name)) name = deparse(substitute(x))
   if (name %in% names(afmdata)){
     afmdata[[name]] <- x
@@ -20,5 +21,7 @@ append.afmdata <- function(afmdata,x, name = NULL){
   newlist[[name]] <- x
   afmdata <- append(afmdata, newlist)
   }
-  return(afmdata(afmdata))
+  res <- afmdata(afmdata)
+  class(res) <- classes
+  return(res)
 }

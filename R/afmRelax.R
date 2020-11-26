@@ -40,7 +40,7 @@
 #' data <- afmContactPoint(data, width = width, mul1 = mul1, mul2 = mul2)
 #' data <- afmDetachPoint(data, width = width, mul1 = mul1, mul2 = mul2)
 #' data <- afmBaselineCorrection(data)
-#' data <- afmExpDecay(data, nexp = 2, type = "CH")
+#' data <- afmRelax(data, model = "exp", nexp = 2, type = "CH")
 #' @references Susana Moreno-Flores, Rafael Benitez, Maria dM Vivanco and Jose Luis 
 #' Toca-Herrera (2010). "Stress relaxation and creep on living cells with the atomic force
 #' microscope: a means to calculate elastic moduli and viscosities of cell components".
@@ -101,6 +101,7 @@ afmRelax <- function(afmdata, model = c("power","exp"), nexp = 2, tmax = NULL,
     
     
   }else if (type == "CH") {
+    
     decay <- subset(
       afmdata$data, Segment == "pause" & Time <= tmax,
       select = c("ForceCorrected", "Time")

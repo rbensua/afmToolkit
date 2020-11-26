@@ -5,8 +5,7 @@
 #' following the local regression and two thresholds methods described 
 #' in Microscopy Research and Technique 2013 (see reference).
 #' 
-#' @usage afmContactPoint(afmdata, width = 1, mul1, mul2, lagdiff = width, Delta = TRUE,
-#'   loessSmooth = FALSE)
+#' @usage afmContactPoint(afmdata, width = 1, mul1, mul2, lagdiff = width, Delta = TRUE, loessSmooth = FALSE, silent = FALSE)
 #' @param afmdata A Force-Distance curve with the afmdata structure. It should be a list
 #'   with at least the 'data' field with a data frame of at least 4 columns.
 #' @param width Width of the window for the local regression (in vector position units)
@@ -21,6 +20,8 @@
 #'   prior to the determination of the contact point. The span of the  smoothing is 0.05
 #'   (5%), the degree is 2 and the number of points equals the number of points in the
 #'   approach segment.
+#' @param silent Logical. If TRUE supresses a message showing which curve is being processing
+#'    (use it when processing a high number of curves). Defaults to FALSE.
 #' @return An \code{afmdata} class variable which will consist on the original input
 #'   \code{afmdata} variable plus a new list named \code{CP} with the following fields:
 #'
@@ -77,62 +78,64 @@ afmContactPoint <-
       })
       return(afmexperiment(afmexperiment))
     }else if(is.afmdata(afmdata)){
-    data.approach <- subset(afmdata$data, Segment == "approach")
-    n <- nrow(data.approach)
-    direction <- data.approach$Z[n] - data.approach$Z[1]
-    if (loessSmooth) {
-      data.approach.smoothed <-
-        loess.smooth(
-          data.approach$Z,
-          data.approach$Force,
-          span = 0.05,
-          degree = 2,
-          evaluation = n
-        )
-      Z <- data.approach.smoothed$x
-      Force <- data.approach.smoothed$y
-      if (direction < 0) {
-        Z <- rev(Z)
-        Force <- rev(Force)
+      # If afmdata is a multi-indentation experiment, we obtain the contact point with the first approach segment.
+      approach_string <- ifelse(is.afmmulti(afmdata),"approach1","approach")
+      data.approach <- subset(afmdata$data, Segment == approach_string)
+      n <- nrow(data.approach)
+      direction <- data.approach$Z[n] - data.approach$Z[1]
+      if (loessSmooth) {
+        data.approach.smoothed <-
+          loess.smooth(
+            data.approach$Z,
+            data.approach$Force,
+            span = 0.05,
+            degree = 2,
+            evaluation = n
+          )
+        Z <- data.approach.smoothed$x
+        Force <- data.approach.smoothed$y
+        if (direction < 0) {
+          Z <- rev(Z)
+          Force <- rev(Force)
+        }
+      } else{
+        Z <- data.approach$Z
+        Force <- data.approach$Force
       }
-    } else{
-      Z <- data.approach$Z
-      Force <- data.approach$Force
-    }
-    b <- array(0, dim = c(n, 1))
-    delta <- array(0, dim = c(n, 1))
-    imax <- n - width
-    app <- matrix(c(rep(1, n), Z, Force), nrow = n, ncol = 3)
-    bRoll <- windowedFit(app, width)
-    delta <- diff(bRoll, lag = lagdiff)
-    delta <- c(rep(0, width + lagdiff), delta, rep(0, width))
-    if (!Delta) {
-      delta <- c(rep(0, width), bRoll, rep(0, width))
-    }
-    
-    noise <-
-      sd(delta[(width + as.integer(n / 3)):(width + as.integer(n / 3) + 
-                                              as.integer(0.1 * n))],
-         na.rm = TRUE)
-    tol1 <- mul1 * noise
-    tol2 <- mul2 * noise
-    
-    if (tol2 > max(abs(delta))) {
-      tol2 <- max(abs(delta)) - 0.05 * diff(range(abs(delta)))
-    }
-    
-    idxGrTol2 <- which(abs(delta) > tol2)
-    idxSmTol1 <- which(abs(delta) < tol1)
-    # if (length(idxGrTol2) == 0) {
-    #   cat("mul2 is too large. Set a smaller value for mul2\n")
-    #   return(list(
-    #     CP = NA,
-    #     iCP = NA,
-    #     delta = delta,
-    #     noise = noise
-    #   ))
+      b <- array(0, dim = c(n, 1))
+      delta <- array(0, dim = c(n, 1))
+      imax <- n - width
+      app <- matrix(c(rep(1, n), Z, Force), nrow = n, ncol = 3)
+      bRoll <- windowedFit(app, width)
+      delta <- diff(bRoll, lag = lagdiff)
+      delta <- c(rep(0, width + lagdiff), delta, rep(0, width))
+      if (!Delta) {
+        delta <- c(rep(0, width), bRoll, rep(0, width))
+      }
       
-    #} else{
+      noise <-
+        sd(delta[(width + as.integer(n / 3)):(width + as.integer(n / 3) + 
+                                                as.integer(0.1 * n))],
+           na.rm = TRUE)
+      tol1 <- mul1 * noise
+      tol2 <- mul2 * noise
+      
+      if (tol2 > max(abs(delta))) {
+        tol2 <- max(abs(delta)) - 0.05 * diff(range(abs(delta)))
+      }
+      
+      idxGrTol2 <- which(abs(delta) > tol2)
+      idxSmTol1 <- which(abs(delta) < tol1)
+      # if (length(idxGrTol2) == 0) {
+      #   cat("mul2 is too large. Set a smaller value for mul2\n")
+      #   return(list(
+      #     CP = NA,
+      #     iCP = NA,
+      #     delta = delta,
+      #     noise = noise
+      #   ))
+      
+      #} else{
       j <- max(idxSmTol1[idxSmTol1 < min(idxGrTol2)])#+1
       
       if ((j > 1) & (delta[j] != 0)) {
@@ -153,7 +156,7 @@ afmContactPoint <-
         noise = noise
       )
       return(append.afmdata(afmdata,CP))
-    #}
+      #}
     }else{
       stop("No afmdata class input provided.")
     }

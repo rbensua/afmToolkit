@@ -35,14 +35,15 @@ afmZeroPointSlope <-
             print(paste("Processing curve: ",x$params$curvename), sep = " ")
           }
           afmZeroPointSlope(x, fstar = fstar, segment = segment)
-          })
+        })
       return(afmexperiment(afmdata))
     } else if (is.afmdata(afmdata)) {
       if (!("ForceCorrected" %in% names(afmdata$data))) {
         stop("Baseline correction should be done first!")
       }
-      if (!any(sapply(afmdata, function(x)
-        "CP" %in% names(x)))) {
+      # if (!any(sapply(afmdata, function(x)
+      #   "CP" %in% names(x)))) {
+      if(!"CP" %in% names(afmdata)){
         stop("Contact Point should be found first!")
       }
       segment <- match.arg(segment)

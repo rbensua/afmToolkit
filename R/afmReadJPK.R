@@ -41,9 +41,9 @@ afmReadJPK <-
     params = list(SpringConstant = SpringConstant, curvename = filename)
     # Obtaining the number of headers
     numberOfHeader <- as.integer(sum(diff(headerLines) != 1) + 1)
-#    if (numberOfHeader>3){
-#      stop("Currently only up to three segments are supported!")
-#    }
+    #    if (numberOfHeader>3){
+    #      stop("Currently only up to three segments are supported!")
+    #    }
     N <- length(fullData)
     Nhead <- length(headerLines)
     
@@ -62,7 +62,7 @@ afmReadJPK <-
     NcolumnNames <- grep("fancy", fullData)[1]
     columnNames <- fullData[NcolumnNames]
     Fcol <- grep(FColStr , unlist(strsplit(columnNames, " \""))) - 1
-#   Zcol <- grep(ZColStr , unlist(strsplit(columnNames, " \""))) - 1
+    #   Zcol <- grep(ZColStr , unlist(strsplit(columnNames, " \""))) - 1
     Zcol <- which(ZColStr == gsub("\"","",unlist(strsplit(columnNames, " \""))))-1
     tcol <- grep(tColStr, unlist(strsplit(columnNames, " \""))) - 1
     cnames <- c("Z", "F", "t")
@@ -98,11 +98,11 @@ afmReadJPK <-
     else{
       pause <- fullData[(headerEnds[2] + 1):(headerStarts[3] - 2)]
       pause <-  matrix(as.numeric(unlist(strsplit(pause, " "))),
-                         ncol = ncolumns,
-                         byrow = TRUE)
+                       ncol = ncolumns,
+                       byrow = TRUE)
       if( numberOfHeader > 3){
         if(!silent){
-        print("More than 3 headers found, considering only the first 3!")
+          print("More than 3 headers found, considering only the first 3!")
         }
         retract <- fullData[(headerEnds[3] + 1):(headerStarts[4] - 2)]
       } else{
@@ -130,23 +130,23 @@ afmReadJPK <-
       afmExperiment <- rbind(approach, pause, retract)
     }
     if(!silent){
-    cat(sprintf(
-      "JPK file %s loaded. %d headers found.\n",
-      filename,
-      numberOfHeader
-    ))
+      cat(sprintf(
+        "JPK file %s loaded. %d headers found.\n",
+        filename,
+        numberOfHeader
+      ))
     }
     afmExperiment$Segment <- factor(afmExperiment$Segment)
     
     ## Finding the speeds
     if ("Time" %in% colnames(afmExperiment)){
-    speeds <- list()
-    for (segment in levels(afmExperiment$Segment)){
-      curve <- subset(afmExperiment, Segment == segment, select = c(Time,Z))
-      speed <- coefficients(lm(Z ~ Time, curve))[2]
-      speeds <- append(speeds, speed)
-    }
-    names(speeds) <- levels(afmExperiment$Segment)
+      speeds <- list()
+      for (segment in levels(afmExperiment$Segment)){
+        curve <- subset(afmExperiment, Segment == segment, select = c(Time,Z))
+        speed <- coefficients(lm(Z ~ Time, curve))[2]
+        speeds <- append(speeds, speed)
+      }
+      names(speeds) <- levels(afmExperiment$Segment)
     } else{
       speeds <- NULL
     }
