@@ -47,6 +47,7 @@ afmExtract <- function(afmexperiment, params = list("YM", "AE", "RE","HY","AF","
     if (!is.null(opt.param)){
     extractedData <- cbind(extractedData,do.call("rbind",lapply(afmexperiment, function(x) 
     as.data.frame(lapply(opt.param,function(p) get(p,x$params)), col.names = opt.param))))
+    rownames(extractedData) <- NULL
   }
   
 ## Young modulus ---------------
@@ -75,9 +76,76 @@ afmExtract <- function(afmexperiment, params = list("YM", "AE", "RE","HY","AF","
   }
 ## Relaxation parameters ---------------- 
   if ("RE" %in% params){
-    # Exponential decay models ----------------------
-    if (afmexperiment[[1]]$Relax$model == "exp") {
-    relax <- lapply(afmexperiment, function(x){
+    if (!is.afmmulti(afmexperiment[[1]])){
+      # Normal case ------------
+      extractedData <- list(General = extractedData, 
+                            Relax = relax(afmexperiment, opt.param = opt.param))
+    } else{
+      # Multi-indentation experiment
+      
+      numpauses <-unlist(lapply(afmexperiment, function(z) length(z$Relax$relaxModel)))
+      relaxList <- list()
+      for (i in 1:max(numpauses)){
+        pp <- afmexperiment[which(numpauses >= i )]
+        tmplist <- lapply(pp, function(X) list(params = X$params, Relax = list(model = X$Relax$model, relaxModel = X$Relax$relaxModel[[i]])))
+        relaxList[[i]] <- cbind(relax(tmplist, opt.param = opt.param), data.frame(Segment = paste0("pause",i)))
+      }
+      extractedData <- list(General = extractedData, 
+                            Relax = do.call(rbind,relaxList))
+    }
+  }
+
+## Hysteresis ------------------    
+  if ("HY" %in% params){
+    HY <-as.data.frame(do.call(rbind,lapply(afmexperiment, function(x) x$Hysteresis$Hysteresis)), rownames = NULL)
+    colnames(HY) <- "Hysteresis"
+    extractedData <- cbind(extractedData, HY)
+    row.names(extractedData) <- NULL
+  }
+# Adhesion Pos...? -------------------  
+  if ("AF" %in% params){
+    adhPos <- sapply(afmexperiment, function(x){
+      ret <- subset(x$data, Segment == "retract")
+      
+      forceMinidx <- which.min(ret$ForceCorrected)
+      adhPos <- ret$Indentation[forceMinidx] - ret$Indentation[1]
+    })
+    forceMin <- sapply(afmexperiment, function(x){
+      ret <- subset(x$data, Segment == "retract")
+      forceMin <- abs(min(ret$ForceCorrected))
+    })
+    dfres <- data.frame(Min.Force = forceMin, Adh.Pos = adhPos, row.names = NULL)
+    extractedData <- cbind(extractedData, dfres)
+  }
+# Indentation Forces ----------------------  
+  if ("IF" %in% params){
+    
+    indforces <- sapply(afmexperiment, function(x){
+      app <- subset(x$data, Segment == "approach")
+      if(is.null(forces)){
+        forces <- max(app$ForceCorrected)
+      }
+      z0 <- x$Slopes$Z0Point
+      idx <- sapply(seq_along(forces), function(i) max(which(app$ForceCorrected <= forces[i])))
+      
+      indforces <- abs(app$Indentation[idx])
+      return(indforces)
+    })
+    A <- matrix(indforces, nrow = length(afmexperiment), ncol = length(forces), 
+                byrow = TRUE,
+                dimnames = list(names(afmexperiment), paste("Ind",seq_along(forces), sep = ".")))
+    extractedData <- cbind(extractedData, data.frame(A, row.names = NULL))
+  }
+    
+  
+  
+  return(extractedData)
+}
+
+relax <- function(afmlist, opt.param){
+  # Exponential decay models ----------------------
+  if (afmlist[[1]]$Relax$model == "exp") {
+    relax <- lapply(afmlist, function(x){
       temp <- as.data.frame(coefficients(
         summary(x$Relax$relaxModel))[,1:2])
       temp$parameter <- rownames(temp)
@@ -88,15 +156,15 @@ afmExtract <- function(afmexperiment, params = list("YM", "AE", "RE","HY","AF","
     })
     relax <- do.call("rbind", relax)
     relax$curve <- as.factor(grep("force",
-                                    unlist(strsplit(rownames(relax), ".txt.")),
-                                    value = T))
+                                  unlist(strsplit(rownames(relax), ".txt.")),
+                                  value = T))
     relax$parameter <- as.factor(relax$parameter)
     relaxOrdered <- data.frame(curve = c(),Estimate = c(), StdError = c(), 
-                                  parameter = c())
+                               parameter = c())
     if (!is.null(opt.param)){
       relaxOrdered[,eval(quote(opt.param))] <- c()
     }
-    call <- afmexperiment[[1]]$Relax$relaxModel$call
+    call <- afmlist[[1]]$Relax$relaxModel$call
     type <- ifelse(any(grepl("tau", as.character(call))),"CH","CF")
     
     if(type == "CH"){
@@ -290,77 +358,34 @@ afmExtract <- function(afmexperiment, params = list("YM", "AE", "RE","HY","AF","
       }
       
     }
-
-    extractedData <- list(General = extractedData, Relax = relaxOrdered)
-    } else { 
+    return(relaxOrdered)
+    #extractedData <- list(General = extractedData, Relax = relaxOrdered)
+  } else { 
     # Power law decay models ---------------------
-      relax <- lapply(afmexperiment, function(x){
-        temp <- as.data.frame(coefficients(
-          summary(x$Relax$relaxModel))[,1:2])
-        temp[1,1] <- exp(temp[1,1])
-        temp[1,2] <- temp[1,1]*temp[1,2]
-        temp$parameter <- c("A","beta")
-        if (!is.null(opt.param)){
-          dfparam <- as.data.frame(lapply(opt.param,function(p) get(p,x$params)),
-                                   col.names = opt.param)
-          temp <- cbind(temp,dfparam)
-        }
-        return(temp)
-      })
-      relax <- do.call("rbind", relax)
-      relax$curve <- as.factor(grep("force",
-                                    unlist(strsplit(rownames(relax), ".txt.")),
-                                    value = T))
-
-      rownames(relax) <- NULL
-      relax <- relax[,c(ncol(relax), 1:(ncol(relax)-1))]
-      extractedData <- list(General = extractedData, Relax = relax)
-    }
-    }
-
-## Hysteresis ------------------    
-  if ("HY" %in% params){
-    HY <-as.data.frame(do.call(rbind,lapply(afmexperiment, function(x) x$Hysteresis$Hysteresis)), rownames = NULL)
-    colnames(HY) <- "Hysteresis"
-    extractedData <- cbind(extractedData, HY)
-    row.names(extractedData) <- NULL
-  }
-# Adhesion Pos...? -------------------  
-  if ("AF" %in% params){
-    adhPos <- sapply(afmexperiment, function(x){
-      ret <- subset(x$data, Segment == "retract")
-      
-      forceMinidx <- which.min(ret$ForceCorrected)
-      adhPos <- ret$Indentation[forceMinidx] - ret$Indentation[1]
-    })
-    forceMin <- sapply(afmexperiment, function(x){
-      ret <- subset(x$data, Segment == "retract")
-      forceMin <- abs(min(ret$ForceCorrected))
-    })
-    dfres <- data.frame(Min.Force = forceMin, Adh.Pos = adhPos, row.names = NULL)
-    extractedData <- cbind(extractedData, dfres)
-  }
-# Indentation Forces ----------------------  
-  if ("IF" %in% params){
-    
-    indforces <- sapply(afmexperiment, function(x){
-      app <- subset(x$data, Segment == "approach")
-      if(is.null(forces)){
-        forces <- max(app$ForceCorrected)
+    relax <- lapply(afmlist, function(x){
+      temp <- as.data.frame(coefficients(
+        summary(x$Relax$relaxModel))[,1:2])
+      temp[1,1] <- exp(temp[1,1])
+      temp[1,2] <- temp[1,1]*temp[1,2]
+      temp$parameter <- c("A","beta")
+      if (!is.null(opt.param)){
+        dfparam <- as.data.frame(lapply(opt.param, function(p) get(p,x$params)),
+                                 col.names = opt.param)
+        temp <- cbind(temp,dfparam)
       }
-      z0 <- x$Slopes$Z0Point
-      idx <- sapply(seq_along(forces), function(i) max(which(app$ForceCorrected <= forces[i])))
-      
-      indforces <- abs(app$Indentation[idx])
-      return(indforces)
+      return(temp)
     })
-    A <- matrix(indforces, nrow = length(afmexperiment), ncol = length(forces), 
-                byrow = TRUE,
-                dimnames = list(names(afmexperiment), paste("Ind",seq_along(forces), sep = ".")))
-    extractedData <- cbind(extractedData, data.frame(A, row.names = NULL))
-  }
+    relax <- do.call("rbind", relax)
+    relax$curve <- as.factor(grep("force",
+                                  unlist(strsplit(rownames(relax), ".txt.")),
+                                  value = T))
     
-  
-  
-  return(extractedData)
+    rownames(relax) <- NULL
+    relax <- relax[,c(ncol(relax), 1:(ncol(relax)-1))]
+    #extractedData <- list(General = extractedData, Relax = relax)
+    return(relax)
+  }
 }
+
+
+

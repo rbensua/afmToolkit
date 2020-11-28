@@ -4,8 +4,8 @@
 \alias{afmRelax}
 \title{Stress relaxation/ Creep model fit}
 \usage{
-afmRelax(afmdata, model = c("power","exp"), nexp = 2, tmax = NULL, type = c("CH","CF"), plt = TRUE,
-  ...)
+afmRelax(afmdata, model = c("power","exp"), nexp = 2, tmax = NULL, 
+       type = c("CH","CF"), plt = TRUE, ...)
 }
 \arguments{
 \item{afmdata}{An object of \code{afmdata} class with a \bold{pause} segment and a

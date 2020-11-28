@@ -3,8 +3,8 @@
 #'   
 #' @description Fits a viscoelastic exponential decay in a Force-Relaxation or Creep
 #'   experiments as described in Nanotechnology 2010 (see references).
-#' @usage afmRelax(afmdata, model = c("power","exp"), nexp = 2, tmax = NULL, type = c("CH","CF"), plt = TRUE,
-#'   ...)
+#' @usage afmRelax(afmdata, model = c("power","exp"), nexp = 2, tmax = NULL, 
+#'        type = c("CH","CF"), plt = TRUE, ...)
 #' @param afmdata An object of \code{afmdata} class with a \bold{pause} segment and a
 #'   \bold{Time} column in the \code{data} dataframe.
 #' @param model Type of model to be fitted. Could be either "power" for a power 
@@ -54,7 +54,7 @@
 
 
 afmRelax <- function(afmdata, model = c("power","exp"), nexp = 2, tmax = NULL,
-                        type = c("CH","CF"), plt = TRUE, ...) {
+                     type = c("CH","CF"), plt = TRUE, ...) {
   Segment <- Time <- Force <- Z <- NULL
   model <- match.arg(model)
   type <- match.arg(type)
@@ -64,20 +64,83 @@ afmRelax <- function(afmdata, model = c("power","exp"), nexp = 2, tmax = NULL,
         print(paste("Processing curve: ", x$params$curvename), sep = " ")
       }
       afmRelax(x, model = model, nexp = nexp, tmax = tmax,type = type, plt = plt, ...)
-      })
+    })
     return(afmexperiment(afmdata))
   }else if (!is.afmdata(afmdata)) {
     stop("Input must be an afmdata or an afmexperiment object!")
   }else{
-  if (!"pause" %in% levels(afmdata$data$Segment)) {
-    stop("A pause segment must be present!")
+    if (!any(grepl("pause", levels(afmdata$data$Segment)))) {
+      stop("A pause segment must be present!")
+    }
+    if (is.null(tmax)) {
+      tmax <- Inf
+    }
+    if (!is.afmmulti(afmdata)){
+      seg <- "pause"
+      fitting <- fitcurve(afmdata, model = model, type = type, segment = seg, tmax = tmax, nexp = nexp,...)
+      Relax <- list(model = model, relaxModel = fitting$relaxModel, relaxFit = fitting$relaxFit) 
+    } else{
+      seg <- as.character(unique(afmdata$data$Segment)[grepl("pause",unique(afmdata$data$Segment))])
+      fitting <- lapply(seg, function(x) fitcurve(afmdata, model = model, type = type, segment = x, tmax = tmax, nexp = nexp,...))
+      names(fitting) <- seg  
+      Relax <- list(model = model, 
+                    relaxModel = lapply(fitting, function(x) x$relaxModel), 
+                    relaxFit = lapply(fitting, function(x) x$relaxFit)) 
+    }
+    
+    
+    if (plt) {
+      if(!is.afmmulti(afmdata)){
+        df <- subset(afmdata$data, Segment == "pause" & Time <= tmax,
+                     select = c("Time"))
+        if (type == "CH"){
+          print(
+            #plot(afmdata, vs = "Time", segment = "pause") +
+              ggplot(data = subset(afmdata$data, Segment == "pause"), 
+                     aes(x = Time, y = ForceCorrected)) +
+              geom_point(alpha = 0.5, shape = 21, colour = "black", fill = "lightblue") + 
+              geom_line(
+                data = data.frame(Time = df, Force = Relax$relaxFit),
+                aes(x = Time, y = Force), col = "blue", lwd = 1) +
+              theme_bw() + ylab("Force (N)") + ggtitle(afmdata$params$curvename)
+          )
+        } else{
+          pause <- subset(afmdata$data, Segment == "pause")
+          print(ggplot(data = pause, aes(x = Time, y = Z)) + 
+                  geom_point(alpha = 0.4, shape = 21, colour = "black", fill = "lightblue") + 
+                  geom_line(
+                    data = data.frame(Time = df, Z = Relax$relaxFit),
+                    aes(x = Time, y = Z), col = "blue", lwd = 1) + 
+                  theme_bw() + ylab("Z (m)") + ggtitle(afmdata$params$curvename)
+                )
+        }
+      }else{
+        df <- afmdata$data %>% filter(grepl("pause", Segment) & Time <= tmax)
+        if (type == "CH"){
+          df <- df %>% mutate(Force_fitted = unlist(Relax$relaxFit))
+          print(ggplot(data = df, aes(x = Time, y = ForceCorrected, fill = Segment)) + 
+                  geom_point(alpha = .5, shape = 21, colour = "black") +
+                  geom_line(aes(y = Force_fitted, group = Segment, col = Segment), lwd = 1.1) +
+                  theme_bw() + ylab("Force (N)") + ggtitle(afmdata$params$curvename))  
+            
+        } else{
+          df <- df %>% mutate(Z_fitted = unlist(Relax$relaxFit))
+          print(ggplot(data = df, aes(x = Time, y = Z, fill = Segment)) + 
+                  geom_point(alpha = .5, shape = 21, colour = "black") +
+                  geom_line(aes(y = Z_fitted, group = Segment, col = Segment), lwd = 1.1) +
+                  theme_bw() + ylab("Z (m)") + ggtitle(afmdata$params$curvename))
+        }
+      }
+    } 
+    return(append.afmdata(afmdata, Relax))
   }
-  if (is.null(tmax)) {
-    tmax <- Inf
-  }
+}
+
+
+fitcurve <- function(afmdata, type, model, segment, tmax, nexp = 2,...){
   if (type == "CF") {
     decay <-
-      subset(afmdata$data, Segment == "pause" &
+      subset(afmdata$data, Segment == segment &
                Time <= tmax, select = c("Z", "Time"))
     decay$Time <- decay$Time - min(decay$Time)
     if (model == "exp"){
@@ -94,19 +157,19 @@ afmRelax <- function(afmdata, model = c("power","exp"), nexp = 2, tmax = NULL,
       relaxFit <-
         predict(relaxModel, data.frame(Time = decay$Time))
     } else {
-        relaxModel <- lm( log(Z) ~ log(Time), data = decay )
-        relaxFit <-
-          exp(predict(relaxModel, data.frame(Time = decay$Time)))
+      relaxModel <- lm( log(Z) ~ log(Time), data = decay )
+      relaxFit <-
+        exp(predict(relaxModel, data.frame(Time = decay$Time)))
     }
     
     
   }else if (type == "CH") {
     
     decay <- subset(
-      afmdata$data, Segment == "pause" & Time <= tmax,
+      afmdata$data, Segment == segment & Time <= tmax,
       select = c("ForceCorrected", "Time")
     )
-
+    
     if (model == "exp"){
       decay$Time <- decay$Time - min(decay$Time) 
       if (nexp == 1) {
@@ -130,30 +193,8 @@ afmRelax <- function(afmdata, model = c("power","exp"), nexp = 2, tmax = NULL,
     }
     
     
-  } else
-    stop("type should be either 'CF' or 'CH'!")
-  if (plt) {
-    df <- subset(afmdata$data, Segment == "pause" & Time <= tmax,
-                 select = c("Time"))
-    if (type == "CH"){
-    print(
-      plot(afmdata, vs = "Time", segment = "pause") +
-        geom_line(
-          data = data.frame(Time = df, Force = relaxFit),
-          aes(x = Time, y = Force), col = "green", size = 1, lty = 3
-        )
-    )
-    } else{
-      pause <- subset(afmdata$data, Segment == "pause")
-        print(ggplot(data = pause, aes(x = Time, y = Z)) + 
-          geom_line() + 
-          geom_line(
-            data = data.frame(Time = df, Z = relaxFit),
-            aes(x = Time, y = Z), col = "green", size = 1.5
-          ))
-    }
   }
-  Relax <- list(model = model, relaxModel = relaxModel, relaxFit = relaxFit) 
-  return(append.afmdata(afmdata, Relax))
-  }
+  
+  return(list(relaxModel = relaxModel, relaxFit = relaxFit))
 }
+

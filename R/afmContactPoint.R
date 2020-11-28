@@ -60,8 +60,11 @@ afmContactPoint <-
            lagdiff = width,
            Delta = TRUE,
            loessSmooth = FALSE, silent = FALSE) {
+    
     Segment <- NULL
+# Checking data inputs ####
     if(is.afmexperiment(afmdata)) {
+      #* Case afmexperiment ------
       afmexperiment <- lapply(afmdata, function(x) {
         if (!is.null(x$params$curvename) & !silent) {
           print(paste("Processing curve: ", x$params$curvename), sep = " ")
@@ -78,12 +81,16 @@ afmContactPoint <-
       })
       return(afmexperiment(afmexperiment))
     }else if(is.afmdata(afmdata)){
-      # If afmdata is a multi-indentation experiment, we obtain the contact point with the first approach segment.
+      #* Case afmdata 1 curve only ----
+      {
+      # If afmdata is a multi-indentation experiment, we obtain the contact 
+      # point with the first approach segment.
       approach_string <- ifelse(is.afmmulti(afmdata),"approach1","approach")
       data.approach <- subset(afmdata$data, Segment == approach_string)
       n <- nrow(data.approach)
       direction <- data.approach$Z[n] - data.approach$Z[1]
       if (loessSmooth) {
+        #* Smoothing the data ----
         data.approach.smoothed <-
           loess.smooth(
             data.approach$Z,
@@ -99,10 +106,12 @@ afmContactPoint <-
           Force <- rev(Force)
         }
       } else{
+        #* No smoothing ----
         Z <- data.approach$Z
         Force <- data.approach$Force
       }
-      b <- array(0, dim = c(n, 1))
+      
+      #* Creating the arrays: bRoll -> slopes in a rolling windows and delta -> change in slopes. -----
       delta <- array(0, dim = c(n, 1))
       imax <- n - width
       app <- matrix(c(rep(1, n), Z, Force), nrow = n, ncol = 3)
@@ -126,16 +135,7 @@ afmContactPoint <-
       
       idxGrTol2 <- which(abs(delta) > tol2)
       idxSmTol1 <- which(abs(delta) < tol1)
-      # if (length(idxGrTol2) == 0) {
-      #   cat("mul2 is too large. Set a smaller value for mul2\n")
-      #   return(list(
-      #     CP = NA,
-      #     iCP = NA,
-      #     delta = delta,
-      #     noise = noise
-      #   ))
-      
-      #} else{
+
       j <- max(idxSmTol1[idxSmTol1 < min(idxGrTol2)])#+1
       
       if ((j > 1) & (delta[j] != 0)) {
@@ -156,7 +156,7 @@ afmContactPoint <-
         noise = noise
       )
       return(append.afmdata(afmdata,CP))
-      #}
+    }
     }else{
       stop("No afmdata class input provided.")
     }

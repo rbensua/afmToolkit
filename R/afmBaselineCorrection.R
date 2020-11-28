@@ -66,7 +66,8 @@ afmBaselineCorrection <-
     }else if (is.afmdata(afmdata)){
     
     # First determine how many segments are in the curve
-    # If afmdata is a multi-indentation experiment, we obtain the contact point with the first approach segment.
+    # If afmdata is a multi-indentation experiment, we obtain the contact point 
+    # with the first approach segment.
       approach_string <- ifelse(is.afmmulti(afmdata),"approach1","approach")
       
       

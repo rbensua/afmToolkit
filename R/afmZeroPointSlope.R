@@ -47,6 +47,9 @@ afmZeroPointSlope <-
         stop("Contact Point should be found first!")
       }
       segment <- match.arg(segment)
+    if(segment == "approach" & is.afmmulti(afmdata)){
+      segment <- "approach1"
+    }
       Z <- subset(afmdata$data, Segment == segment)$Z
       isTime <- "Time" %in% colnames(afmdata$data)
       

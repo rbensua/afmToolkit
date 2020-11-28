@@ -20,4 +20,4 @@ Imports:
     tibble
 License: GPL
 LazyData: true
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
