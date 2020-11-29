@@ -60,7 +60,7 @@ afmZeroPointSlope <-
         subset(afmdata$data, Segment == segment)$ForceCorrected
       Zmin <- Z[which.min(ForceCorrected)]
       Fmin <- min(ForceCorrected)
-      if (segment == "approach") {
+      if (grepl("approach",segment)) {
         # Computing the standard deviation in the baseline
         stddev <- sd(ForceCorrected[which(Z > afmdata$CP$CP)])
         zerovalue <- fstar*stddev;
