@@ -1,0 +1,30 @@
+Package: afmToolkit
+Title: Functions for Atomic Force Microscope Force-Distance Curves Analysis
+Version: 0.1.0
+Authors@R: c(person(given = "Rafael",
+                      family = "Benitez",
+                      role = c("aut", "cre"),
+                      email = "rabesua@uv.es"),
+               person(given = c("Vicente", "Jose"),
+                      family = "Bolos",
+                      role = "aut"),
+               person(given = "Jose-Luis",
+                      family = "Toca-Herrera",
+                      role = "aut"))
+Maintainer: Rafael Benitez <rabesua@uv.es>
+Description: Set of functions for analyzing Atomic Force Microscope (AFM) force-distance curves. It allows to obtain the contact and unbinding points, perform the baseline correction, estimate the Young's modulus, fit up to two exponential decay function to a stress-relaxation / creep experiment, obtain adhesion energies. These operations can be done either over a single F-d curve or over a set of F-d curves in batch  mode.
+Depends:
+    R (>= 3.2.2),
+    ggplot2
+Imports:
+    stats,
+    utils,
+    minpack.lm,
+    grid,
+    gridExtra,
+    scales,
+    dplyr
+License: GPL
+LazyData: true
+RoxygenNote: 7.3.3
+Encoding: UTF-8
