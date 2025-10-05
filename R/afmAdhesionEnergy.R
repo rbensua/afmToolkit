@@ -66,7 +66,10 @@ afmAdhesionEnergy <-
       
       imin <- min(which(Force < 0))
       idx <- seq_along(Force)
-      imax <- min(which(Force > 0 & idx > which.min(Force)))
+      iFmin <- which.min(Force)
+      Fmin <- min(Force)
+      ZFmin <- Z[iFmin]
+      imax <- min(which(Force > 0 & idx > iFmin))
       
       
       
@@ -183,6 +186,10 @@ afmAdhesionEnergy <-
           E1adh = abs(E1adh),
           E2adh = abs(E2adh),
           Etotal = Weight
+        ),
+        minForce = data.frame(
+          Fmin = Fmin, 
+          ZFmin = ZFmin
         )
       )
       return(append.afmdata(afmdata, AdhEner))

@@ -45,7 +45,7 @@ data <- afmBaselineCorrection(data)
 data <- afmZeroPointSlope(data)
 data <- afmIndentation(data)
 data <- afmYoungModulus(data, thickness = 2e-7, params = list(alpha = 22))
-data <- afmExpDecay(data, plt = FALSE)
+data <- afmRelax(data, plt = FALSE)
 data <- afmAdhesionEnergy(data, mul = 7)
 
 # Extract the values of the parameters obtained in the analysis

@@ -26,7 +26,7 @@
 #' data <- afmZeroPointSlope(data)
 #' data <- afmIndentation(data)
 #' data <- afmYoungModulus(data, thickness = 2e-7, params = list(alpha = 22))
-#' data <- afmExpDecay(data, plt = FALSE)
+#' data <- afmRelax(data, plt = FALSE)
 #' data <- afmAdhesionEnergy(data, mul = 7)
 #' 
 #' # Extract the values of the parameters obtained in the analysis
@@ -56,98 +56,132 @@ afmExtract <- function(afmexperiment,
     as.data.frame(lapply(opt.param,function(p) get(p,x$params)), col.names = opt.param))))
     rownames(extractedData) <- NULL
   }
+
+## Find out what has been computed on the afmexperiment
   
+  available <- names(afmexperiment[[1]])
+    
 ## Young modulus ---------------
   
   
   if ("YM" %in% params){
-    YM <- lapply(afmexperiment, function(x){ YM <- get("YoungModulus",
-                                                       get("YoungModulus",x))})
-    YM <- as.data.frame(do.call(rbind, YM), rownames = NULL)
-    colnames(YM) <- "YM"
-    R2 <- sapply(afmexperiment, function(x){
-      temp <- summary(x$YoungModulus$fitYM)
-      return(temp$r.squared)
-    })
-    R2 <- data.frame(r.squared = R2, row.names = NULL)
-    extractedData <- cbind(extractedData, YM,R2)
-    row.names(extractedData) <- NULL
+    if (!"YoungModulus" %in% available){
+      warning("Young Modulus has not been calculated, ignoring parameter 'YM' (maybe you should run afmYoungModulus() first)")
+    }else{
+      YM <- lapply(afmexperiment, function(x){ YM <- get("YoungModulus",
+                                                         get("YoungModulus",x))})
+      YM <- as.data.frame(do.call(rbind, YM), rownames = NULL)
+      colnames(YM) <- "YM"
+      R2 <- sapply(afmexperiment, function(x){
+        temp <- summary(x$YoungModulus$fitYM)
+        return(temp$r.squared)
+      })
+      R2 <- data.frame(r.squared = R2, row.names = NULL)
+      extractedData <- cbind(extractedData, YM,R2)
+      row.names(extractedData) <- NULL
+    }
   }
   
 ## Adhesion energy --------------
   if ("AE" %in% params){
-    AE <- lapply(afmexperiment, function(x){AE <- get("Energies", get("AdhEner",x))})
-    AE <- as.data.frame(do.call(rbind, AE), rownames = NULL)
-    extractedData <- cbind(extractedData, AE)
-    row.names(extractedData) <- NULL
-  }
-## Relaxation parameters ---------------- 
-  if ("RE" %in% params){
-    if (!is.afmmulti(afmexperiment[[1]])){
-      # Normal case ------------
-      extractedData <- list(General = extractedData, 
-                            Relax = relax(afmexperiment, opt.param = opt.param))
-    } else{
-      # Multi-indentation experiment
-      
-      numpauses <-unlist(lapply(afmexperiment, function(z) length(z$Relax$relaxModel)))
-      relaxList <- list()
-      for (i in 1:max(numpauses)){
-        pp <- afmexperiment[which(numpauses >= i )]
-        tmplist <- lapply(pp, function(X) list(params = X$params, Relax = list(model = X$Relax$model, relaxModel = X$Relax$relaxModel[[i]])))
-        relaxList[[i]] <- cbind(relax(tmplist, opt.param = opt.param), data.frame(Segment = paste0("pause",i)))
-      }
-      extractedData <- list(General = extractedData, 
-                            Relax = do.call(rbind,relaxList))
+    if(!"AdhEner" %in% available){
+      warning("Adhesion energies have not been calculated, ignoring parameter 'AE' (maybe you should run afmAdhesionEnergy() first)")
+    }else{
+      AE <- lapply(afmexperiment, function(x){AE <- get("Energies", get("AdhEner",x))})
+      AE <- as.data.frame(do.call(rbind, AE), rownames = NULL)
+      extractedData <- cbind(extractedData, AE)
+      row.names(extractedData) <- NULL
     }
   }
 
 ## Hysteresis ------------------    
   if ("HY" %in% params){
-    HY <-as.data.frame(do.call(rbind,lapply(afmexperiment, 
-                                            function(x) c(x$Hysteresis$Hysteresis,
-                                                          x$Hysteresis$Hyst_ratio) )), 
-                       rownames = NULL)
-    colnames(HY) <- c("Hysteresis", "Hyst. ratio")
-    extractedData <- cbind(extractedData, HY)
-    row.names(extractedData) <- NULL
+    if (!"Hysteresis" %in% available){
+      warning("Hysteresis energy has not been calculated. Ignoring parameter 'HY' (maybe you should run afmHysteresis() first)")
+      
+    }else{
+      HY <-as.data.frame(do.call(rbind,lapply(afmexperiment, 
+                                              function(x) c(x$Hysteresis$Hysteresis,
+                                                            x$Hysteresis$Hyst_ratio) )), 
+                         rownames = NULL)
+      colnames(HY) <- c("Hysteresis", "Hyst. ratio")
+      extractedData <- cbind(extractedData, HY)
+      row.names(extractedData) <- NULL}
   }
 # Adhesion Pos...? -------------------  
   if ("AF" %in% params){
-    adhPos <- sapply(afmexperiment, function(x){
-      ret <- subset(x$data, Segment == "retract")
-      
-      forceMinidx <- which.min(ret$ForceCorrected)
-      adhPos <- ret$Indentation[forceMinidx] - ret$Indentation[1]
-    })
-    forceMin <- sapply(afmexperiment, function(x){
-      ret <- subset(x$data, Segment == "retract")
-      forceMin <- abs(min(ret$ForceCorrected))
-    })
-    dfres <- data.frame(Min.Force = forceMin, Adh.Pos = adhPos, row.names = NULL)
-    extractedData <- cbind(extractedData, dfres)
+    if(!"ForceCorrected" %in% colnames(afmexperiment[[1]]$data)){
+      warning("You need to make the baseline correction first. Ignoring parameter 'AF'.")
+    }else if(!"Slopes" %in% available){
+      warning("Indentation has not been calculated. Ignoring parameter 'AF' (you should run afmZeroPointSlope() first).")
+    }else{
+      adhPos <- sapply(afmexperiment, function(x){
+        ret <- subset(x$data, Segment == "retract")
+        
+        forceMinidx <- which.min(ret$ForceCorrected)
+        adhPos <- ret$Indentation[forceMinidx] - ret$Indentation[1]
+      })
+      forceMin <- sapply(afmexperiment, function(x){
+        ret <- subset(x$data, Segment == "retract")
+        forceMin <- abs(min(ret$ForceCorrected))
+      })
+      dfres <- data.frame(Min.Force = forceMin, Adh.Pos = adhPos, row.names = NULL)
+      extractedData <- cbind(extractedData, dfres)
+    }
   }
 # Indentation Forces ----------------------  
+  if (!is.afmmulti(afmexperiment[[1]])){
+    warning("Indentation Forces can be calculated in a multi-indentation experiment! Ignoring parameter 'IF'")
+  }else{
   if ("IF" %in% params){
-    
-    indforces <- sapply(afmexperiment, function(x){
-      app <- subset(x$data, Segment == "approach")
-      if(is.null(forces)){
-        forces <- max(app$ForceCorrected)
-      }
-      z0 <- x$Slopes$Z0Point
-      idx <- sapply(seq_along(forces), function(i) max(which(app$ForceCorrected <= forces[i])))
-      
-      indforces <- abs(app$Indentation[idx])
-      return(indforces)
-    })
-    A <- matrix(indforces, nrow = length(afmexperiment), ncol = length(forces), 
-                byrow = TRUE,
-                dimnames = list(names(afmexperiment), paste("Ind",seq_along(forces), sep = ".")))
-    extractedData <- cbind(extractedData, data.frame(A, row.names = NULL))
+    if(!"ForceCorrected" %in% colnames(afmexperiment[[1]]$data)){
+      warning("You need to make the baseline correction first. Ignoring parameter 'IF'.")
+    }else if(!"Slopes" %in% available){
+      warning("Indentation has not been calculated. Ignoring parameter 'IF' (you should run afmZeroPointSlope() first).")
+    }else{
+      indforces <- sapply(afmexperiment, function(x){
+        app <- subset(x$data, Segment == "approach")
+        if(is.null(forces)){
+          forces <- max(app$ForceCorrected)
+        }
+        z0 <- x$Slopes$Z0Point
+        idx <- sapply(seq_along(forces), function(i) max(which(app$ForceCorrected <= forces[i])))
+        
+        indforces <- abs(app$Indentation[idx])
+        return(indforces)
+      })
+      A <- matrix(indforces, nrow = length(afmexperiment), ncol = length(forces), 
+                  byrow = TRUE,
+                  dimnames = list(names(afmexperiment), paste("Ind",seq_along(forces), sep = ".")))
+      extractedData <- cbind(extractedData, data.frame(A, row.names = NULL))
+    }
   }
-    
+  }
   
+  ## Relaxation parameters ---------------- 
+  if ("RE" %in% params){
+    if(!"Relax" %in% available){
+      warning("Force relaxation / creep have not been calculated, ignoring parameter 'RE' (maybe you should run afmRelax() first)")
+    }else{
+      if (!is.afmmulti(afmexperiment[[1]])){
+        # Normal case ------------
+        extractedData <- list(General = extractedData, 
+                              Relax = relax(afmexperiment, opt.param = opt.param))
+      } else{
+        # Multi-indentation experiment
+        
+        numpauses <-unlist(lapply(afmexperiment, function(z) length(z$Relax$relaxModel)))
+        relaxList <- list()
+        for (i in 1:max(numpauses)){
+          pp <- afmexperiment[which(numpauses >= i )]
+          tmplist <- lapply(pp, function(X) list(params = X$params, Relax = list(model = X$Relax$model, relaxModel = X$Relax$relaxModel[[i]])))
+          relaxList[[i]] <- cbind(relax(tmplist, opt.param = opt.param), data.frame(Segment = paste0("pause",i)))
+        }
+        extractedData <- list(General = extractedData, 
+                              Relax = do.call(rbind,relaxList))
+      }
+    }
+  }
   
   return(extractedData)
 }

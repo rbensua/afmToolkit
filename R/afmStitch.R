@@ -6,10 +6,7 @@
 #' @usage afmStitch(expname)
 #' @param expname Veeco experiment namea character string with the common part of the 4 files.
 #' @return An \code{afmdata} class variable with the three segments of the Veeco file experiment
-#'
-#' @examples
 #' 
-#' @export
 afmStitch <- function(expname){
   available_files <- list.files(pattern = ".txt")
   
