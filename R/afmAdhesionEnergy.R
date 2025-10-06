@@ -187,6 +187,7 @@ afmAdhesionEnergy <-
           E2adh = abs(E2adh),
           Etotal = Weight
         ),
+        # Minimum force and point of minimum force
         minForce = data.frame(
           Fmin = Fmin, 
           ZFmin = ZFmin
