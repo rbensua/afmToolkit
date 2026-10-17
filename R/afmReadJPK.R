@@ -30,6 +30,36 @@ afmReadJPK <-
     
     Segment <- Time <- Z <- NULL # For CRAN compatibility
     
+    # Parse the data lines of one segment into a data frame, using the
+    # "fancy" column-names line of its header to locate the Force, Z and
+    # Time columns. (Internal helper, defined here to avoid repeating the
+    # same parsing block for the approach, pause and retract segments.)
+    parseSegment <- function(lines, columnNames, segmentName) {
+      ncolumns <- length(unlist(strsplit(lines[1], " ")))
+      m <- matrix(as.numeric(unlist(strsplit(lines, " "))),
+                  ncol = ncolumns,
+                  byrow = TRUE)
+      tokens <- unlist(strsplit(columnNames, " \""))
+      Fcol <- grep(FColStr, tokens) - 1
+      Zcol <- which(ZColStr == gsub("\"", "", tokens)) - 1
+      tcol <- grep(tColStr, tokens) - 1
+      data.frame(
+        Z = m[, Zcol],
+        Force = m[, Fcol],
+        Time = m[, tcol],
+        Segment = segmentName
+      )
+    }
+    
+    # JPK sometimes stores the retract segment with decreasing Z; make Z increasing.
+    ensureZIncreasing <- function(segment) {
+      if (coef(lm(segment$Z ~ seq_along(segment$Z)))[2] < 0) {
+        segment$Z <- rev(segment$Z)
+        segment$Force <- rev(segment$Force)
+      }
+      segment
+    }
+    
     if (path == ""){
       fullfilename <- filename
     } else{
@@ -45,115 +75,46 @@ afmReadJPK <-
     params = list(SpringConstant = SpringConstant, curvename = filename)
     # Obtaining the number of headers
     numberOfHeader <- as.integer(sum(diff(headerLines) != 1) + 1)
-    #    if (numberOfHeader>3){
-    #      stop("Currently only up to three segments are supported!")
-    #    }
     N <- length(fullData)
     Nhead <- length(headerLines)
     
     headerStarts <- c(1, headerLines[which(diff(headerLines) != 1) + 1])
     headerEnds <-
       c(headerLines[which(diff(headerLines) != 1)], headerLines[Nhead])
+    # Line index of the "fancy" column-names line of each segment header
+    fancyLines <- grep("fancy", fullData)
+    
+    # Approach segment (always the first one)
     if (numberOfHeader > 1) {
-      approach <- fullData[(headerEnds[1] + 1):(headerStarts[2] - 2)]
-    } else if (numberOfHeader == 1) {
-      approach <- fullData[(headerEnds[1] + 1):N]
+      approachLines <- fullData[(headerEnds[1] + 1):(headerStarts[2] - 2)]
+    } else {
+      approachLines <- fullData[(headerEnds[1] + 1):N]
     }
-    ncolumns <- length(unlist(strsplit(approach[1], " ")))
-    approach <- matrix(as.numeric(unlist(strsplit(approach, " "))),
-                       ncol = ncolumns,
-                       byrow = TRUE)
-    NcolumnNames <- grep("fancy", fullData)[1]
-    columnNames <- fullData[NcolumnNames]
-    Fcol <- grep(FColStr , unlist(strsplit(columnNames, " \""))) - 1
-    #   Zcol <- grep(ZColStr , unlist(strsplit(columnNames, " \""))) - 1
-    Zcol <- which(ZColStr == gsub("\"","",unlist(strsplit(columnNames, " \""))))-1
-    tcol <- grep(tColStr, unlist(strsplit(columnNames, " \""))) - 1
-    approach <- data.frame(
-      Z = approach[, Zcol],
-      Force = approach[, Fcol],
-      Time = approach[, tcol],
-      Segment = "approach"
-    )
+    approach <- parseSegment(approachLines, fullData[fancyLines[1]], "approach")
+    
     if (numberOfHeader == 1) {
       afmExperiment <- approach
     }
     else if (numberOfHeader == 2){
-      retract <- fullData[(headerEnds[2] + 1):N]
-      ncolumns_ret <- length(unlist(strsplit(retract[1], " ")))
-      retract <-  matrix(as.numeric(unlist(strsplit(retract, " "))),
-                         ncol = ncolumns_ret,
-                         byrow = TRUE)
-      NcolumnNames_ret <- grep("fancy", fullData)[2]
-      columnNames_ret <- fullData[NcolumnNames_ret]
-      Fcol_ret <- grep(FColStr , unlist(strsplit(columnNames_ret, " \""))) - 1
-      #   Zcol <- grep(ZColStr , unlist(strsplit(columnNames, " \""))) - 1
-      Zcol_ret <- which(ZColStr == gsub("\"","",unlist(strsplit(columnNames_ret, " \""))))-1
-      tcol_ret <- grep(tColStr, unlist(strsplit(columnNames_ret, " \""))) - 1
-      retract <- data.frame(
-        Z = retract[, Zcol_ret],
-        Force = retract[, Fcol_ret],
-        Time = retract[, tcol_ret],
-        Segment = "retract"
-      )
-      if (coef(lm(retract$Z ~ seq_along(retract$Z)))[2] < 0) {
-        retract$Z <- rev(retract$Z)
-        retract$Force <- rev(retract$Force)
-      }
+      retractLines <- fullData[(headerEnds[2] + 1):N]
+      retract <- parseSegment(retractLines, fullData[fancyLines[2]], "retract")
+      retract <- ensureZIncreasing(retract)
       afmExperiment <- rbind(approach, retract)
     }
     else{
-      pause <- fullData[(headerEnds[2] + 1):(headerStarts[3] - 2)]
-      ncolumns_pau <- length(unlist(strsplit(pause[1], " ")))
+      pauseLines <- fullData[(headerEnds[2] + 1):(headerStarts[3] - 2)]
+      pause <- parseSegment(pauseLines, fullData[fancyLines[2]], "pause")
       
-      pause <-  matrix(as.numeric(unlist(strsplit(pause, " "))),
-                       ncol = ncolumns_pau,
-                       byrow = TRUE)
-      NcolumnNames_pau <- grep("fancy", fullData)[2]
-      columnNames_pau <- fullData[NcolumnNames_pau]
-      Fcol_pau <- grep(FColStr , unlist(strsplit(columnNames_pau, " \""))) - 1
-      #   Zcol <- grep(ZColStr , unlist(strsplit(columnNames, " \""))) - 1
-      Zcol_pau <- which(ZColStr == gsub("\"","",unlist(strsplit(columnNames_pau, " \""))))-1
-      tcol_pau <- grep(tColStr, unlist(strsplit(columnNames_pau, " \""))) - 1
-      
-      
-      if( numberOfHeader > 3){
+      if (numberOfHeader > 3){
         if(!silent){
           print("More than 3 headers found, considering only the first 3!")
         }
-        retract <- fullData[(headerEnds[3] + 1):(headerStarts[4] - 2)]
+        retractLines <- fullData[(headerEnds[3] + 1):(headerStarts[4] - 2)]
       } else{
-        retract <- fullData[(headerEnds[3] + 1):N]
+        retractLines <- fullData[(headerEnds[3] + 1):N]
       }
-      
-      ncolumns_ret <- length(unlist(strsplit(retract[1], " ")))
-      retract <-  matrix(as.numeric(unlist(strsplit(retract, " "))),
-                         ncol = ncolumns_ret,
-                         byrow = TRUE)
-      NcolumnNames_ret <- grep("fancy", fullData)[3]
-      columnNames_ret <- fullData[NcolumnNames_ret]
-      Fcol_ret <- grep(FColStr , unlist(strsplit(columnNames_ret, " \""))) - 1
-      #   Zcol <- grep(ZColStr , unlist(strsplit(columnNames, " \""))) - 1
-      Zcol_ret <- which(ZColStr == gsub("\"","",unlist(strsplit(columnNames_ret, " \""))))-1
-      tcol_ret <- grep(tColStr, unlist(strsplit(columnNames_ret, " \""))) - 1
-      
-      
-      pause <- data.frame(
-        Z = pause[, Zcol_pau],
-        Force = pause[, Fcol_pau],
-        Time = pause[, tcol_pau],
-        Segment = "pause"
-      )
-      retract <- data.frame(
-        Z = retract[, Zcol_ret],
-        Force = retract[, Fcol_ret],
-        Time = retract[, tcol_ret],
-        Segment = "retract"
-      )
-      if (coef(lm(retract$Z ~ seq_along(retract$Z)))[2] < 0) {
-        retract$Z <- rev(retract$Z)
-        retract$Force <- rev(retract$Force)
-      }
+      retract <- parseSegment(retractLines, fullData[fancyLines[3]], "retract")
+      retract <- ensureZIncreasing(retract)
       afmExperiment <- rbind(approach, pause, retract)
     }
     if(!silent){
