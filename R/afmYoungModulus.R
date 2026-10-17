@@ -56,71 +56,128 @@ afmYoungModulus <-
            showfit = FALSE,
            params, 
            silent = FALSE) {
+    afmDispatch(
+      afmdata,
+      afmYoungModulusSingle,
+      thickness = thickness,
+      model = model,
+      geometry = geometry,
+      thin_correction = thin_correction,
+      showfit = showfit,
+      params = params,
+      silent = silent,
+      error = "Error: input is not a valid afmdata or afmexperiment."
+    )
+  }
+
+# Internal: Young's modulus of a single afmdata curve.
+# The afmdata/afmexperiment dispatch is done by afmYoungModulus()
+# via the afmDispatch() helper. Note that silent is needed here because
+# in the paraboloid geometry it also controls printing the fit summary.
+afmYoungModulusSingle <-
+  function(afmdata,
+           thickness = NULL,
+           model = "Hertz",
+           geometry = c("pyramid","paraboloid", "cone"),
+           thin_correction = FALSE,
+           showfit = FALSE,
+           params, 
+           silent = FALSE) {
     Segment <- Indentation <- ForceCorrected <- NULL
-    if (is.afmexperiment(afmdata)) {
-      afmexperiment <-
-        lapply(afmdata, function(x){
-          if(!is.null(x$params$curvename)& !silent){
-            print(paste("Processing curve: ",x$params$curvename), sep = " ")
+    if (!("ForceCorrected" %in% names(afmdata$data))) {
+      stop("Baseline correction should be done first!")
+    }
+    if (!any ("Slopes" %in% names(afmdata))) {
+      stop("Zero Point Force should be found first (run afmSlopes)!")
+    }
+    if (!afmdata$params$SpringConstant > 0) {
+      stop("The cantilever spring constant should be provided!")
+    }
+    if (!("Indentation" %in% names(afmdata$data))) {
+      stop("Indentation should be computed first(run afmIndentation)!")
+    }
+    if (is.null(thickness)) {
+      fitdata <-
+        subset(afmdata$data,
+               Segment == "approach" & Indentation <= 0)
+    } else{
+      fitdata <-
+        subset(
+          afmdata$data,
+          Segment == "approach" & Indentation <= 0 &
+            abs(Indentation) < thickness
+        )
+    }
+    #  fitdata$Indentation <- -fitdata$Indentation
+    fitdata$Indentation <-
+      fitdata$Indentation - fitdata$Indentation[1]
+    fitdata$ForceCorrected <-
+      fitdata$ForceCorrected - fitdata$ForceCorrected[1]
+    geometry <- match.arg(geometry)
+    if (geometry == "pyramid"){
+      if ( nrow(fitdata) > 3 ){
+        if(thin_correction){
+          if(is.null(params$h)){
+            stop("You need to provide the height of the sample!")
           }
-          afmYoungModulus(
-            x,
-            thickness = thickness,
-            model = model,
-            geometry = geometry,
-            params = params,
-            thin_correction = thin_correction,
-            showfit = showfit,
-            silent = silent)
-          })
-      return(afmexperiment(afmexperiment))
-    } else if (is.afmdata(afmdata)) {
-      if (!("ForceCorrected" %in% names(afmdata$data))) {
-        stop("Baseline correction should be done first!")
-      }
-      if (!any ("Slopes" %in% names(afmdata))) {
-        stop("Zero Point Force should be found first (run afmSlopes)!")
-      }
-      if (!afmdata$params$SpringConstant > 0) {
-        stop("The cantilever spring constant should be provided!")
-      }
-      if (!("Indentation" %in% names(afmdata$data))) {
-        stop("Indentation should be computed first(run afmIndentation)!")
-      }
-      if (is.null(thickness)) {
-        fitdata <-
-          subset(afmdata$data,
-                 Segment == "approach" & Indentation <= 0)
-      } else{
-        fitdata <-
-          subset(
-            afmdata$data,
-            Segment == "approach" & Indentation <= 0 &
-              abs(Indentation) < thickness
-          )
-      }
-      #  fitdata$Indentation <- -fitdata$Indentation
-      fitdata$Indentation <-
-        fitdata$Indentation - fitdata$Indentation[1]
-      fitdata$ForceCorrected <-
-        fitdata$ForceCorrected - fitdata$ForceCorrected[1]
-      geometry <- match.arg(geometry)
-      if (geometry == "pyramid"){
-        if ( nrow(fitdata) > 3 ){
-          if(thin_correction){
-            if(is.null(params$h)){
-              stop("You need to provide the height of the sample!")
-            }
-            warning("No thin sample correction for pyramidal geometry is available. Switching to conical geometry!")
-            fitdata$Indentation <- -fitdata$Indentation
-            fitdata <- subset(fitdata, Indentation>=0)
-            chi <- fitdata$Indentation / params$h
-            fitdata$corr_factor <- 1 + 1.7795 * 2 * tan(params$alpha * pi / 180) * chi / pi^2 + 
-              16 * 1.7795^2 * tan(params$alpha * pi / 180)^2 * chi^2 
-            fitYM <- lm(ForceCorrected ~ I(corr_factor * Indentation ^ 2) - 1, data = fitdata)
-          } else{
-            fitYM <- lm(ForceCorrected ~ I(Indentation ^ 2) - 1, data = fitdata)
+          warning("No thin sample correction for pyramidal geometry is available. Switching to conical geometry!")
+          fitdata$Indentation <- -fitdata$Indentation
+          fitdata <- subset(fitdata, Indentation>=0)
+          chi <- fitdata$Indentation / params$h
+          fitdata$corr_factor <- 1 + 1.7795 * 2 * tan(params$alpha * pi / 180) * chi / pi^2 + 
+            16 * 1.7795^2 * tan(params$alpha * pi / 180)^2 * chi^2 
+          fitYM <- lm(ForceCorrected ~ I(corr_factor * Indentation ^ 2) - 1, data = fitdata)
+        } else{
+          fitYM <- lm(ForceCorrected ~ I(Indentation ^ 2) - 1, data = fitdata)
+        }
+        predYM <-  predict(fitYM, newdata =
+                             data.frame(Indentation = fitdata$Indentation))
+        
+        slope <- coef(fitYM)
+        if (showfit) {
+          print(summary(fitYM))
+        }
+        
+        if(thin_correction){
+          YM <-
+            as.numeric(slope * 3 * pi / (8 *  
+                         tan(params$alpha * pi / 180))
+                       )
+        } else {
+          if (is.null(params$nu)) {
+            params$nu <- 0.5
           }
+          YM <-
+            as.numeric(slope * sqrt(2) * (1 - params$nu ^ 2) / 
+                         tan(params$alpha * pi / 180))
+        }
+      } else {
+        YM <- NA
+        fitYM <- NA
+      }
+    }else if (geometry == "cone"){
+      if ( nrow(fitdata) > 3 ){
+        if (thin_correction){
+          if(is.null(params$h)){
+            stop("You need to provide the height of the sample!")
+          }
+          fitdata$Indentation <- -fitdata$Indentation
+          fitdata <- subset(fitdata, Indentation>=0)
+          chi <- fitdata$Indentation / params$h
+          fitdata$corr_factor <- 1 + 1.7795 * 2 * tan(params$alpha * pi / 180) * chi / pi^2 + 
+            16 * 1.7795^2 * tan(params$alpha * pi / 180)^2 * chi^2 
+          
+          fitYM <- lm(ForceCorrected ~ I(corr_factor * Indentation ^ 2) - 1, data = fitdata)
+          predYM <-  predict(fitYM)
+          
+          slope <- coef(fitYM)
+          YM <-
+            as.numeric(slope * 3 * pi / (8 *  
+                                           tan(params$alpha * pi / 180))
+            )
+        }else {
+          fitYM <- lm(ForceCorrected ~ I(Indentation ^ 2) - 1, data = fitdata)
+          
           predYM <-  predict(fitYM, newdata =
                                data.frame(Indentation = fitdata$Indentation))
           
@@ -128,113 +185,62 @@ afmYoungModulus <-
           if (showfit) {
             print(summary(fitYM))
           }
-          
-          if(thin_correction){
-          YM <-
-            as.numeric(slope * 3 * pi / (8 *  
-                         tan(params$alpha * pi / 180))
-                       )
-          } else {
-            if (is.null(params$nu)) {
-              params$nu <- 0.5
-            }
-            YM <-
-              as.numeric(slope * sqrt(2) * (1 - params$nu ^ 2) / 
-                           tan(params$alpha * pi / 180))
-          }
-        } else {
-          YM <- NA
-          fitYM <- NA
-        }
-      }else if (geometry == "cone"){
-        if ( nrow(fitdata) > 3 ){
-          if (thin_correction){
-            if(is.null(params$h)){
-              stop("You need to provide the height of the sample!")
-            }
-            fitdata$Indentation <- -fitdata$Indentation
-            fitdata <- subset(fitdata, Indentation>=0)
-            chi <- fitdata$Indentation / params$h
-            fitdata$corr_factor <- 1 + 1.7795 * 2 * tan(params$alpha * pi / 180) * chi / pi^2 + 
-              16 * 1.7795^2 * tan(params$alpha * pi / 180)^2 * chi^2 
-            
-            fitYM <- lm(ForceCorrected ~ I(corr_factor * Indentation ^ 2) - 1, data = fitdata)
-            predYM <-  predict(fitYM)
-            
-            slope <- coef(fitYM)
-            YM <-
-              as.numeric(slope * 3 * pi / (8 *  
-                                             tan(params$alpha * pi / 180))
-              )
-          }else {
-            fitYM <- lm(ForceCorrected ~ I(Indentation ^ 2) - 1, data = fitdata)
-            
-            predYM <-  predict(fitYM, newdata =
-                                 data.frame(Indentation = fitdata$Indentation))
-            
-            slope <- coef(fitYM)
-            if (showfit) {
-              print(summary(fitYM))
-            }
-            if (is.null(params$nu)) {
-              params$nu <- 0.5
-            }
-            YM <-
-              as.numeric(slope * pi * (1 - params$nu ^ 2) /
-                           (2* tan(params$alpha * pi /180)))
-          }
-        } else { 
-          YM <- NA
-          fitYM <- NA
-        }
-        
-      }else {
-        fitdata$Indentation <- -fitdata$Indentation
-        fitdata <- subset(fitdata, Indentation>=0)
-        if (nrow(fitdata) > 3){
-          if(thin_correction){
+          if (is.null(params$nu)) {
             params$nu <- 0.5
-            
-            chi <- sqrt(params$R * fitdata$Indentation) / params$h
-            fitdata$corr_factor <- 1 + 1.133 * chi + 1.283 * chi^2 + 
-              0.769 * chi^3 + 0.0975 * chi^4
-            fitYM <- lm(ForceCorrected ~ I(corr_factor * Indentation^1.5) - 1, data = fitdata)
-            
-            predYM <-  predict(fitYM)
-            
-            slope <- coef(fitYM)
-            if (!silent) {
-              print(summary(fitYM))
-            }
-            
-            YM <-
-              as.numeric(slope * 9 / (16 * sqrt(params$R)))
-          } else{
-            fitYM <- lm(ForceCorrected ~ I(Indentation ^ 1.5) - 1, data = fitdata)
-            
-            predYM <-  predict(fitYM)
-            
-            slope <- coef(fitYM)
-            if (!silent) {
-              print(summary(fitYM))
-            }
-            if (is.null(params$nu)) {
-              params$nu <- 0.5
-            }
-            YM <-
-              as.numeric(slope * 0.75 * (1 - params$nu ^ 2) / sqrt(params$R))
           }
-        } else {
-          YM <- NA
-          fitYM <- NA
+          YM <-
+            as.numeric(slope * pi * (1 - params$nu ^ 2) /
+                         (2* tan(params$alpha * pi /180)))
         }
+      } else { 
+        YM <- NA
+        fitYM <- NA
       }
-      YoungModulus <- list(YoungModulus = YM,
-                           fitYM = fitYM,
-                           fitdata = subset(fitdata, 
-                                            select = c(Indentation,ForceCorrected))) 
-      return(append.afmdata(afmdata,YoungModulus))
-    } else {
-      stop("Error: input is not a valid afmdata or afmexperiment.")
+      
+    }else {
+      fitdata$Indentation <- -fitdata$Indentation
+      fitdata <- subset(fitdata, Indentation>=0)
+      if (nrow(fitdata) > 3){
+        if(thin_correction){
+          params$nu <- 0.5
+          
+          chi <- sqrt(params$R * fitdata$Indentation) / params$h
+          fitdata$corr_factor <- 1 + 1.133 * chi + 1.283 * chi^2 + 
+            0.769 * chi^3 + 0.0975 * chi^4
+          fitYM <- lm(ForceCorrected ~ I(corr_factor * Indentation^1.5) - 1, data = fitdata)
+          
+          predYM <-  predict(fitYM)
+          
+          slope <- coef(fitYM)
+          if (!silent) {
+            print(summary(fitYM))
+          }
+          
+          YM <-
+            as.numeric(slope * 9 / (16 * sqrt(params$R)))
+        } else{
+          fitYM <- lm(ForceCorrected ~ I(Indentation ^ 1.5) - 1, data = fitdata)
+          
+          predYM <-  predict(fitYM)
+          
+          slope <- coef(fitYM)
+          if (!silent) {
+            print(summary(fitYM))
+          }
+          if (is.null(params$nu)) {
+            params$nu <- 0.5
+          }
+          YM <-
+            as.numeric(slope * 0.75 * (1 - params$nu ^ 2) / sqrt(params$R))
+        }
+      } else {
+        YM <- NA
+        fitYM <- NA
+      }
     }
+    YoungModulus <- list(YoungModulus = YM,
+                         fitYM = fitYM,
+                         fitdata = subset(fitdata, 
+                                          select = c(Indentation,ForceCorrected))) 
+    return(append.afmdata(afmdata,YoungModulus))
   }
