@@ -113,8 +113,6 @@ afmContactPointSingle <-
     }
 
     #* Creating the arrays: bRoll -> slopes in a rolling windows and delta -> change in slopes. -----
-    delta <- array(0, dim = c(n, 1))
-    imax <- n - width
     app <- matrix(c(rep(1, n), Z, Force), nrow = n, ncol = 3)
     bRoll <- windowedFit(app, width)
     delta <- diff(bRoll, lag = lagdiff)
@@ -137,7 +135,7 @@ afmContactPointSingle <-
     idxGrTol2 <- which(abs(delta) > tol2)
     idxSmTol1 <- which(abs(delta) < tol1)
 
-    j <- max(idxSmTol1[idxSmTol1 < min(idxGrTol2)])#+1
+    j <- max(idxSmTol1[idxSmTol1 < min(idxGrTol2)])
 
     if ((j > 1) & (delta[j] != 0)) {
       eps <-

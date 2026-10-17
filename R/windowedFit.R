@@ -6,8 +6,7 @@
 #' It computes the slopes of a linear fit to the data in a window of a given radius.
 #' This function should not be used directly unless by experienced users.
 #' @usage windowedFit(X, width)
-#' @param X Least squares matrix on the form [1 z Force], 
-#' according to input parameters in function \code{lm.fit} 
+#' @param X Least squares matrix on the form [1 z Force]
 #' @param width Width of the window for the local regression (in vector position units)
 
 #' @return \code{OUT} A vector of length \code{nrow(X)-2*width}, 
@@ -22,7 +21,6 @@
 #' plot(x[(width+1):(n-width)],b,xlab = "x",ylab = "y",type = "l")
 #' lines(x,y,col = "red")
 #' legend("bottomleft",c("Slopes","Signal"),col = c(1,2),lty = 1)
-#' @importFrom stats lm.fit
 #' @export
 windowedFit <- function(X, width){
   lenX <- dim(X)[1]

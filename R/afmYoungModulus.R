@@ -108,7 +108,6 @@ afmYoungModulusSingle <-
             abs(Indentation) < thickness
         )
     }
-    #  fitdata$Indentation <- -fitdata$Indentation
     fitdata$Indentation <-
       fitdata$Indentation - fitdata$Indentation[1]
     fitdata$ForceCorrected <-
