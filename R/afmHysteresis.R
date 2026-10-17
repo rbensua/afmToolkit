@@ -35,19 +35,6 @@
 
 afmHysteresis <-
   function(afmdata, silent = FALSE,...) {
-    if (is.afmexperiment(afmdata)) {
-      # Historical behaviour (preserved): when applied to an afmexperiment,
-      # the extra arguments in ... are dropped, so every curve is processed
-      # with the default options of afmZeroPointSlope().
-      return(
-        afmDispatch(
-          afmdata,
-          afmHysteresisSingle,
-          silent = silent,
-          error = "No afmdata class input provided."
-        )
-      )
-    }
     afmDispatch(
       afmdata,
       afmHysteresisSingle,
