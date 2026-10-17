@@ -41,53 +41,60 @@ afmAdhesionEnergy <-
            lagdiff = width,
            mul,
            mdj = NULL) {
+    afmDispatch(
+      afmdata,
+      afmAdhesionEnergySingle,
+      width = width,
+      lagdiff = lagdiff,
+      mul = mul,
+      mdj = mdj,
+      silent = FALSE,
+      error = "No afmdata or afmexperiment class input provided."
+    )
+  }
+
+# Internal: adhesion energies of a single afmdata curve.
+# The afmdata/afmexperiment dispatch is done by afmAdhesionEnergy()
+# via the afmDispatch() helper. Note that, as in the original
+# implementation, the "Processing curve" message is always printed
+# when processing an afmexperiment (no silent argument here).
+afmAdhesionEnergySingle <-
+  function(afmdata,
+           width = 1,
+           lagdiff = width,
+           mul,
+           mdj = NULL) {
     # Extract the retract segment from the afmdata
     Segment <- NULL
-    if (is.afmexperiment(afmdata)) {
-      afmexperiment <-
-        lapply(afmdata, function(x) {
-          if (!is.null(x$params$curvename)) {
-            print(paste("Processing curve: ", x$params$curvename), sep = " ")
-          }
-          afmAdhesionEnergy(
-            x,
-            width = width,
-            mul = mul,
-            lagdiff = lagdiff,
-            mdj = mdj
-          )
-        })
-      return(afmexperiment(afmexperiment))
-    } else if (is.afmdata(afmdata)) {
-      data <- subset(afmdata$data, Segment == "retract")
-      Z <- data$Z
-      Force <- data$ForceCorrected
-      
-      
-      imin <- min(which(Force < 0))
-      idx <- seq_along(Force)
-      iFmin <- which.min(Force)
-      Fmin <- min(Force)
-      ZFmin <- Z[iFmin]
-      imax <- min(which(Force > 0 & idx > iFmin))
-      
-      
-      
-      
-      n = length(Z)
-      if (is.null(mdj)) {
-        mdj = width
-      }
-      
-      delta <- array(0, dim = c(n, 1))
-      app <- matrix(c(rep(1, n), Z, Force), nrow = n, ncol = 3)
-      bRoll <- windowedFit(app, width)
-      dif1 <- diff(bRoll, lag = lagdiff)
-      delta <- dif1
-      delta <- c(rep(0, width + lagdiff), delta, rep(0, width))
-      bRoll <- c(rep(0, width), bRoll, rep(0, width))
-      
-      #Noise at the contact part of the curve
+    data <- subset(afmdata$data, Segment == "retract")
+    Z <- data$Z
+    Force <- data$ForceCorrected
+    
+    
+    imin <- min(which(Force < 0))
+    idx <- seq_along(Force)
+    iFmin <- which.min(Force)
+    Fmin <- min(Force)
+    ZFmin <- Z[iFmin]
+    imax <- min(which(Force > 0 & idx > iFmin))
+    
+    
+    
+    
+    n = length(Z)
+    if (is.null(mdj)) {
+      mdj = width
+    }
+    
+    delta <- array(0, dim = c(n, 1))
+    app <- matrix(c(rep(1, n), Z, Force), nrow = n, ncol = 3)
+    bRoll <- windowedFit(app, width)
+    dif1 <- diff(bRoll, lag = lagdiff)
+    delta <- dif1
+    delta <- c(rep(0, width + lagdiff), delta, rep(0, width))
+    bRoll <- c(rep(0, width), bRoll, rep(0, width))
+    
+    #Noise at the contact part of the curve
 #      noiseContactDelta <-
 #        sd(delta[width:(width + as.integer(0.1 * n))], na.rm =
 #             TRUE)
@@ -194,7 +201,4 @@ afmAdhesionEnergy <-
         )
       )
       return(append.afmdata(afmdata, AdhEner))
-    } else{
-      stop("No afmdata or afmexperiment class input provided.")
-    }
   }

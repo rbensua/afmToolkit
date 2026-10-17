@@ -57,21 +57,53 @@ afmBaselineCorrection <-
            fitpause = c("approach","retract","none"), 
            vsTime = FALSE,
            sinusoidal = FALSE) {
+    fitpause <- match.arg(fitpause)
+    if (is.afmexperiment(afmdata)) {
+      # Historical behaviour (preserved): when applied to an afmexperiment,
+      # only ZPointApp and ZPointRet are passed to each curve, so fitpause,
+      # vsTime and sinusoidal keep their DEFAULT values for every curve, and
+      # no "Processing curve" message is printed.
+      return(
+        afmDispatch(
+          afmdata,
+          afmBaselineCorrectionSingle,
+          ZPointApp = ZPointApp,
+          ZPointRet = ZPointRet,
+          silent = TRUE,
+          error = "input is not a valid afmdata or afmexperiment."
+        )
+      )
+    }
+    afmDispatch(
+      afmdata,
+      afmBaselineCorrectionSingle,
+      ZPointApp = ZPointApp,
+      ZPointRet = ZPointRet,
+      fitpause = fitpause,
+      vsTime = vsTime,
+      sinusoidal = sinusoidal,
+      silent = TRUE,
+      error = "input is not a valid afmdata or afmexperiment."
+    )
+  }
+
+# Internal: baseline correction of a single afmdata curve.
+# The afmdata/afmexperiment dispatch is done by afmBaselineCorrection()
+# via the afmDispatch() helper.
+afmBaselineCorrectionSingle <-
+  function(afmdata,
+           ZPointApp = NULL,
+           ZPointRet = NULL, 
+           fitpause = c("approach","retract","none"), 
+           vsTime = FALSE,
+           sinusoidal = FALSE) {
     Segment <- Z <- NULL
     fitpause <- match.arg(fitpause)
-    if (is.afmexperiment(afmdata)){
-      data <- lapply(afmdata, function(x) afmBaselineCorrection(x,
-                                                                ZPointApp = ZPointApp,
-                                                                ZPointRet = ZPointRet))
-      return(afmexperiment(data))
-    }else if (is.afmdata(afmdata)){
     
     # First determine how many segments are in the curve
     # If afmdata is a multi-indentation experiment, we obtain the contact point 
     # with the first approach segment.
-      approach_string <- ifelse(is.afmmulti(afmdata),"approach1","approach")
-      
-      
+    approach_string <- ifelse(is.afmmulti(afmdata),"approach1","approach")
     
     N <- nlevels(afmdata$data$Segment)
     if (is.null(ZPointApp)) {
@@ -166,7 +198,4 @@ afmBaselineCorrection <-
       }
     }
     return(afmdata(afmdata))
-      }else{
-    stop("input is not a valid afmdata or afmexperiment.")
-      }
   }
