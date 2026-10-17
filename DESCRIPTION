@@ -24,7 +24,10 @@ Imports:
     gridExtra,
     scales,
     dplyr
+Suggests:
+    testthat (>= 3.0.0)
 License: GPL
 LazyData: true
 RoxygenNote: 7.3.3
 Encoding: UTF-8
+Config/testthat/edition: 3
