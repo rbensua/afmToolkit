@@ -58,22 +58,6 @@ afmBaselineCorrection <-
            vsTime = FALSE,
            sinusoidal = FALSE) {
     fitpause <- match.arg(fitpause)
-    if (is.afmexperiment(afmdata)) {
-      # Historical behaviour (preserved): when applied to an afmexperiment,
-      # only ZPointApp and ZPointRet are passed to each curve, so fitpause,
-      # vsTime and sinusoidal keep their DEFAULT values for every curve, and
-      # no "Processing curve" message is printed.
-      return(
-        afmDispatch(
-          afmdata,
-          afmBaselineCorrectionSingle,
-          ZPointApp = ZPointApp,
-          ZPointRet = ZPointRet,
-          silent = TRUE,
-          error = "input is not a valid afmdata or afmexperiment."
-        )
-      )
-    }
     afmDispatch(
       afmdata,
       afmBaselineCorrectionSingle,

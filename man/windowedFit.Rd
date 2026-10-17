@@ -7,8 +7,7 @@
 windowedFit(X, width)
 }
 \arguments{
-\item{X}{Least squares matrix on the form [1 z Force], 
-according to input parameters in function \code{lm.fit}}
+\item{X}{Least squares matrix on the form [1 z Force]}
 
 \item{width}{Width of the window for the local regression (in vector position units)}
 }

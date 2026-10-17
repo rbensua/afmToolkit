@@ -86,7 +86,6 @@ afmAdhesionEnergySingle <-
       mdj = width
     }
     
-    delta <- array(0, dim = c(n, 1))
     app <- matrix(c(rep(1, n), Z, Force), nrow = n, ncol = 3)
     bRoll <- windowedFit(app, width)
     dif1 <- diff(bRoll, lag = lagdiff)
@@ -94,20 +93,14 @@ afmAdhesionEnergySingle <-
     delta <- c(rep(0, width + lagdiff), delta, rep(0, width))
     bRoll <- c(rep(0, width), bRoll, rep(0, width))
     
-    #Noise at the contact part of the curve
-#      noiseContactDelta <-
-#        sd(delta[width:(width + as.integer(0.1 * n))], na.rm =
-#             TRUE)
-
-            # Noise at the non-contact part of the curve
+    # Noise at the non-contact part of the curve
       noiseFreeDelta <-
         sd(delta[(n - (width + as.integer(0.1 * n))):(n - width)],
            na.rm = TRUE)
       # Tolerances in Delta
       
       tolFree <- mul * noiseFreeDelta
- #     tolContact <- mul * noiseContactDelta
-      
+
       # Jumps in Delta
       jumpsDelta <- list()
       
@@ -136,15 +129,11 @@ afmAdhesionEnergySingle <-
       
       
       magnitude2Corrected <- numeric()
-      noiseForce <-
-        sd(Force[(n - (width + as.integer(0.1 * n))):(n - width)],
-           na.rm = TRUE)
       pmid <- numeric()
       
       for (i in seq_along(jumpsDelta)) {
         r1 <- 1.25 * width
         r2 <- 0.5 * (length(jumpsDelta[[i]]) - lagdiff)
-        radius1 <- max(r2, width)
         radius2 <- max(r1, r2)
         pmedio <-
           as.integer(jumpsDelta[[i]][1] + tail(jumpsDelta[[i]], n = 1)) /
@@ -185,8 +174,6 @@ afmAdhesionEnergySingle <-
       inc <- diff(Zadh) * (Fadh[-length(Fadh)] + Fadh[-1]) / 2
       Eadh <- c(0, cumsum(inc))
       Weight <- Eadh[length(Eadh)]
-      EnerFun <- Eadh / Eadh[length(Eadh)]
-      EnerFun[1] <- 0
       AdhEner <-  list(
         Points = c(imin, leftPoint, imax),
         Energies = data.frame(

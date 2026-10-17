@@ -11,11 +11,10 @@ d3 <- std_pipeline(read_jpk_3h())
 
 test_that("contact point matches the value published in the paper", {
   # Paper (summary output): Contact Point = 6.982701e-06
-  # unname(): the CP value currently carries a leftover name attribute
-  # ("x2", inherited from the lm coefficient used in its computation).
-  # Purely cosmetic, no numerical impact. Candidate for a unname() in
-  # the v2 rewrite.
-  expect_equal(unname(d3$CP$CP), 6.982701e-06, tolerance = 0.01)
+  # The CP value used to carry a leftover name attribute ("x2", inherited
+  # from the lm.fit coefficient used in its computation). Removed at the
+  # source (windowedFit) in the v2 rewrite, so no unname() is needed.
+  expect_equal(d3$CP$CP, 6.982701e-06, tolerance = 0.01)
 })
 
 test_that("zero force point matches the paper", {

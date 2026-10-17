@@ -47,8 +47,6 @@ afmZeroPointSlopeSingle <-
     if (!("ForceCorrected" %in% names(afmdata$data))) {
       stop("Baseline correction should be done first!")
     }
-    # if (!any(sapply(afmdata, function(x)
-    #   "CP" %in% names(x)))) {
     if(!"CP" %in% names(afmdata)){
       stop("Contact Point should be found first!")
     }
@@ -70,20 +68,11 @@ afmZeroPointSlopeSingle <-
       # Computing the standard deviation in the baseline
       stddev <- sd(ForceCorrected[which(Z > afmdata$CP$CP)])
       zerovalue <- fstar*stddev;
-      #indicesSlope <-
-      #  which(ForceCorrected > 0 & Z < min(afmdata$CP$CP, Zmin))
       indicesSlope <-
         which(ForceCorrected <= zerovalue & Z <=  Zmin)
       
       i1 <- max(indicesSlope)
-      #i0 <- i1 - 1
       i0 <- i1+1
-      # if (abs(Zmin) < abs(afmdata$CP$CP)) {
-      #   Z0Point <- Z[i0] - ForceCorrected[i0] * (Z[i1] - Z[i0]) /
-      #     (ForceCorrected[i1] - ForceCorrected[i0])
-      # } else {
-      #   Z0Point <- afmdata$CP$CP
-      # }
       Z0Point <- Z[i0] + (zerovalue - ForceCorrected[i0]) * (Z[i1] - Z[i0]) /
         (ForceCorrected[i1] - ForceCorrected[i0])
       if (isTime){
@@ -98,7 +87,6 @@ afmZeroPointSlopeSingle <-
         which(ForceCorrected > 0 & Z < min(afmdata$DP$DP, Zmin))
       i1 <- max(indicesSlope)
       i0 <- i1 + 1
-      #  if (Zmin < afmdata$DP$DP){
       Z0Point <- Z[i0] - ForceCorrected[i0] * (Z[i1] - Z[i0]) /
         (ForceCorrected[i1] - ForceCorrected[i0])
       if (isTime){
@@ -107,10 +95,6 @@ afmZeroPointSlopeSingle <-
       } else{
         t0Point <- NULL
       }
-      
-      # } else {
-      #   Z0Point <- afmdata$DP$DP
-      #  }
     }
     indicesSlope2 <-
       which(Z <=  Zmin)
