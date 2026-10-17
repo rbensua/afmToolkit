@@ -35,46 +35,60 @@
 
 afmHysteresis <-
   function(afmdata, silent = FALSE,...) {
-    Segment <- Time <-  NULL # For CRAN compatibility
-    if(is.afmexperiment(afmdata)) {
-      afmexperiment <- lapply(afmdata, function(x) {
-        if (!is.null(x$params$curvename) & !silent) {
-          print(paste("Processing curve: ", x$params$curvename), sep = " ")
-        }
-        afmHysteresis(x)
-      })
-      return(afmexperiment(afmexperiment))
-    }else if(is.afmdata(afmdata)){
-      if(!"Time" %in% colnames(afmdata$data)) {
-        stop("A time column should be present!")
-      }
-      tmp1 <- afmZeroPointSlope(afmdata, segment = "approach", ...)
-      tmp2 <- afmZeroPointSlope(afmdata, segment = "retract", ...)
-      t1 <- tmp1$Slopes$t0Point
-      t4 <- tmp2$Slopes$t0Point
-      t2 <- max(afmdata$data$Time[afmdata$data$Segment == "approach"])
-      t3 <- min(afmdata$data$Time[afmdata$data$Segment == "retract"])
-      info = c(t1,t2,t3,t4)
-      names(info) <- c("t1","t2","t3","t4")
-      rm(list = c("tmp1","tmp2"))
-      data.approach <- subset(afmdata$data, Segment == "approach" & Time >= t1)
-      data.retract <- subset(afmdata$data, Segment == "retract" & Time <= t4)
-      Hyst_app <- trapz(data.approach$Time, data.approach$ForceCorrected)
-      Hyst_ret <- trapz(data.retract$Time, data.retract$ForceCorrected)
-      Hyst_tot <- Hyst_app + Hyst_ret
-      
-      Energy_app <- abs(afmdata$params$speeds$approach) * Hyst_app
-      Energy_ret <- abs(afmdata$params$speeds$retract) * Hyst_ret      
-      Hysteresis <- Energy_app - Energy_ret
-      Hyst_ratio <- Hysteresis / Energy_app
-      Hysteresis <- list(
-        Hyst_ratio  = Hyst_ratio,
-        Hysteresis = Hysteresis,
-        info = info
+    if (is.afmexperiment(afmdata)) {
+      # Historical behaviour (preserved): when applied to an afmexperiment,
+      # the extra arguments in ... are dropped, so every curve is processed
+      # with the default options of afmZeroPointSlope().
+      return(
+        afmDispatch(
+          afmdata,
+          afmHysteresisSingle,
+          silent = silent,
+          error = "No afmdata class input provided."
+        )
       )
-      return(append.afmdata(afmdata,Hysteresis))
-
-    }else{
-      stop("No afmdata class input provided.")
     }
+    afmDispatch(
+      afmdata,
+      afmHysteresisSingle,
+      silent = silent,
+      error = "No afmdata class input provided.",
+      ...
+    )
+  }
+
+# Internal: hysteresis of a single afmdata curve.
+# The afmdata/afmexperiment dispatch is done by afmHysteresis()
+# via the afmDispatch() helper.
+afmHysteresisSingle <-
+  function(afmdata, silent = FALSE,...) {
+    Segment <- Time <-  NULL # For CRAN compatibility
+    if(!"Time" %in% colnames(afmdata$data)) {
+      stop("A time column should be present!")
+    }
+    tmp1 <- afmZeroPointSlope(afmdata, segment = "approach", ...)
+    tmp2 <- afmZeroPointSlope(afmdata, segment = "retract", ...)
+    t1 <- tmp1$Slopes$t0Point
+    t4 <- tmp2$Slopes$t0Point
+    t2 <- max(afmdata$data$Time[afmdata$data$Segment == "approach"])
+    t3 <- min(afmdata$data$Time[afmdata$data$Segment == "retract"])
+    info = c(t1,t2,t3,t4)
+    names(info) <- c("t1","t2","t3","t4")
+    rm(list = c("tmp1","tmp2"))
+    data.approach <- subset(afmdata$data, Segment == "approach" & Time >= t1)
+    data.retract <- subset(afmdata$data, Segment == "retract" & Time <= t4)
+    Hyst_app <- trapz(data.approach$Time, data.approach$ForceCorrected)
+    Hyst_ret <- trapz(data.retract$Time, data.retract$ForceCorrected)
+    Hyst_tot <- Hyst_app + Hyst_ret
+    
+    Energy_app <- abs(afmdata$params$speeds$approach) * Hyst_app
+    Energy_ret <- abs(afmdata$params$speeds$retract) * Hyst_ret      
+    Hysteresis <- Energy_app - Energy_ret
+    Hyst_ratio <- Hysteresis / Energy_app
+    Hysteresis <- list(
+      Hyst_ratio  = Hyst_ratio,
+      Hysteresis = Hysteresis,
+      info = info
+    )
+    return(append.afmdata(afmdata,Hysteresis))
   }

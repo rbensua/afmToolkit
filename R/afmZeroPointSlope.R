@@ -28,94 +28,96 @@
 #' @export
 afmZeroPointSlope <-
   function(afmdata, fstar = 0, segment = c("approach", "retract"), silent = FALSE) {
+    afmDispatch(
+      afmdata,
+      afmZeroPointSlopeSingle,
+      fstar = fstar,
+      segment = segment,
+      silent = silent,
+      error = "Error: input is not a valid afmdata or afmexperiment."
+    )
+  }
+
+# Internal: zero force point and slope of a single afmdata curve.
+# The afmdata/afmexperiment dispatch is done by afmZeroPointSlope()
+# via the afmDispatch() helper.
+afmZeroPointSlopeSingle <-
+  function(afmdata, fstar = 0, segment = c("approach", "retract")) {
     Segment <- NULL
-    if (is.afmexperiment(afmdata)) {
-      afmdata <-
-        lapply(afmdata, function(x){
-          if(!is.null(x$params$curvename)& !silent){
-            print(paste("Processing curve: ",x$params$curvename), sep = " ")
-          }
-          afmZeroPointSlope(x, fstar = fstar, segment = segment)
-        })
-      return(afmexperiment(afmdata))
-    } else if (is.afmdata(afmdata)) {
-      if (!("ForceCorrected" %in% names(afmdata$data))) {
-        stop("Baseline correction should be done first!")
-      }
-      # if (!any(sapply(afmdata, function(x)
-      #   "CP" %in% names(x)))) {
-      if(!"CP" %in% names(afmdata)){
-        stop("Contact Point should be found first!")
-      }
-      segment <- match.arg(segment)
+    if (!("ForceCorrected" %in% names(afmdata$data))) {
+      stop("Baseline correction should be done first!")
+    }
+    # if (!any(sapply(afmdata, function(x)
+    #   "CP" %in% names(x)))) {
+    if(!"CP" %in% names(afmdata)){
+      stop("Contact Point should be found first!")
+    }
+    segment <- match.arg(segment)
     if(segment == "approach" & is.afmmulti(afmdata)){
       segment <- "approach1"
     }
-      Z <- subset(afmdata$data, Segment == segment)$Z
-      isTime <- "Time" %in% colnames(afmdata$data)
-      
-      if (isTime) {
-        Time <- subset(afmdata$data, Segment == segment)$Time  
-      }
-      ForceCorrected <-
-        subset(afmdata$data, Segment == segment)$ForceCorrected
-      Zmin <- Z[which.min(ForceCorrected)]
-      Fmin <- min(ForceCorrected)
-      if (grepl("approach",segment)) {
-        # Computing the standard deviation in the baseline
-        stddev <- sd(ForceCorrected[which(Z > afmdata$CP$CP)])
-        zerovalue <- fstar*stddev;
-        #indicesSlope <-
-        #  which(ForceCorrected > 0 & Z < min(afmdata$CP$CP, Zmin))
-        indicesSlope <-
-          which(ForceCorrected <= zerovalue & Z <=  Zmin)
-        
-        i1 <- max(indicesSlope)
-        #i0 <- i1 - 1
-        i0 <- i1+1
-        # if (abs(Zmin) < abs(afmdata$CP$CP)) {
-        #   Z0Point <- Z[i0] - ForceCorrected[i0] * (Z[i1] - Z[i0]) /
-        #     (ForceCorrected[i1] - ForceCorrected[i0])
-        # } else {
-        #   Z0Point <- afmdata$CP$CP
-        # }
-        Z0Point <- Z[i0] + (zerovalue - ForceCorrected[i0]) * (Z[i1] - Z[i0]) /
-          (ForceCorrected[i1] - ForceCorrected[i0])
-        if (isTime){
-          t0Point <- Time[i0] + (zerovalue - ForceCorrected[i0]) * (Time[i1] - Time[i0]) /
-            (ForceCorrected[i1] - ForceCorrected[i0])
-        } else{
-          t0Point <- NULL
-        }
-        
-      } else {
-        indicesSlope <-
-          which(ForceCorrected > 0 & Z < min(afmdata$DP$DP, Zmin))
-        i1 <- max(indicesSlope)
-        i0 <- i1 + 1
-        #  if (Zmin < afmdata$DP$DP){
-        Z0Point <- Z[i0] - ForceCorrected[i0] * (Z[i1] - Z[i0]) /
-          (ForceCorrected[i1] - ForceCorrected[i0])
-        if (isTime){
-          t0Point <- Time[i0] - ForceCorrected[i0] * (Time[i1] - Time[i0]) /
-            (ForceCorrected[i1] - ForceCorrected[i0])
-        } else{
-          t0Point <- NULL
-        }
-        
-        # } else {
-        #   Z0Point <- afmdata$DP$DP
-        #  }
-      }
-      indicesSlope2 <-
-        which(Z <=  Zmin)
-      Zslope <- Z[indicesSlope2]
-      Fslope <- ForceCorrected[indicesSlope2]
-      FitSlope <- lm(Fslope ~ Zslope)
-      slope <- coef(FitSlope)[2] # Second coefficient of the fit
-      Slopes <- list(Z0Point = Z0Point, t0Point = t0Point, Slope = slope)
-      return(append.afmdata(afmdata,Slopes))
-    } else{
-      stop("Error: input is not a valid afmdata or afmexperiment.")
+    Z <- subset(afmdata$data, Segment == segment)$Z
+    isTime <- "Time" %in% colnames(afmdata$data)
+    
+    if (isTime) {
+      Time <- subset(afmdata$data, Segment == segment)$Time  
     }
+    ForceCorrected <-
+      subset(afmdata$data, Segment == segment)$ForceCorrected
+    Zmin <- Z[which.min(ForceCorrected)]
+    Fmin <- min(ForceCorrected)
+    if (grepl("approach",segment)) {
+      # Computing the standard deviation in the baseline
+      stddev <- sd(ForceCorrected[which(Z > afmdata$CP$CP)])
+      zerovalue <- fstar*stddev;
+      #indicesSlope <-
+      #  which(ForceCorrected > 0 & Z < min(afmdata$CP$CP, Zmin))
+      indicesSlope <-
+        which(ForceCorrected <= zerovalue & Z <=  Zmin)
+      
+      i1 <- max(indicesSlope)
+      #i0 <- i1 - 1
+      i0 <- i1+1
+      # if (abs(Zmin) < abs(afmdata$CP$CP)) {
+      #   Z0Point <- Z[i0] - ForceCorrected[i0] * (Z[i1] - Z[i0]) /
+      #     (ForceCorrected[i1] - ForceCorrected[i0])
+      # } else {
+      #   Z0Point <- afmdata$CP$CP
+      # }
+      Z0Point <- Z[i0] + (zerovalue - ForceCorrected[i0]) * (Z[i1] - Z[i0]) /
+        (ForceCorrected[i1] - ForceCorrected[i0])
+      if (isTime){
+        t0Point <- Time[i0] + (zerovalue - ForceCorrected[i0]) * (Time[i1] - Time[i0]) /
+          (ForceCorrected[i1] - ForceCorrected[i0])
+      } else{
+        t0Point <- NULL
+      }
+      
+    } else {
+      indicesSlope <-
+        which(ForceCorrected > 0 & Z < min(afmdata$DP$DP, Zmin))
+      i1 <- max(indicesSlope)
+      i0 <- i1 + 1
+      #  if (Zmin < afmdata$DP$DP){
+      Z0Point <- Z[i0] - ForceCorrected[i0] * (Z[i1] - Z[i0]) /
+        (ForceCorrected[i1] - ForceCorrected[i0])
+      if (isTime){
+        t0Point <- Time[i0] - ForceCorrected[i0] * (Time[i1] - Time[i0]) /
+          (ForceCorrected[i1] - ForceCorrected[i0])
+      } else{
+        t0Point <- NULL
+      }
+      
+      # } else {
+      #   Z0Point <- afmdata$DP$DP
+      #  }
+    }
+    indicesSlope2 <-
+      which(Z <=  Zmin)
+    Zslope <- Z[indicesSlope2]
+    Fslope <- ForceCorrected[indicesSlope2]
+    FitSlope <- lm(Fslope ~ Zslope)
+    slope <- coef(FitSlope)[2] # Second coefficient of the fit
+    Slopes <- list(Z0Point = Z0Point, t0Point = t0Point, Slope = slope)
+    return(append.afmdata(afmdata,Slopes))
   }

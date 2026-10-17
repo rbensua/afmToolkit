@@ -26,10 +26,20 @@
 
 
 afmIndentation <- function(afmdata){
-  if (is.afmexperiment(afmdata)){
-    afmdata <- lapply(afmdata, afmIndentation)
-    return(afmexperiment(afmdata))
-  }else if(is.afmdata(afmdata)){
+  afmDispatch(
+    afmdata,
+    afmIndentationSingle,
+    silent = TRUE,
+    error = "Error: input is not a valid afmdata or afmexperiment."
+  )
+}
+
+# Internal: indentation of a single afmdata curve.
+# The afmdata/afmexperiment dispatch is done by afmIndentation()
+# via the afmDispatch() helper. Note that, as in the original
+# implementation, no "Processing curve" message is printed when
+# processing an afmexperiment.
+afmIndentationSingle <- function(afmdata){
   if (!("ForceCorrected" %in% names(afmdata$data))) {
     stop("Baseline correction should be done first!")
   }
@@ -44,7 +54,4 @@ afmIndentation <- function(afmdata){
   Indentation <- afmdata$data$Z - Z0Point - CantileverDeflection
   afmdata$data$Indentation <- Indentation
   return(afmdata(afmdata))
-  }else{
-    stop("Error: input is not a valid afmdata or afmexperiment.")
-  }
 }

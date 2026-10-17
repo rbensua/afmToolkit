@@ -54,32 +54,38 @@ afmDetachPoint <- function(afmdata,width=1,
                            Delta=TRUE, 
                            loessSmooth = FALSE, 
                            silent = FALSE){
+  afmDispatch(
+    afmdata,
+    afmDetachPointSingle,
+    width = width,
+    mul1 = mul1,
+    mul2 = mul2,
+    lagdiff = lagdiff,
+    Delta = Delta,
+    loessSmooth = loessSmooth,
+    silent = silent,
+    error = "Error: Input is not a valid afmdata or afmexperiment."
+  )
+}
+
+# Internal: computes the detach point of a single afmdata curve.
+# The afmdata/afmexperiment dispatch is done by afmDetachPoint()
+# via the afmDispatch() helper.
+afmDetachPointSingle <- function(afmdata,width=1,
+                                 mul1,
+                                 mul2, 
+                                 lagdiff = width, 
+                                 Delta=TRUE, 
+                                 loessSmooth = FALSE){
   Segment <- NULL
-  if (is.afmexperiment(afmdata)){
-    afmexperiment <- lapply(afmdata, function(x) {
-      if(!is.null(x$params$curvename) & !silent){
-        print(paste("Processing curve: ",x$params$curvename), sep = " ")
-      }
-      afmDetachPoint(
-        x,
-        width = width,
-        mul1 = mul1,
-        mul2 = mul2,
-        lagdiff = lagdiff,
-        Delta = Delta,
-        loessSmooth = loessSmooth
-      )
-    })
-    return(afmexperiment(afmexperiment))
-  }else if (is.afmdata(afmdata)){
   data.retract <- subset(afmdata$data, Segment == "retract")
   Z <- data.retract$Z
   Force <- data.retract$Force
   n <- length(Z)
   direction <- Z[n] - Z[1]
   if (direction > 0){
-  Z <- rev(Z)
-  Force <- rev(Force)
+    Z <- rev(Z)
+    Force <- rev(Force)
   }
   if (loessSmooth){
     data.contact.smoothed <- loess.smooth(Z, Force, span = 0.05, 
@@ -136,7 +142,4 @@ afmDetachPoint <- function(afmdata,width=1,
     DP <- list(DP=z_detach, iDP=i_detach,delta=delta,noise=noise)
     return(append.afmdata(afmdata,DP))
 #  }
-  }else{
-    stop("Error: Input is not a valid afmdata or afmexperiment.")
-  }
 }
