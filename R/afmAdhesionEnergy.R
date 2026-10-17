@@ -173,10 +173,10 @@ afmAdhesionEnergy <-
       }
       Zadh <- Z[seq(from = imax, to = imin, by = -1)]
       Fadh <- Force[seq(from = imax, to = imin, by = -1)]
-      Eadh <- numeric()
-      for (i in seq_along(Zadh)) {
-        Eadh[i] <- trapz(Zadh[1:i], Fadh[1:i])
-      }
+      # Cumulative trapezoidal integration in O(n) instead of
+      # recomputing trapz(Zadh[1:i], Fadh[1:i]) for every i (O(n^2))
+      inc <- diff(Zadh) * (Fadh[-length(Fadh)] + Fadh[-1]) / 2
+      Eadh <- c(0, cumsum(inc))
       Weight <- Eadh[length(Eadh)]
       EnerFun <- Eadh / Eadh[length(Eadh)]
       EnerFun[1] <- 0
