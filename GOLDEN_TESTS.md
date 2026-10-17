@@ -48,3 +48,15 @@ goldens: a failure there deserves investigation, not an automatic update.
 
 `.github/workflows/R-CMD-check.yaml` runs `R CMD check` (which includes these
 tests) on several platforms at every push and pull request.
+
+## Golden regeneration log
+
+- **v2-refactor-4-fixes (Oct 2026)** — goldens `cp-2h-w20`, `dp-2h-w20`,
+  `cp-3h-w20` and `dp-3h-w20` were regenerated because `windowedFit()` no
+  longer propagates the leftover `"x2"` coefficient name (an `lm.fit`
+  artifact) into the CP and DP values; it was removed at the source.
+  **Only the `names` attribute changed — the numeric values are identical**
+  (verified by comparing the regenerated files against the previous ones).
+  The batch CP golden (`batch-cp-w50`) is unaffected: it stores the values
+  via `setNames()`, which never carried the `"x2"` name.
+

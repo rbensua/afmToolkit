@@ -46,11 +46,10 @@ windowedFit <- function(X, width){
   Sy <- cs_y[hi + 1] - cs_y[lo]
   Szz <- cs_zz[hi + 1] - cs_zz[lo]
   Szy <- cs_zy[hi + 1] - cs_zy[lo]
-  # Slope of the least squares fit of y on [1, z] within each window
+  # Slope of the least squares fit of y on [1, z] within each window.
+  # The returned vector is (deliberately) unnamed: the "x2" name that the
+  # old lm.fit-based implementation left on every slope used to leak all
+  # the way into the CP and DP values.
   OUT <- (m * Szy - Sz * Sy) / (m * Szz - Sz * Sz)
-  # lm.fit names the slope coefficient "x2" when the columns of X are
-  # unnamed; preserve that behaviour for backward compatibility
-  names(OUT) <- rep(if (is.null(colnames(X))) "x2" else colnames(X)[2],
-                    nout)
   return(OUT)
 }
