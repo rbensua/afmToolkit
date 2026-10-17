@@ -26,9 +26,31 @@
 #' @export
 windowedFit <- function(X, width){
   lenX <- dim(X)[1]
-  SEQ1 <- seq(width+1,lenX-width)
-  SEQ2 <- lapply(SEQ1, function(x) (x-width):(x+width))
-  OUT <- lapply(SEQ2, function(a) coef(lm.fit(X[a,1:2],X[a,3]))[2])
-  OUT <- simplify2array(OUT,higher=TRUE)
+  centers <- seq(width + 1, lenX - width)
+  nout <- length(centers)
+  if (nout == 0) {
+    return(numeric(0))
+  }
+  z <- X[, 2]
+  y <- X[, 3]
+  m <- 2 * width + 1
+  lo <- centers - width
+  hi <- centers + width
+  # Prefix sums: allows computing every window's fit in O(1),
+  # so the whole call is O(n) instead of one lm.fit per window.
+  cs_z <- c(0, cumsum(z))
+  cs_y <- c(0, cumsum(y))
+  cs_zz <- c(0, cumsum(z * z))
+  cs_zy <- c(0, cumsum(z * y))
+  Sz <- cs_z[hi + 1] - cs_z[lo]
+  Sy <- cs_y[hi + 1] - cs_y[lo]
+  Szz <- cs_zz[hi + 1] - cs_zz[lo]
+  Szy <- cs_zy[hi + 1] - cs_zy[lo]
+  # Slope of the least squares fit of y on [1, z] within each window
+  OUT <- (m * Szy - Sz * Sy) / (m * Szz - Sz * Sz)
+  # lm.fit names the slope coefficient "x2" when the columns of X are
+  # unnamed; preserve that behaviour for backward compatibility
+  names(OUT) <- rep(if (is.null(colnames(X))) "x2" else colnames(X)[2],
+                    nout)
   return(OUT)
 }
