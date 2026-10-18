@@ -2,7 +2,7 @@
 # the parameter table, the contact point / zero force point vertical
 # lines and (when present) the Young's modulus fit inset.
 afmSummaryApproachPlot <- function(afmdata, output) {
-  Indentation <- Z <- ForceCorrected <- NULL
+  Indentation <- Z <- ForceCorrected <- Segment <-  NULL
   # Parameters table: only the parameters actually present are shown
   # (a missing field would leave empty entries, which used to break the
   # construction of the table)

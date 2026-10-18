@@ -16,11 +16,11 @@ data.}
 }
 \value{
 A one-row data frame (returned invisibly) summarizing the curve:
-number of segments, spring constant and, when already computed, the
-contact point, Young's modulus, zero force point and type of
-experiment (\code{Constant Force} or \code{Constant Height}). If
-\code{plt = TRUE}, the summary plots of all available segments are
-also printed to the active graphics device.
+  number of segments, spring constant and, when already computed, the
+  contact point, Young's modulus, zero force point and type of
+  experiment (\code{Constant Force} or \code{Constant Height}). If
+  \code{plt = TRUE}, the summary plots of all available segments are
+  also printed to the active graphics device.
 }
 \description{
 This function sumarizes the main features of an afmdata object and,

@@ -4,7 +4,7 @@
 # typeoffit ("Constant Force" / "Constant Height") comes from
 # afmSummaryTable().
 afmSummaryPausePlot <- function(afmdata, typeoffit = NULL) {
-  Time <- Z <- Segment <- NULL
+  Time <- Z <- Segment <- Force <-  NULL
   if (!("pause" %in% levels(afmdata$data$Segment))) {
     return(invisible(NULL))
   }
