@@ -8,7 +8,7 @@ afmYoungModulus(
   afmdata,
   thickness = NULL,
   model = "Hertz",
-  geometry = c("pyramid", "paraboloid", "cone"),
+  geometry = c("pyramid", "paraboloid", "cone", "sphere"),
   thin_correction = FALSE,
   showfit = FALSE,
   params,
@@ -31,7 +31,7 @@ negative.}
 model is available.}
 
 \item{geometry}{Geometry of the tip. Currently only pyramidal (default), paraboloid, 
-and conical geometries are implemented.}
+conical and spherical geometries are implemented.}
 
 \item{thin_correction}{Logical value. If TRUE a thin layer correction is performed as 
 shown in Dimitriadis et al. 2002, and in Gavara and Chadwick 2012.}
@@ -41,7 +41,8 @@ shown in Dimitriadis et al. 2002, and in Gavara and Chadwick 2012.}
 
 \item{params}{A list containing different parameters of the model: e.g. nu (Poisson's 
 ratio) or alpha (internal angle, in degrees, of the pyramidal and conical tips) or R (tip radius, 
-in the paraboloid geometry)}
+in the paraboloidal and spherical geometries). Also if thin_correction is 
+set to TRUE, the height of the sample, h, should be provided}
 
 \item{silent}{Logical value. If TRUE suppresses the message indicating the name of the curve being processed
 (useful for batch-processing large number of curves). Defaults to FALSE}

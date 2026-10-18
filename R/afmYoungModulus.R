@@ -14,14 +14,15 @@
 #' @param model Contact mechanics model to be used. Currently only Hertz's pure elastic 
 #'   model is available.
 #' @param geometry Geometry of the tip. Currently only pyramidal (default), paraboloid, 
-#'   and conical geometries are implemented.
+#'   conical and spherical geometries are implemented.
 #' @param thin_correction Logical value. If TRUE a thin layer correction is performed as 
 #' shown in Dimitriadis et al. 2002, and in Gavara and Chadwick 2012. 
 #' @param showfit Logical value. If FALSE it prints the fit model summary (via 
 #'   \code{summary.lm()}). Default value is FALSE
 #' @param params A list containing different parameters of the model: e.g. nu (Poisson's 
 #'   ratio) or alpha (internal angle, in degrees, of the pyramidal and conical tips) or R (tip radius, 
-#'   in the paraboloid geometry)
+#'   in the paraboloidal and spherical geometries). Also if thin_correction is 
+#'   set to TRUE, the height of the sample, h, should be provided
 #' @param silent Logical value. If TRUE suppresses the message indicating the name of the curve being processed
 #' (useful for batch-processing large number of curves). Defaults to FALSE
 #' @return An \code{afmdata} class variable which will consist on the original input 
@@ -51,7 +52,7 @@ afmYoungModulus <-
   function(afmdata,
            thickness = NULL,
            model = "Hertz",
-           geometry = c("pyramid","paraboloid", "cone"),
+           geometry = c("pyramid","paraboloid", "cone", "sphere"),
            thin_correction = FALSE,
            showfit = FALSE,
            params, 
@@ -78,7 +79,7 @@ afmYoungModulusSingle <-
   function(afmdata,
            thickness = NULL,
            model = "Hertz",
-           geometry = c("pyramid","paraboloid", "cone"),
+           geometry = c("pyramid","paraboloid", "cone", "sphere"),
            thin_correction = FALSE,
            showfit = FALSE,
            params, 
@@ -114,6 +115,9 @@ afmYoungModulusSingle <-
       fitdata$ForceCorrected - fitdata$ForceCorrected[1]
     geometry <- match.arg(geometry)
     if (geometry == "pyramid"){
+      if(is.null(params$alpha)){
+        stop("You need to provide the internal angle of the pyramidal tip!")
+      }
       if ( nrow(fitdata) > 3 ){
         if(thin_correction){
           if(is.null(params$h)){
@@ -155,6 +159,9 @@ afmYoungModulusSingle <-
         fitYM <- NA
       }
     }else if (geometry == "cone"){
+      if(is.null(params$alpha)){
+        stop("You need to provide the internal angle of the conical tip!")
+      }
       if ( nrow(fitdata) > 3 ){
         if (thin_correction){
           if(is.null(params$h)){
@@ -196,11 +203,17 @@ afmYoungModulusSingle <-
         fitYM <- NA
       }
       
-    }else {
+    }else if (geometry == "paraboloid") {
+      if(is.null(params$R)){
+        stop("You need to provide the radius of the paraboloidal tip!")
+      }
       fitdata$Indentation <- -fitdata$Indentation
       fitdata <- subset(fitdata, Indentation>=0)
       if (nrow(fitdata) > 3){
         if(thin_correction){
+          if(is.null(params$h)){
+            stop("You need to provide the height of the sample!")
+          }
           params$nu <- 0.5
           
           chi <- sqrt(params$R * fitdata$Indentation) / params$h
@@ -236,6 +249,66 @@ afmYoungModulusSingle <-
         YM <- NA
         fitYM <- NA
       }
+    } else{
+      if(is.null(params$R)){
+        stop("You need to provide the radius of the spherical tip!")
+      }
+      if (is.null(params$nu)) {
+        params$nu <- 0.5
+      }
+      fitdata$Indentation <- -fitdata$Indentation
+      fitdata <- subset(fitdata, Indentation>=0) 
+      R <- params$R
+      
+      # Obtaining the contact radius for each indentantion
+      # a is given as the solution to the equation
+      #  delta = a / 2 * log( (R + a) / (R - a))
+      #
+      
+      a <- numeric(nrow(fitdata))
+      for (i in 1:nrow(fitdata)){
+        delta <-fitdata$Indentation[i]
+        f <- function(x) {
+          res <- x / 2 * log((R + x) / (R - x)) - delta
+          return(res)
+        }
+        df <- function(x){
+          res <- 0.5 * log((R + x) / (R - x)) + R * x /(R^2 - x^2)
+        }
+        # Newton's method for getting the contact radius
+        x0 <- 0.9*R
+        tol <- 1e-12
+        err <- 1
+        maxiter <- 100
+        iter <- 0
+        # Find the root of the function
+        while(err > tol & iter <= maxiter){
+          x_old <- x0
+          x0 <- x0 - f(x0) / df(x0)
+          err <- abs(x_old - x0)
+          iter <- iter + 1
+        }
+        
+        root <- x0
+        #root <- uniroot(f, c(0, 0.9 * R ), tol = 1e-12)
+        a[i] <- root #root$root
+      }
+      
+      # we include the radius as a new variable in the fit dataframe
+      fitdata$a <- a
+      
+      # We add a column with the transformed data:
+      #
+      # at =  0.5 * (a^2+ R^2) * log((R + a) / (R - a)) - a * R
+      #
+      fitdata$at <- 0.5 * (a^2+ R^2) * log((R + a) / (R - a)) - a * R
+      
+      # Fit a line with no intercept to F vs at:
+      fitYM <- lm(ForceCorrected ~ at -1, data = fitdata)
+      # The slope of the line
+      M <- coef(fitYM)
+      # The Young's Modulus
+      YM <- unname(M * (1 - params$nu^2))
     }
     YoungModulus <- list(YoungModulus = YM,
                          fitYM = fitYM,
