@@ -6,6 +6,7 @@
 # module needs.
 afmSummaryTable <- function(afmdata) {
   typeoffit <- NULL
+  relax_formula <- NULL
   fields <- names(afmdata)
   Nsegments <- nlevels(afmdata$data$Segment)
   spring <- afmdata$params$SpringConstant
@@ -32,7 +33,9 @@ afmSummaryTable <- function(afmdata) {
     names(output) <- newnames
   }
   if ("Relax" %in% names(afmdata)) {
-    if (grepl("Z ~", afmdata$Relax$relaxModel$call[2])) {
+    relax_formula <-
+      paste(deparse(afmdata$Relax$relaxModel$call[[2]]), collapse = " ")
+    if (grepl("Z ~", relax_formula)) {
       typeoffit <- "Constant Force"
     } else {
       typeoffit <- "Constant Height"
@@ -40,9 +43,18 @@ afmSummaryTable <- function(afmdata) {
     newnames <- c(names(output), "Type of Experiment")
     output <- cbind(output, typeoffit)
     names(output) <- newnames
-    Relax <- summary(afmdata$Relax$relaxModel)
-    print(Relax$coefficients)
   }
-  print(output)
+  # The data frame always has a single row, so the implicit row name
+  # ("1") carries no information: print without it.
+  print(output, row.names = FALSE)
+  # Relaxation fit: shown as its own clearly separated section, with the
+  # fitted formula (taken from the model call) and its coefficients table.
+  if (!is.null(typeoffit)) {
+    cat("\n", strrep("-", 60), "\n", sep = "")
+    cat("Relaxation fit (model: ", afmdata$Relax$model, ", ", typeoffit, "):\n", sep = "")
+    cat("  ", relax_formula, "\n\n", sep = "")
+    print(summary(afmdata$Relax$relaxModel)$coefficients)
+    cat(strrep("-", 60), "\n", sep = "")
+  }
   invisible(list(output = output, typeoffit = typeoffit))
 }
