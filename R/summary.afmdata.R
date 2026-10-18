@@ -8,6 +8,12 @@
 #' @param plt Logical variable. If TRUE plots all available segments with all available
 #'   data.
 #' @param ... Additional arguments (for compatibility with \code{summary})
+#' @return A one-row data frame (returned invisibly) summarizing the curve:
+#'   number of segments, spring constant and, when already computed, the
+#'   contact point, Young's modulus, zero force point and type of
+#'   experiment (\code{Constant Force} or \code{Constant Height}). If
+#'   \code{plt = TRUE}, the summary plots of all available segments are
+#'   also printed to the active graphics device.
 #' @examples
 #' \dontrun{path <- path.package("afmToolkit")
 #' data <- afmReadJPK("force-save-JPK-3h.txt.gz", path = path)

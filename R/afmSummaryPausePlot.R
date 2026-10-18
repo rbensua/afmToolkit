@@ -55,9 +55,13 @@ afmSummaryPausePlot <- function(afmdata, typeoffit = NULL) {
   }
   g1 <- ggplotGrob(ctc1)
   g2 <- ggplotGrob(ctc2)
-  g <- rbind(g1, g2, size = "first")
-  g$widths <- unit.pmax(g1$widths, g2$widths)
-  g$layout[grepl("guide", g$layout$name), c("t","b")] <- c(1, nrow(g))
+  # Combine the two panels with the public gtable API: size = "max"
+  # aligns the columns to the widest panel, which is exactly what the
+  # old manual assignment g$widths <- unit.pmax(g1$widths, g2$widths)
+  # achieved. The old line that stretched guide (legend) grobs through
+  # g$layout is dropped: these single-segment plots never carry guides,
+  # so it always matched nothing.
+  g <- rbind(g1, g2, size = "max")
   grid.newpage()
   grid.draw(g)
 }
