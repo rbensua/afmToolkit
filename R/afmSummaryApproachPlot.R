@@ -7,36 +7,12 @@ afmSummaryApproachPlot <- function(afmdata, output) {
   # (a missing field would leave empty entries, which used to break the
   # construction of the table)
   table_entries <- c(
-    if (!is.null(output# Internal module of summary.afmdata(): plots the approach segment with
-# the parameter table, the contact point / zero force point vertical
-# lines and (when present) the Young's modulus fit inset.
-afmSummaryApproachPlot <- function(afmdata, output) {
-Contact Point`))
-      c("C. Point:" = format(output# Internal module of summary.afmdata(): plots the approach segment with
-# the parameter table, the contact point / zero force point vertical
-# lines and (when present) the Young's modulus fit inset.
-afmSummaryApproachPlot <- function(afmdata, output) {
-Contact Point`, digits = 4)),
-    if (!is.null(output# Internal module of summary.afmdata(): plots the approach segment with
-# the parameter table, the contact point / zero force point vertical
-# lines and (when present) the Young's modulus fit inset.
-afmSummaryApproachPlot <- function(afmdata, output) {
-Zero force pt.`))
-      c("Zero F. Pt.:" = format(output# Internal module of summary.afmdata(): plots the approach segment with
-# the parameter table, the contact point / zero force point vertical
-# lines and (when present) the Young's modulus fit inset.
-afmSummaryApproachPlot <- function(afmdata, output) {
-Zero force pt.`, digits = 4)),
-    if (!is.null(output# Internal module of summary.afmdata(): plots the approach segment with
-# the parameter table, the contact point / zero force point vertical
-# lines and (when present) the Young's modulus fit inset.
-afmSummaryApproachPlot <- function(afmdata, output) {
-Young's Modulus`))
-      c("Young's Modulus:" = format(output# Internal module of summary.afmdata(): plots the approach segment with
-# the parameter table, the contact point / zero force point vertical
-# lines and (when present) the Young's modulus fit inset.
-afmSummaryApproachPlot <- function(afmdata, output) {
-Young's Modulus`, digits = 4))
+    if (!is.null(output$`Contact Point`))
+      c("C. Point:" = format(output$`Contact Point`, digits = 4)),
+    if (!is.null(output$`Zero force pt.`))
+      c("Zero F. Pt.:" = format(output$`Zero force pt.`, digits = 4)),
+    if (!is.null(output$`Young's Modulus`))
+      c("Young's Modulus:" = format(output$`Young's Modulus`, digits = 4))
   )
   
   # Theme for tableGrob
