@@ -3,13 +3,41 @@
 # lines and (when present) the Young's modulus fit inset.
 afmSummaryApproachPlot <- function(afmdata, output) {
   Indentation <- Z <- ForceCorrected <- NULL
-  # Parameters table
-  mytable <- data.frame(c(format(output$`Contact Point`, digits = 4),
-                          format(output$`Zero force pt.`, digits = 4),
-                          format(output$`Young's Modulus`, digits = 4)),
-                        row.names = c("C. Point:", "Zero F. Pt.:",
-                                      "Young's Modulus:"))
-  names(mytable) <- NULL
+  # Parameters table: only the parameters actually present are shown
+  # (a missing field would leave empty entries, which used to break the
+  # construction of the table)
+  table_entries <- c(
+    if (!is.null(output# Internal module of summary.afmdata(): plots the approach segment with
+# the parameter table, the contact point / zero force point vertical
+# lines and (when present) the Young's modulus fit inset.
+afmSummaryApproachPlot <- function(afmdata, output) {
+Contact Point`))
+      c("C. Point:" = format(output# Internal module of summary.afmdata(): plots the approach segment with
+# the parameter table, the contact point / zero force point vertical
+# lines and (when present) the Young's modulus fit inset.
+afmSummaryApproachPlot <- function(afmdata, output) {
+Contact Point`, digits = 4)),
+    if (!is.null(output# Internal module of summary.afmdata(): plots the approach segment with
+# the parameter table, the contact point / zero force point vertical
+# lines and (when present) the Young's modulus fit inset.
+afmSummaryApproachPlot <- function(afmdata, output) {
+Zero force pt.`))
+      c("Zero F. Pt.:" = format(output# Internal module of summary.afmdata(): plots the approach segment with
+# the parameter table, the contact point / zero force point vertical
+# lines and (when present) the Young's modulus fit inset.
+afmSummaryApproachPlot <- function(afmdata, output) {
+Zero force pt.`, digits = 4)),
+    if (!is.null(output# Internal module of summary.afmdata(): plots the approach segment with
+# the parameter table, the contact point / zero force point vertical
+# lines and (when present) the Young's modulus fit inset.
+afmSummaryApproachPlot <- function(afmdata, output) {
+Young's Modulus`))
+      c("Young's Modulus:" = format(output# Internal module of summary.afmdata(): plots the approach segment with
+# the parameter table, the contact point / zero force point vertical
+# lines and (when present) the Young's modulus fit inset.
+afmSummaryApproachPlot <- function(afmdata, output) {
+Young's Modulus`, digits = 4))
+  )
   
   # Theme for tableGrob
   mytheme <- ttheme_default(base_size = 10,
@@ -36,11 +64,15 @@ afmSummaryApproachPlot <- function(afmdata, output) {
   yini <- layer_scales(applt)$y$range$range[1]
   ymin <- yini + 0.75 * yrange
   ymax <- yini + 0.95 * yrange
-  # Add table to plot
-  applt <- applt +
-    annotation_custom(tableGrob(mytable, theme = mytheme), xmin = xmin,
-                      xmax = xmax, ymin = ymin, ymax = ymax) +
-    ggtitle('Approach segment')
+  # Add table to plot (only if there is something to show in it)
+  if (length(table_entries) > 0) {
+    mytable <- data.frame(table_entries, row.names = names(table_entries))
+    names(mytable) <- NULL
+    applt <- applt +
+      annotation_custom(tableGrob(mytable, theme = mytheme), xmin = xmin,
+                        xmax = xmax, ymin = ymin, ymax = ymax)
+  }
+  applt <- applt + ggtitle('Approach segment')
   
   if ("YoungModulus" %in% names(afmdata)) {
     # add inset with plot of YM fit
