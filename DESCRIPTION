@@ -1,6 +1,6 @@
 Package: afmToolkit
 Title: Functions for Atomic Force Microscope Force-Distance Curves Analysis
-Version: 0.1.0
+Version: 2.0.0
 Authors@R: c(person(given = "Rafael",
                       family = "Benitez",
                       role = c("aut", "cre"),
