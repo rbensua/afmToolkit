@@ -49,3 +49,17 @@ test_that("afmSummaryTable shows the relaxation fit formula and coefficients", {
   expect_true(which(grepl("Spring Constant", out)) <
               which(grepl("Relaxation fit", out)))
 })
+
+test_that("afmSummaryPausePlot draws the two-panel pause figure without warnings", {
+  # Regression test: the pause plot used to combine its two panels by
+  # hand via gtable internals (g$widths with unit.pmax() and g$layout),
+  # which the gtable documentation discourages. The relaxed curve is
+  # used so the fit overlay and the coefficients table are exercised.
+  data <- std_pipeline(read_jpk_3h())
+  data <- afmRelax(data, model = "exp", nexp = 2, type = "CH", plt = FALSE,
+                   start = c(a0 = 8.2e-7, a1 = 1.675e-7, a2 = 1.675e-7,
+                             tau1 = 5, tau2 = 0.1))
+  out <- capture.output(res <- afmSummaryTable(data))
+  expect_warning(capture.output(
+    afmSummaryPausePlot(data, res$typeoffit)), NA)
+})
