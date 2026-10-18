@@ -29,6 +29,6 @@ data <- afmZeroPointSlope(data, segment = "approach")
 data <- afmIndentation(data)
 data <- afmYoungModulus(data, thickness = 1e-7, params = list(alpha = 22),
                         silent = TRUE)
-data <- afmExpDecay(data, nexp = 2, type = "CH")
+data <- afmRelax(data, model = "exp", nexp = 2, type = "CH")
 summary(data)}                        
 }

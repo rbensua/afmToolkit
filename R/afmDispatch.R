@@ -28,13 +28,16 @@ afmDispatch <-
            silent = FALSE,
            error = "No afmdata or afmexperiment class input provided.") {
     if (is.afmexperiment(afmdata)) {
-      afmexperiment <- lapply(afmdata, function(x) {
+      n_curves <- length(afmdata)
+      ID <- names(afmdata)
+      afmexperiment <- lapply(seq_len(n_curves), function(idx) {
+        x <- afmdata[[idx]]
         if (!is.null(x$params$curvename) & !silent) {
-          print(paste("Processing curve: ", x$params$curvename), sep = " ")
+          cat("Processing curve", idx , "/", n_curves,":", x$params$curvename,"\n")
         }
         FUN(x, ...)
       })
-      return(afmexperiment(afmexperiment))
+      return(afmexperiment(afmexperiment, ID = ID))
     } else if (is.afmdata(afmdata)) {
       return(FUN(afmdata, ...))
     } else {

@@ -19,7 +19,7 @@
 #' data <- afmIndentation(data)
 #' data <- afmYoungModulus(data, thickness = 1e-7, params = list(alpha = 22),
 #'                         silent = TRUE)
-#' data <- afmExpDecay(data, nexp = 2, type = "CH")
+#' data <- afmRelax(data, model = "exp", nexp = 2, type = "CH")
 #' summary(data)}                        
 #' @import grid
 #' @importFrom  gridExtra ttheme_default tableGrob
@@ -64,8 +64,8 @@ summary.afmdata <- function(object , plt = TRUE, ...){
     output <- cbind(output,z0)
     names(output) <- newnames
   }
-  if ("ExpFit" %in% names(afmdata)){
-    if(grepl("Z ~",afmdata$ExpFit$expdecayModel$call[2])){
+  if ("Relax" %in% names(afmdata)){
+    if(grepl("Z ~",afmdata$Relax$relaxModel$call[2])){
       typeoffit <- "Constant Force"
     }else{
       typeoffit <- "Constant Height"
@@ -73,8 +73,8 @@ summary.afmdata <- function(object , plt = TRUE, ...){
     newnames <- c(names(output),"Type of Experiment")
     output <- cbind(output,typeoffit)
     names(output) <- newnames
-    expfit <- summary(afmdata$ExpFit$expdecayModel)
-    print(expfit$coefficients)
+    Relax <- summary(afmdata$Relax$relaxModel)
+    print(Relax$coefficients)
   }
   print(output)
   if (plt){
@@ -166,10 +166,10 @@ summary.afmdata <- function(object , plt = TRUE, ...){
                     aes(x = Time, y = Z)) + geom_line() +
        #scale_y_continuous(labels = fancy_scientific)+
        theme_bw()
-     if ("ExpFit" %in% names(afmdata)){
+     if ("Relax" %in% names(afmdata)){
        times <- subset(afmdata$data, 
-                       Segment == "pause")$Time[seq_along(afmdata$ExpFit$expdecayFit)]
-       fitcoef <- summary(afmdata$ExpFit$expdecayModel)$coefficients[,1:2]
+                       Segment == "pause")$Time[seq_along(afmdata$Relax$relaxFit)]
+       fitcoef <- summary(afmdata$Relax$relaxModel)$coefficients[,1:2]
        fitcoef <- format(fitcoef, digits = 2)
        xrange <- layer_scales(ctc2)$x$range$range[2] -
          layer_scales(ctc2)$x$range$range[1]
@@ -185,8 +185,8 @@ summary.afmdata <- function(object , plt = TRUE, ...){
          ymin <- yini + 0.3*yrange
          ymax <- yini + 0.9*yrange
          ctc2 <- ctc2 + geom_line(data = data.frame(Time = times, 
-                                                    Z = afmdata$ExpFit$expdecayFit),
-                                  aes(x = Time, y = Z), col = "green", size = 1.5) +
+                                                    Z = afmdata$Relax$relaxFit),
+                                  aes(x = Time, y = Z), col = "green", linewidth = 1.1) +
            annotation_custom(tableGrob(fitcoef, theme = mytheme), xmin = xmin , 
                              xmax = xmax, ymin = ymin, ymax = ymax) 
        }else {
@@ -196,8 +196,8 @@ summary.afmdata <- function(object , plt = TRUE, ...){
          ymin <- yini + 0.3*yrange
          ymax <- yini + 0.9*yrange
          ctc1 <- ctc1 + geom_line(data = data.frame(Time = times, 
-                                                    Force = afmdata$ExpFit$expdecayFit),
-                                  aes(x = Time, y = Force), col = "green", size = 1.5)+
+                                                    Force = afmdata$Relax$relaxFit),
+                                  aes(x = Time, y = Force), col = "green", linewidth = 1.1)+
            annotation_custom(tableGrob(fitcoef, theme = mytheme), xmin = xmin , 
                              xmax = xmax, ymin = ymin, ymax = ymax) 
        }
