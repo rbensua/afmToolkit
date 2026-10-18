@@ -44,7 +44,9 @@ afmSummaryTable <- function(afmdata) {
     output <- cbind(output, typeoffit)
     names(output) <- newnames
   }
-  print(output)
+  # The data frame always has a single row, so the implicit row name
+  # ("1") carries no information: print without it.
+  print(output, row.names = FALSE)
   # Relaxation fit: shown as its own clearly separated section, with the
   # fitted formula (taken from the model call) and its coefficients table.
   if (!is.null(typeoffit)) {

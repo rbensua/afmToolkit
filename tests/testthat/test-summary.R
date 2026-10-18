@@ -37,6 +37,8 @@ test_that("afmSummaryTable shows the relaxation fit formula and coefficients", {
                c("# of segments", "Spring Constant", "Contact Point",
                  "Zero force pt.", "Type of Experiment"))
   expect_equal(res$typeoffit, "Constant Height")
+  # The table always has a single row, so no row numbers are printed.
+  expect_false(any(grepl("^1\\s", out)))
   # ...and the relaxation fit is printed as its own section, with the
   # fitted formula and the coefficients table.
   expect_true(any(grepl("Relaxation fit \\(model: exp, Constant Height\\):", out)))
