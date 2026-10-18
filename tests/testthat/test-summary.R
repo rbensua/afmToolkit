@@ -40,9 +40,11 @@ test_that("afmSummaryTable shows the relaxation fit formula and coefficients", {
   # The table always has a single row, so no row numbers are printed.
   expect_false(any(grepl("^1\\s", out)))
   # ...and the relaxation fit is printed as its own section, with the
-  # fitted formula and the coefficients table.
+  # fitted formula and the coefficients table. The formula is matched
+  # with fixed = TRUE: it contains "+" and "~", and as a regex the
+  # "+" would be a quantifier that could never match the real output.
   expect_true(any(grepl("Relaxation fit \\(model: exp, Constant Height\\):", out)))
-  expect_true(any(grepl("ForceCorrected ~ a0 + a1", out)))
+  expect_true(any(grepl("ForceCorrected ~ a0 + a1", out, fixed = TRUE)))
   expect_true(any(grepl("Estimate", out)))
   expect_true(any(grepl("tau2", out)))
   # The general table is printed before the relaxation section
