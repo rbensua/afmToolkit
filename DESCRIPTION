@@ -23,7 +23,8 @@ Imports:
     grid,
     gridExtra,
     scales,
-    dplyr
+    dplyr,
+    wavScalogram
 Suggests:
     testthat (>= 3.0.0)
 License: GPL
