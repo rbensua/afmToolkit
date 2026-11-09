@@ -134,8 +134,8 @@ test_that("afmReadJPK fails informatively when no column matches the pattern", {
   lines <- c(
     "# spring constant: 0.5",
     "# segment: retract",
-    "# columns: height vDeflection time",
-    "# fancyNames: \"Height (raw)\" \"Vertical Deflection\" \"Segment Time\"",
+    "# columns: zSensor vDeflection time",
+    "# fancyNames: \"Z Sensor\" \"Vertical Deflection\" \"Segment Time\"",
     "# units: m N s",
     "#",
     "0 0 0",

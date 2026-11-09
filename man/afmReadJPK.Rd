@@ -39,14 +39,14 @@ Reads an ascii JPK file with one to three headers.
 \details{
 The Force, Z and Time columns of each segment are located in the
 "fancy names" line of the JPK header: \code{FColStr}, \code{ZColStr} and
-\code{tColStr} are first tried as exact matches and then as substrings, so
-minor variations of the channel names in the export (e.g. "Height (measured
-& smoothed)" still matching "Height (measured)") are recognized. When
-several channels match the force pattern, deflection channels are
-preferred. If no unique column can be identified, an informative error is
-thrown. Files with a single segment take their segment name ("approach",
-"retract" or "pause") from the header, defaulting to "approach" when the
-header does not declare one.
+\code{tColStr} are first tried as exact matches, then as substrings and
+finally ignoring spaces and parentheses, so minor variations of the channel
+names in the export (e.g. "Height (measured)" matching "Height (measured &
+smoothed)") are still recognized. When several channels match the force
+pattern, deflection channels are preferred. If no unique column can be
+identified, an informative error is thrown. Files with a single segment
+take their segment name ("approach", "retract" or "pause") from the header,
+defaulting to "approach" when the header does not declare one.
 }
 \examples{
 data <- afmReadJPK("force-save-JPK-3h.txt.gz",path = path.package("afmToolkit"))

@@ -12,14 +12,14 @@
 #'   
 #' @details The Force, Z and Time columns of each segment are located in the
 #' "fancy names" line of the JPK header: \code{FColStr}, \code{ZColStr} and
-#' \code{tColStr} are first tried as exact matches and then as substrings, so
-#' minor variations of the channel names in the export (e.g. "Height (measured
-#' & smoothed)" still matching "Height (measured)") are recognized. When
-#' several channels match the force pattern, deflection channels are
-#' preferred. If no unique column can be identified, an informative error is
-#' thrown. Files with a single segment take their segment name ("approach",
-#' "retract" or "pause") from the header, defaulting to "approach" when the
-#' header does not declare one.
+#' \code{tColStr} are first tried as exact matches, then as substrings and
+#' finally ignoring spaces and parentheses, so minor variations of the channel
+#' names in the export (e.g. "Height (measured)" matching "Height (measured &
+#' smoothed)") are still recognized. When several channels match the force
+#' pattern, deflection channels are preferred. If no unique column can be
+#' identified, an informative error is thrown. Files with a single segment
+#' take their segment name ("approach", "retract" or "pause") from the header,
+#' defaulting to "approach" when the header does not declare one.
 #' 
 #' @return A afmdata structure list containing a field 'data' which is a data frame with 
 #' variables Force, Z, Time (if aplicable) and Segment ("approach", "retract" and/or "pause") and 
@@ -42,14 +42,22 @@ afmReadJPK <-
     Segment <- Time <- Z <- NULL # For CRAN compatibility
     
     # Locate a column of a data block among the "fancy" channel names: an
-    # exact match is preferred over a substring match and, when several
-    # channels match the pattern, prefer (if not NULL) tries to disambiguate.
-    # Returns the index of the column in the data matrix, or fails with an
+    # exact match is preferred over a substring match, which is preferred
+    # over a match ignoring spaces and parentheses; when several channels
+    # match the pattern, prefer (if not NULL) tries to disambiguate. Returns
+    # the index of the column in the data matrix, or fails with an
     # informative error.
     findCol <- function(pattern, tokens, prefer = NULL) {
       hits <- which(tokens == pattern)
       if (length(hits) == 0) {
         hits <- grep(pattern, tokens, fixed = TRUE)
+      }
+      if (length(hits) == 0) {
+        # Last resort: compare ignoring spaces and parentheses, so e.g.
+        # "Height (measured)" also matches "Height (measured & smoothed)".
+        hits <- grep(gsub("[ ()]", "", pattern),
+                     gsub("[ ()]", "", tokens),
+                     fixed = TRUE)
       }
       if (length(hits) > 1 && !is.null(prefer)) {
         preferred <- grep(prefer, tokens[hits], fixed = TRUE)
