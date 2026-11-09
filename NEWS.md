@@ -1,3 +1,21 @@
+# afmToolkit 2.0.1 (unreleased)
+
+## Bug fixes
+
+* `afmReadJPK()` can now read single-segment JPK exports that contain
+  only the retract curve (e.g. protein-unfolding experiments exported
+  from the JPK SPM map viewer), which previously failed with the cryptic
+  error "tipo (NULL) inválido para la variable 'Z'" (#13). The channel
+  names of the "fancyNames" header line are now matched exactly first
+  and then as substrings, so exports shipping channels such as "Height
+  (measured & smoothed)" are read correctly, and when several channels
+  match the force pattern the deflection channel is preferred. When no
+  unique column can be identified, an informative error is thrown. The
+  single segment of a one-header file now takes its name from the
+  "# segment:" header line instead of always being labelled "approach",
+  and a warning is issued when the file carries no spring constant
+  (it stays `NA`).
+
 # afmToolkit 2.0.0
 
 ## Major internal refactoring, no user-facing API changes

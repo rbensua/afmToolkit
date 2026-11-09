@@ -10,6 +10,17 @@
 #' @param tColStr String with a pattern identifying the Time column.
 #' @param silent Logical parameter. If TRUE it suppresses the messages regarding the loading of the JPK file (defaults to FALSE).
 #'   
+#' @details The Force, Z and Time columns of each segment are located in the
+#' "fancy names" line of the JPK header: \code{FColStr}, \code{ZColStr} and
+#' \code{tColStr} are first tried as exact matches and then as substrings, so
+#' minor variations of the channel names in the export (e.g. "Height (measured
+#' & smoothed)" still matching "Height (measured)") are recognized. When
+#' several channels match the force pattern, deflection channels are
+#' preferred. If no unique column can be identified, an informative error is
+#' thrown. Files with a single segment take their segment name ("approach",
+#' "retract" or "pause") from the header, defaulting to "approach" when the
+#' header does not declare one.
+#' 
 #' @return A afmdata structure list containing a field 'data' which is a data frame with 
 #' variables Force, Z, Time (if aplicable) and Segment ("approach", "retract" and/or "pause") and 
 #' a field 'params' which is a list with the fields 'curvename' and 'SpringConstant'.
@@ -30,6 +41,32 @@ afmReadJPK <-
     
     Segment <- Time <- Z <- NULL # For CRAN compatibility
     
+    # Locate a column of a data block among the "fancy" channel names: an
+    # exact match is preferred over a substring match and, when several
+    # channels match the pattern, prefer (if not NULL) tries to disambiguate.
+    # Returns the index of the column in the data matrix, or fails with an
+    # informative error.
+    findCol <- function(pattern, tokens, prefer = NULL) {
+      hits <- which(tokens == pattern)
+      if (length(hits) == 0) {
+        hits <- grep(pattern, tokens, fixed = TRUE)
+      }
+      if (length(hits) > 1 && !is.null(prefer)) {
+        preferred <- grep(prefer, tokens[hits], fixed = TRUE)
+        if (length(preferred) == 1) {
+          hits <- hits[preferred]
+        }
+      }
+      if (length(hits) != 1) {
+        stop("afmReadJPK: could not uniquely identify the column matching '",
+             pattern, "'. Available columns: ",
+             paste(tokens, collapse = ", "),
+             ". Please adjust FColStr, ZColStr or tColStr accordingly.",
+             call. = FALSE)
+      }
+      hits
+    }
+    
     # Parse the data lines of one segment into a data frame, using the
     # "fancy" column-names line of its header to locate the Force, Z and
     # Time columns. (Internal helper, defined here to avoid repeating the
@@ -39,10 +76,11 @@ afmReadJPK <-
       m <- matrix(as.numeric(unlist(strsplit(lines, " "))),
                   ncol = ncolumns,
                   byrow = TRUE)
-      tokens <- unlist(strsplit(columnNames, " \""))
-      Fcol <- grep(FColStr, tokens) - 1
-      Zcol <- which(ZColStr == gsub("\"", "", tokens)) - 1
-      tcol <- grep(tColStr, tokens) - 1
+      tokens <- gsub("\"", "", unlist(strsplit(columnNames, " \"")))
+      tokens <- tokens[!grepl("^#", tokens)]
+      Fcol <- findCol(FColStr, tokens, prefer = "Deflection")
+      Zcol <- findCol(ZColStr, tokens)
+      tcol <- findCol(tColStr, tokens)
       data.frame(
         Z = m[, Zcol],
         Force = m[, Fcol],
@@ -60,6 +98,16 @@ afmReadJPK <-
       segment
     }
     
+    # Segment type declared in the header lines ("approach", "retract" or
+    # "pause"); NA when the header does not declare one.
+    segmentInHeader <- function(lines) {
+      segLine <- grep("# segment:", lines, fixed = TRUE, value = TRUE)
+      if (length(segLine) == 0) {
+        return(NA_character_)
+      }
+      trimws(sub("# segment:", "", segLine[1]))
+    }
+    
     if (path == ""){
       fullfilename <- filename
     } else{
@@ -69,9 +117,16 @@ afmReadJPK <-
     fullData <- fullData[sapply(fullData, nchar) > 0]
     headerLines <- grep("#", fullData)
     
-    # Obtaining the spring constant
-    springLine <- grep("spring", fullData, value = T)[1]
-    SpringConstant <- as.numeric(unlist(strsplit(springLine, ":"))[2])
+    # Obtaining the spring constant (absent in some exports, e.g. map files)
+    springLine <- grep("spring", fullData, value = TRUE)
+    if (length(springLine) == 0) {
+      SpringConstant <- NA_real_
+      if (!silent) {
+        warning("No spring constant found in the JPK file.")
+      }
+    } else {
+      SpringConstant <- as.numeric(unlist(strsplit(springLine[1], ":"))[2])
+    }
     params = list(SpringConstant = SpringConstant, curvename = filename)
     # Obtaining the number of headers
     numberOfHeader <- as.integer(sum(diff(headerLines) != 1) + 1)
@@ -90,10 +145,22 @@ afmReadJPK <-
     } else {
       approachLines <- fullData[(headerEnds[1] + 1):N]
     }
-    approach <- parseSegment(approachLines, fullData[fancyLines[1]], "approach")
+    # Single-segment files are not always approach curves: take the segment
+    # name declared in the header when present.
+    firstSegmentName <- "approach"
+    if (numberOfHeader == 1) {
+      declaredSegment <- segmentInHeader(fullData[1:headerEnds[1]])
+      if (!is.na(declaredSegment)) {
+        firstSegmentName <- declaredSegment
+      }
+    }
+    approach <- parseSegment(approachLines, fullData[fancyLines[1]], firstSegmentName)
     
     if (numberOfHeader == 1) {
       afmExperiment <- approach
+      if (firstSegmentName == "retract") {
+        afmExperiment <- ensureZIncreasing(afmExperiment)
+      }
     }
     else if (numberOfHeader == 2){
       retractLines <- fullData[(headerEnds[2] + 1):N]
@@ -139,13 +206,18 @@ afmReadJPK <-
       speeds <- NULL
     }
     
-    # Finding index position xpos and ypos
-    indexLine <- grep("index", fullData, value = T)[1]
-    Index <- as.numeric(unlist(strsplit(indexLine, ":"))[2])
-    xposLine <- grep("xPosition", fullData, value = T)[1]
-    xpos <- as.numeric(unlist(strsplit(xposLine, ":"))[2])
-    yposLine <- grep("yPosition", fullData, value = T)[1]
-    ypos <- as.numeric(unlist(strsplit(yposLine, ":"))[2])
+    # Finding index position xpos and ypos (these keys are absent from some
+    # exports, e.g. single-curve map files; the values then stay NA)
+    numFromHeader <- function(pattern) {
+      line <- grep(pattern, fullData, value = TRUE)
+      if (length(line) == 0) {
+        return(NA_real_)
+      }
+      as.numeric(unlist(strsplit(line[1], ":"))[2])
+    }
+    Index <- numFromHeader("index")
+    xpos <- numFromHeader("xPosition")
+    ypos <- numFromHeader("yPosition")
     
     
     params <- append(params, list(speeds = speeds, Index = Index, xpos = xpos, ypos = ypos))

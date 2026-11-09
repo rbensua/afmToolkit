@@ -84,3 +84,66 @@ test_that("afmReadJPKMultiIndent reads a multi-indentation experiment", {
     spring = d$params$SpringConstant
   ))
 })
+
+test_that("afmReadJPK reads a single-segment retract-only JPK file", {
+  d <- afmReadJPK(test_path("jpk-retract-only.txt"), silent = TRUE)
+  expect_true(is.afmdata(d))
+  expect_setequal(names(d$data), c("Z", "Force", "Time", "Segment"))
+  expect_setequal(levels(d$data$Segment), "retract")
+  expect_equal(nrow(d$data), 100L)
+  # Z comes from "Height (measured & smoothed)" and Force from
+  # "Vertical Deflection", not from "Vertical Tip Position"
+  expect_equal(d$data$Z[1], -2.4674994E-8)
+  expect_equal(d$data$Force[1], 1.9822173E-9)
+  expect_equal(d$data$Time[1], 4.0E-4)
+  expect_gt(d$params$speeds$retract, 0)
+  # This export carries neither a spring constant nor index/position keys
+  expect_true(is.na(d$params$SpringConstant))
+  expect_true(is.na(d$params$Index))
+  expect_true(is.na(d$params$xpos))
+  expect_true(is.na(d$params$ypos))
+})
+
+test_that("afmReadJPK warns when the file has no spring constant", {
+  expect_warning(
+    capture.output(afmReadJPK(test_path("jpk-retract-only.txt"), silent = FALSE)),
+    "No spring constant"
+  )
+})
+
+test_that("afmReadJPK keeps 'approach' when a single-segment file declares no segment", {
+  lines <- c(
+    "# segmentIndex: 1",
+    "# columns: height vDeflection time",
+    "# fancyNames: \"Height (measured)\" \"Vertical Deflection\" \"Segment Time\"",
+    "# units: m N s",
+    "#",
+    "0 0 0",
+    "1e-9 1e-9 0.1",
+    "2e-9 2e-9 0.2"
+  )
+  f <- tempfile(fileext = ".txt")
+  writeLines(lines, f)
+  d <- afmReadJPK(f, silent = TRUE)
+  expect_setequal(levels(d$data$Segment), "approach")
+  expect_equal(d$data$Z, c(0, 1e-9, 2e-9))
+  unlink(f)
+})
+
+test_that("afmReadJPK fails informatively when no column matches the pattern", {
+  lines <- c(
+    "# spring constant: 0.5",
+    "# segment: retract",
+    "# columns: height vDeflection time",
+    "# fancyNames: \"Height (raw)\" \"Vertical Deflection\" \"Segment Time\"",
+    "# units: m N s",
+    "#",
+    "0 0 0",
+    "1e-9 1e-9 0.1",
+    "2e-9 2e-9 0.2"
+  )
+  f <- tempfile(fileext = ".txt")
+  writeLines(lines, f)
+  expect_error(afmReadJPK(f, silent = TRUE), "could not uniquely identify")
+  unlink(f)
+})
