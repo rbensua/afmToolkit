@@ -32,10 +32,10 @@ expect_golden <- function(name, value, tolerance = 1e-6) {
   if (afm_golden_regen() || !file.exists(path)) {
     dir.create(afm_golden_dir(), recursive = TRUE, showWarnings = FALSE)
     saveRDS(value, path)
-    testthat::skip(sprintf(
-      "Golden '%s' %s; run the tests again to compare.",
-      name, if (afm_golden_regen()) "regenerated" else "created"
-    ))
+    # Do NOT skip() here: skip() aborts the enclosing test_that block,
+    # which silently prevented every further expect_golden() call in
+    # the same block from being (re)generated. Fall through to the
+    # comparison instead; right after saving it is trivially satisfied.
   }
   expected <- readRDS(path)
   testthat::expect_equal(
