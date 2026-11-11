@@ -4,7 +4,8 @@
 #
 # 1. First run: every expect_golden() stores the value it receives as an
 #    .rds file under tests/testthat/_goldens/ and the comparison is
-#    skipped. Commit the generated _goldens/ directory afterwards.
+#    trivially satisfied against the just-saved file. Commit the
+#    generated _goldens/ directory afterwards.
 # 2. Every later run compares against the stored goldens: any change in
 #    the numerical behaviour of the package fails the tests.
 # 3. If a numerical change is INTENTIONAL, regenerate the goldens,

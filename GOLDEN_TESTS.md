@@ -22,8 +22,9 @@ refactored (the `v2` rewrite).
    devtools::test()
    ```
 
-   The first run writes `tests/testthat/_goldens/*.rds` and skips the
-   comparisons. **Commit the generated directory** afterwards.
+   The first run writes `tests/testthat/_goldens/*.rds` and compares each
+   value against the file it has just written (trivially satisfied).
+   **Commit the generated directory** afterwards.
 
 2. **Refactor freely.** Run `devtools::test()` after every change; the tests
    now compare against the committed goldens.
@@ -50,6 +51,14 @@ goldens: a failure there deserves investigation, not an automatic update.
 tests) on several platforms at every push and pull request.
 
 ## Golden regeneration log
+
+- **v2-fix-jpk-retract-only (Nov 2026)** — all goldens computed from JPK
+  curves were regenerated because `afmReadJPK()` no longer drops the last
+  data row of every non-final segment (an off-by-one in the segment end
+  detection). Row counts increase by one per non-final segment and every
+  downstream result (speeds, contact point, slopes, baseline, hysteresis,
+  ...) shifts accordingly. The Veeco and multi-indentation goldens are
+  unaffected (their readers did not change).
 
 - **v2-refactor-4-fixes (Oct 2026)** — goldens `cp-2h-w20`, `dp-2h-w20`,
   `cp-3h-w20` and `dp-3h-w20` were regenerated because `windowedFit()` no
