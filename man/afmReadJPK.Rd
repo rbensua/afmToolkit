@@ -43,8 +43,14 @@ segment is taken from its "# segment:" key: "extend" is renamed to
 "approach" and any other declared name ("pause", "retract", "modulation",
 ...) is kept as is. Header blocks without a "# segment:" key fall back to
 the positional names "approach" (first block), "pause" (middle blocks) and
-"retract" (last block). The Force, Z and Time columns of each segment are
-located in the "fancy names" line of its header: \code{FColStr},
+"retract" (last block). The data of each segment is located through its
+"# segmentIndex:" key when the file declares one per segment header (JPK
+5.0 and 6.1 exports do, possibly writing all the header blocks
+consecutively, without blank lines in between), and through the runs of
+"#" lines separated by blank lines otherwise; only the numeric rows of
+each segment are kept, so the "#" separator and key lines are dropped
+whatever the export layout. The Force, Z and Time columns of each segment
+are located in the "fancy names" line of its header: \code{FColStr},
 \code{ZColStr} and \code{tColStr} are first tried as exact matches, then as
 substrings and finally ignoring spaces and parentheses, so minor variations
 of the channel names in the export (e.g. "Height (measured)" also matching

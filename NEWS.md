@@ -15,6 +15,15 @@
   "# segment:" header line instead of always being labelled "approach",
   and a warning is issued when the file carries no spring constant
   (it stays `NA`).
+* `afmReadJPK()` failed on JPK 5.0 force-save exports (e.g. CellHesion
+  multi-segment experiments) with "could not uniquely identify the
+  column matching 'Vertical'. Available columns: .": the "fancy"
+  pattern used to locate the column-names line also matched the
+  "prefix-fancy"/"suffix-fancy" keys of those exports, and their
+  header blocks are written consecutively, without blank lines. The
+  column-names line is now located through the "fancyNames" key, the
+  data of each segment is delimited by its "# segmentIndex:" key, and
+  only the numeric rows of each segment are parsed (#13).
 
 ## Improvements
 

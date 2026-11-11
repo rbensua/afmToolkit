@@ -15,8 +15,14 @@
 #' "approach" and any other declared name ("pause", "retract", "modulation",
 #' ...) is kept as is. Header blocks without a "# segment:" key fall back to
 #' the positional names "approach" (first block), "pause" (middle blocks) and
-#' "retract" (last block). The Force, Z and Time columns of each segment are
-#' located in the "fancy names" line of its header: \code{FColStr},
+#' "retract" (last block). The data of each segment is located through its
+#' "# segmentIndex:" key when the file declares one per segment header (JPK
+#' 5.0 and 6.1 exports do, possibly writing all the header blocks
+#' consecutively, without blank lines in between), and through the runs of
+#' "#" lines separated by blank lines otherwise; only the numeric rows of
+#' each segment are kept, so the "#" separator and key lines are dropped
+#' whatever the export layout. The Force, Z and Time columns of each segment
+#' are located in the "fancy names" line of its header: \code{FColStr},
 #' \code{ZColStr} and \code{tColStr} are first tried as exact matches, then as
 #' substrings and finally ignoring spaces and parentheses, so minor variations
 #' of the channel names in the export (e.g. "Height (measured)" also matching
@@ -84,6 +90,10 @@ afmReadJPK <-
     # Time columns. (Internal helper, defined here to avoid repeating the
     # same parsing block for the approach, pause and retract segments.)
     parseSegment <- function(lines, columnNames, segmentName) {
+      if (length(lines) == 0) {
+        return(data.frame(Z = numeric(0), Force = numeric(0),
+                          Time = numeric(0), Segment = segmentName))
+      }
       ncolumns <- length(unlist(strsplit(lines[1], " ")))
       m <- matrix(as.numeric(unlist(strsplit(lines, " "))),
                   ncol = ncolumns,
@@ -145,45 +155,78 @@ afmReadJPK <-
       SpringConstant <- as.numeric(unlist(strsplit(springLine[1], ":"))[2])
     }
     params = list(SpringConstant = SpringConstant, curvename = filename)
-    # Obtaining the number of headers
-    numberOfHeader <- as.integer(sum(diff(headerLines) != 1) + 1)
     N <- length(fullData)
-    Nhead <- length(headerLines)
+    # Line index of the "fancyNames" column-names line of each segment
+    # header (the plain "fancy" pattern would also match the
+    # "prefix-fancy"/"suffix-fancy" keys written by JPK 5.0 exports)
+    fancyLines <- grep("fancyNames", fullData, fixed = TRUE)
+    if (length(fancyLines) == 0) {
+      stop("afmReadJPK: no segment headers (fancyNames key) found in the file.",
+           call. = FALSE)
+    }
+    # Line index of the "# segmentIndex:" key of each segment header
+    segIdxLines <- grep("# segmentIndex:", fullData, fixed = TRUE)
     
-    headerStarts <- c(1, headerLines[which(diff(headerLines) != 1) + 1])
-    headerEnds <-
-      c(headerLines[which(diff(headerLines) != 1)], headerLines[Nhead])
-    # Line index of the "fancy" column-names line of each segment header
-    fancyLines <- grep("fancy", fullData)
+    # Data range of each segment. When the file declares one
+    # "# segmentIndex:" key per segment header (JPK 5.0 and 6.1 exports do,
+    # possibly writing all the header blocks consecutively, without blank
+    # lines in between), the data of a segment runs from the line after its
+    # fancyNames line to the line before the next "# segmentIndex:" key;
+    # otherwise the runs of "#" lines separated by blank lines delimit the
+    # header blocks, as in the original reader.
+    if (length(segIdxLines) == length(fancyLines)) {
+      numberOfHeader <- length(segIdxLines)
+      dataStarts <- fancyLines + 1
+      dataEnds <- c(segIdxLines[-1] - 1, N)
+      nameBlockStarts <- segIdxLines
+    } else {
+      numberOfHeader <- as.integer(sum(diff(headerLines) != 1) + 1)
+      Nhead <- length(headerLines)
+      headerStarts <- c(1, headerLines[which(diff(headerLines) != 1) + 1])
+      headerEnds <-
+        c(headerLines[which(diff(headerLines) != 1)], headerLines[Nhead])
+      dataStarts <- headerEnds + 1
+      dataEnds <- c(headerStarts[-1] - 2, N)
+      nameBlockStarts <- headerStarts
+    }
+    if (numberOfHeader != length(fancyLines)) {
+      stop("afmReadJPK: found ", numberOfHeader, " header blocks for ",
+           length(fancyLines), " segment headers; unsupported file layout.",
+           call. = FALSE)
+    }
     
     # Segment name of each header block: taken from the "# segment:" key of
     # the block ("extend" is renamed to "approach", any other declared name
     # is kept as is); blocks without the key fall back to the positional
     # names approach/pause/retract.
-    segmentNames <- character(numberOfHeader)
-    for (i in seq_len(numberOfHeader)) {
-      declared <- segmentInHeader(fullData[headerStarts[i]:headerEnds[i]])
+    segmentNames <- vapply(seq_len(numberOfHeader), function(i) {
+      declared <- segmentInHeader(fullData[nameBlockStarts[i]:fancyLines[i]])
       if (!is.na(declared)) {
-        segmentNames[i] <- declared
+        declared
       } else if (i == 1) {
-        segmentNames[i] <- "approach"
+        "approach"
       } else if (i == numberOfHeader) {
-        segmentNames[i] <- "retract"
+        "retract"
       } else {
-        segmentNames[i] <- "pause"
+        "pause"
       }
-    }
+    }, character(1))
     
-    # Parse the data lines of every segment: non-final segments run up to
-    # the line before the next header block and the last one runs to the
-    # end of the file. Retract segments get the Z-increasing normalisation.
+    # Parse the data lines of every segment: only the numeric rows are
+    # kept, so the "#"-key and separator lines inside the range are dropped
+    # whatever the export layout. Retract segments get the Z-increasing
+    # normalisation.
     segments <- lapply(seq_len(numberOfHeader), function(i) {
-      if (i < numberOfHeader) {
-        segmentLines <- fullData[(headerEnds[i] + 1):(headerStarts[i + 1] - 2)]
+      if (dataEnds[i] >= dataStarts[i]) {
+        segmentLines <- fullData[dataStarts[i]:dataEnds[i]]
       } else {
-        segmentLines <- fullData[(headerEnds[i] + 1):N]
+        segmentLines <- character(0)
       }
-      segment <- parseSegment(segmentLines, fullData[fancyLines[i]], segmentNames[i])
+      rowTokens <- strsplit(trimws(segmentLines), "\\s+")
+      isData <- vapply(rowTokens, function(tk) {
+        length(tk) > 0 && all(!is.na(suppressWarnings(as.numeric(tk))))
+      }, logical(1))
+      segment <- parseSegment(segmentLines[isData], fullData[fancyLines[i]], segmentNames[i])
       if (segmentNames[i] == "retract") {
         segment <- ensureZIncreasing(segment)
       }

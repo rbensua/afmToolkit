@@ -256,3 +256,58 @@ test_that("afmReadJPK falls back to positional names when no segment key is decl
   expect_equal(d$data$Z[d$data$Segment == "retract"], c(1e-9, 2e-9))
   unlink(f)
 })
+
+test_that("afmReadJPK reads JPK 5.0 force-save exports (fancyNames keys, consecutive headers)", {
+  lines <- c(
+    "# TEXT EXPORT",
+    "# index: 0",
+    "# xPosition: 1.0E-13",
+    "# yPosition: -2.0E-13",
+    "# force-settings.segment.0.identifier.prefix-fancy: ",
+    "# force-settings.segment.0.identifier.suffix-fancy:  (1)",
+    "#",
+    "# segmentIndex: 0",
+    "# segment: extend",
+    "# columns: smoothedMeasuredHeight vDeflection measuredHeight seriesTime time",
+    "# fancyNames: \"Height (measured & smoothed)\" \"Vertical Deflection\" \"Height (measured)\" \"Series Time\" \"Segment Time\"",
+    "# springConstant: 0.12",
+    "# units: m N m s s",
+    "#",
+    "1e-8 0 0 0 0",
+    "1.1e-8 1e-9 1e-9 0.1 0.1",
+    "1.2e-8 2e-9 2e-9 0.2 0.2",
+    "#",
+    "# segmentIndex: 1",
+    "# segment: pause",
+    "# columns: smoothedMeasuredHeight vDeflection measuredHeight seriesTime time",
+    "# fancyNames: \"Height (measured & smoothed)\" \"Vertical Deflection\" \"Height (measured)\" \"Series Time\" \"Segment Time\"",
+    "# units: m N m s s",
+    "#",
+    "1.3e-8 3e-9 3e-9 0.3 0.3",
+    "1.4e-8 4e-9 4e-9 0.4 0.4",
+    "#",
+    "# segmentIndex: 2",
+    "# segment: retract",
+    "# columns: smoothedMeasuredHeight vDeflection measuredHeight seriesTime time",
+    "# fancyNames: \"Height (measured & smoothed)\" \"Vertical Deflection\" \"Height (measured)\" \"Series Time\" \"Segment Time\"",
+    "# units: m N m s s",
+    "#",
+    "1.6e-8 6e-9 6e-9 0.6 0.6",
+    "1.5e-8 5e-9 5e-9 0.7 0.7"
+  )
+  f <- tempfile(fileext = ".txt")
+  writeLines(lines, f)
+  d <- afmReadJPK(f, silent = TRUE)
+  expect_true(is.afmdata(d))
+  expect_setequal(levels(d$data$Segment), c("approach", "pause", "retract"))
+  expect_equal(as.integer(table(d$data$Segment)), c(3L, 2L, 2L))
+  # Z comes from the exact "Height (measured)" channel, not from
+  # "Height (measured & smoothed)", despite the "prefix-fancy"/
+  # "suffix-fancy" keys and the consecutively written header blocks
+  expect_equal(d$data$Z, c(0, 1e-9, 2e-9, 3e-9, 4e-9, 5e-9, 6e-9))
+  expect_equal(d$data$Force, c(0, 1e-9, 2e-9, 3e-9, 4e-9, 5e-9, 6e-9))
+  expect_equal(sort(names(d$params$speeds)), c("approach", "pause", "retract"))
+  expect_equal(d$params$SpringConstant, 0.12)
+  expect_equal(d$params$Index, 0)
+  unlink(f)
+})
