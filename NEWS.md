@@ -24,6 +24,13 @@
   column-names line is now located through the "fancyNames" key, the
   data of each segment is delimited by its "# segmentIndex:" key, and
   only the numeric rows of each segment are parsed (#13).
+* `afmReadJPK()` silently dropped the last data row of every segment
+  except the last one: the end of each non-final segment was cut one
+  row short. Every numeric data row of each segment is now kept, so
+  files are read with one additional row per non-final segment and
+  downstream results (speeds, contact point, slopes, hysteresis, ...)
+  change accordingly. The golden master files of the test suite were
+  regenerated to lock the corrected behaviour (#13).
 
 ## Improvements
 

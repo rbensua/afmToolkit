@@ -35,6 +35,17 @@ test_that("afmReadJPK reads a 3-header JPK file", {
   ))
 })
 
+test_that("afmReadJPK keeps every numeric data row of each segment", {
+  # Regression test: the end of each non-final segment used to be cut
+  # one row short, silently dropping the last data row of the segment.
+  for (file in c("force-save-JPK-2h.txt.gz", "force-save-JPK-3h.txt.gz")) {
+    lines <- readLines(gzfile(afm_example_path(file)))
+    n_numeric <- sum(!grepl("^#", lines) & trimws(lines) != "")
+    d <- afmReadJPK(file, path = afm_example_path(), silent = TRUE)
+    expect_equal(nrow(d$data), n_numeric, info = file)
+  }
+})
+
 test_that("afmReadVeeco reads a Veeco ascii file", {
   d <- afmReadVeeco("veeco_file.txt.gz", path = afm_example_path(), silent = TRUE)
   expect_true(is.afmdata(d))
