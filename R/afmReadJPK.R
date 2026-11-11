@@ -2,7 +2,7 @@
 #'   
 #' @description Read an ascii JPK file.
 #' 
-#' Reads an ascii JPK file with one to three headers.
+#' Reads an ascii JPK file with any number of segment headers.
 #' @param filename String with the name of the jpk file.
 #' @param path Path to the folder where the file is.
 #' @param FColStr String with a pattern identifying the Force column.
@@ -10,20 +10,24 @@
 #' @param tColStr String with a pattern identifying the Time column.
 #' @param silent Logical parameter. If TRUE it suppresses the messages regarding the loading of the JPK file (defaults to FALSE).
 #'   
-#' @details The Force, Z and Time columns of each segment are located in the
-#' "fancy names" line of the JPK header: \code{FColStr}, \code{ZColStr} and
-#' \code{tColStr} are first tried as exact matches, then as substrings and
-#' finally ignoring spaces and parentheses, so minor variations of the channel
-#' names in the export (e.g. "Height (measured)" matching "Height (measured &
-#' smoothed)") are still recognized. When several channels match the force
-#' pattern, deflection channels are preferred. If no unique column can be
-#' identified, an informative error is thrown. Files with a single segment
-#' take their segment name ("approach", "retract" or "pause") from the header,
-#' defaulting to "approach" when the header does not declare one.
+#' @details All the segment headers of the file are read, and the name of each
+#' segment is taken from its "# segment:" key: "extend" is renamed to
+#' "approach" and any other declared name ("pause", "retract", "modulation",
+#' ...) is kept as is. Header blocks without a "# segment:" key fall back to
+#' the positional names "approach" (first block), "pause" (middle blocks) and
+#' "retract" (last block). The Force, Z and Time columns of each segment are
+#' located in the "fancy names" line of its header: \code{FColStr},
+#' \code{ZColStr} and \code{tColStr} are first tried as exact matches, then as
+#' substrings and finally ignoring spaces and parentheses, so minor variations
+#' of the channel names in the export (e.g. "Height (measured)" also matching
+#' "Height (measured & smoothed)") are still recognized. When several channels
+#' match the force pattern, deflection channels are preferred. If no unique
+#' column can be identified, an informative error is thrown.
 #' 
 #' @return A afmdata structure list containing a field 'data' which is a data frame with 
-#' variables Force, Z, Time (if aplicable) and Segment ("approach", "retract" and/or "pause") and 
-#' a field 'params' which is a list with the fields 'curvename' and 'SpringConstant'.
+#' variables Force, Z, Time (if aplicable) and Segment (one level per segment of 
+#' the file, see Details) and a field 'params' which is a list with the fields 
+#' 'curvename' and 'SpringConstant'.
 #'   
 #' @examples
 #' data <- afmReadJPK("force-save-JPK-3h.txt.gz",path = path.package("afmToolkit"))
@@ -106,14 +110,19 @@ afmReadJPK <-
       segment
     }
     
-    # Segment type declared in the header lines ("approach", "retract" or
-    # "pause"); NA when the header does not declare one.
+    # Segment type declared in the header lines; "extend" is renamed to
+    # "approach" and any other declared name is kept as is. NA when the
+    # header does not declare one.
     segmentInHeader <- function(lines) {
       segLine <- grep("# segment:", lines, fixed = TRUE, value = TRUE)
       if (length(segLine) == 0) {
         return(NA_character_)
       }
-      trimws(sub("# segment:", "", segLine[1]))
+      segmentName <- trimws(sub("# segment:", "", segLine[1]))
+      if (segmentName == "extend") {
+        segmentName <- "approach"
+      }
+      segmentName
     }
     
     if (path == ""){
@@ -147,51 +156,40 @@ afmReadJPK <-
     # Line index of the "fancy" column-names line of each segment header
     fancyLines <- grep("fancy", fullData)
     
-    # Approach segment (always the first one)
-    if (numberOfHeader > 1) {
-      approachLines <- fullData[(headerEnds[1] + 1):(headerStarts[2] - 2)]
-    } else {
-      approachLines <- fullData[(headerEnds[1] + 1):N]
-    }
-    # Single-segment files are not always approach curves: take the segment
-    # name declared in the header when present.
-    firstSegmentName <- "approach"
-    if (numberOfHeader == 1) {
-      declaredSegment <- segmentInHeader(fullData[1:headerEnds[1]])
-      if (!is.na(declaredSegment)) {
-        firstSegmentName <- declaredSegment
+    # Segment name of each header block: taken from the "# segment:" key of
+    # the block ("extend" is renamed to "approach", any other declared name
+    # is kept as is); blocks without the key fall back to the positional
+    # names approach/pause/retract.
+    segmentNames <- character(numberOfHeader)
+    for (i in seq_len(numberOfHeader)) {
+      declared <- segmentInHeader(fullData[headerStarts[i]:headerEnds[i]])
+      if (!is.na(declared)) {
+        segmentNames[i] <- declared
+      } else if (i == 1) {
+        segmentNames[i] <- "approach"
+      } else if (i == numberOfHeader) {
+        segmentNames[i] <- "retract"
+      } else {
+        segmentNames[i] <- "pause"
       }
     }
-    approach <- parseSegment(approachLines, fullData[fancyLines[1]], firstSegmentName)
     
-    if (numberOfHeader == 1) {
-      afmExperiment <- approach
-      if (firstSegmentName == "retract") {
-        afmExperiment <- ensureZIncreasing(afmExperiment)
+    # Parse the data lines of every segment: non-final segments run up to
+    # the line before the next header block and the last one runs to the
+    # end of the file. Retract segments get the Z-increasing normalisation.
+    segments <- lapply(seq_len(numberOfHeader), function(i) {
+      if (i < numberOfHeader) {
+        segmentLines <- fullData[(headerEnds[i] + 1):(headerStarts[i + 1] - 2)]
+      } else {
+        segmentLines <- fullData[(headerEnds[i] + 1):N]
       }
-    }
-    else if (numberOfHeader == 2){
-      retractLines <- fullData[(headerEnds[2] + 1):N]
-      retract <- parseSegment(retractLines, fullData[fancyLines[2]], "retract")
-      retract <- ensureZIncreasing(retract)
-      afmExperiment <- rbind(approach, retract)
-    }
-    else{
-      pauseLines <- fullData[(headerEnds[2] + 1):(headerStarts[3] - 2)]
-      pause <- parseSegment(pauseLines, fullData[fancyLines[2]], "pause")
-      
-      if (numberOfHeader > 3){
-        if(!silent){
-          print("More than 3 headers found, considering only the first 3!")
-        }
-        retractLines <- fullData[(headerEnds[3] + 1):(headerStarts[4] - 2)]
-      } else{
-        retractLines <- fullData[(headerEnds[3] + 1):N]
+      segment <- parseSegment(segmentLines, fullData[fancyLines[i]], segmentNames[i])
+      if (segmentNames[i] == "retract") {
+        segment <- ensureZIncreasing(segment)
       }
-      retract <- parseSegment(retractLines, fullData[fancyLines[3]], "retract")
-      retract <- ensureZIncreasing(retract)
-      afmExperiment <- rbind(approach, pause, retract)
-    }
+      segment
+    })
+    afmExperiment <- do.call(rbind, segments)
     if(!silent){
       cat(sprintf(
         "JPK file %s loaded. %d headers found.\n",

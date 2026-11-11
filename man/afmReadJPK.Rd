@@ -28,25 +28,29 @@ afmReadJPK(
 }
 \value{
 A afmdata structure list containing a field 'data' which is a data frame with 
-variables Force, Z, Time (if aplicable) and Segment ("approach", "retract" and/or "pause") and 
-a field 'params' which is a list with the fields 'curvename' and 'SpringConstant'.
+variables Force, Z, Time (if aplicable) and Segment (one level per segment of 
+the file, see Details) and a field 'params' which is a list with the fields 
+'curvename' and 'SpringConstant'.
 }
 \description{
 Read an ascii JPK file.
 
-Reads an ascii JPK file with one to three headers.
+Reads an ascii JPK file with any number of segment headers.
 }
 \details{
-The Force, Z and Time columns of each segment are located in the
-"fancy names" line of the JPK header: \code{FColStr}, \code{ZColStr} and
-\code{tColStr} are first tried as exact matches, then as substrings and
-finally ignoring spaces and parentheses, so minor variations of the channel
-names in the export (e.g. "Height (measured)" matching "Height (measured &
-smoothed)") are still recognized. When several channels match the force
-pattern, deflection channels are preferred. If no unique column can be
-identified, an informative error is thrown. Files with a single segment
-take their segment name ("approach", "retract" or "pause") from the header,
-defaulting to "approach" when the header does not declare one.
+All the segment headers of the file are read, and the name of each
+segment is taken from its "# segment:" key: "extend" is renamed to
+"approach" and any other declared name ("pause", "retract", "modulation",
+...) is kept as is. Header blocks without a "# segment:" key fall back to
+the positional names "approach" (first block), "pause" (middle blocks) and
+"retract" (last block). The Force, Z and Time columns of each segment are
+located in the "fancy names" line of its header: \code{FColStr},
+\code{ZColStr} and \code{tColStr} are first tried as exact matches, then as
+substrings and finally ignoring spaces and parentheses, so minor variations
+of the channel names in the export (e.g. "Height (measured)" also matching
+"Height (measured & smoothed)") are still recognized. When several channels
+match the force pattern, deflection channels are preferred. If no unique
+column can be identified, an informative error is thrown.
 }
 \examples{
 data <- afmReadJPK("force-save-JPK-3h.txt.gz",path = path.package("afmToolkit"))

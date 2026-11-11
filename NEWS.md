@@ -16,6 +16,16 @@
   and a warning is issued when the file carries no spring constant
   (it stays `NA`).
 
+## Improvements
+
+* `afmReadJPK()` now reads every segment header of the file instead of
+  at most three. The name of each segment is taken from its
+  "# segment:" key ("extend" is renamed to "approach"; "pause",
+  "retract", "modulation" or any other declared name is kept as is),
+  so experiments with modulation segments or with several approach or
+  pause segments are read completely. Header blocks without the key
+  keep the positional names approach/pause/retract (#13).
+
 # afmToolkit 2.0.0
 
 ## Major internal refactoring, no user-facing API changes

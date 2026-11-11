@@ -147,3 +147,112 @@ test_that("afmReadJPK fails informatively when no column matches the pattern", {
   expect_error(afmReadJPK(f, silent = TRUE), "could not uniquely identify")
   unlink(f)
 })
+
+test_that("afmReadJPK maps 'extend' to 'approach' and keeps other declared names", {
+  lines <- c(
+    "# segmentIndex: 1",
+    "# segment: extend",
+    "# columns: height vDeflection time",
+    "# fancyNames: \"Height (measured)\" \"Vertical Deflection\" \"Segment Time\"",
+    "# units: m N s",
+    "#",
+    "0 0 0",
+    "1e-9 1e-9 0.1",
+    "2e-9 2e-9 0.2",
+    " ",
+    "# segmentIndex: 2",
+    "# segment: retract",
+    "# columns: height vDeflection time",
+    "# fancyNames: \"Height (measured)\" \"Vertical Deflection\" \"Segment Time\"",
+    "# units: m N s",
+    "#",
+    "3e-9 3e-9 0.3",
+    "4e-9 4e-9 0.4",
+    "5e-9 5e-9 0.5"
+  )
+  f <- tempfile(fileext = ".txt")
+  writeLines(lines, f)
+  d <- afmReadJPK(f, silent = TRUE)
+  expect_setequal(levels(d$data$Segment), c("approach", "retract"))
+  expect_equal(as.integer(table(d$data$Segment)), c(3L, 3L))
+  expect_equal(d$data$Z[d$data$Segment == "approach"], c(0, 1e-9, 2e-9))
+  expect_equal(d$data$Z[d$data$Segment == "retract"], c(3e-9, 4e-9, 5e-9))
+  expect_equal(sort(names(d$params$speeds)), c("approach", "retract"))
+  unlink(f)
+})
+
+test_that("afmReadJPK reads every header, including modulation and repeated segments", {
+  lines <- c(
+    "# segmentIndex: 1",
+    "# segment: extend",
+    "# columns: height vDeflection time",
+    "# fancyNames: \"Height (measured)\" \"Vertical Deflection\" \"Segment Time\"",
+    "# units: m N s",
+    "#",
+    "0 0 0",
+    "1e-9 1e-9 0.1",
+    " ",
+    "# segmentIndex: 2",
+    "# segment: modulation",
+    "# columns: height vDeflection time",
+    "# fancyNames: \"Height (measured)\" \"Vertical Deflection\" \"Segment Time\"",
+    "# units: m N s",
+    "#",
+    "2e-9 2e-9 0.2",
+    "3e-9 3e-9 0.3",
+    " ",
+    "# segmentIndex: 3",
+    "# segment: extend",
+    "# columns: height vDeflection time",
+    "# fancyNames: \"Height (measured)\" \"Vertical Deflection\" \"Segment Time\"",
+    "# units: m N s",
+    "#",
+    "4e-9 4e-9 0.4",
+    "5e-9 5e-9 0.5",
+    " ",
+    "# segmentIndex: 4",
+    "# segment: retract",
+    "# columns: height vDeflection time",
+    "# fancyNames: \"Height (measured)\" \"Vertical Deflection\" \"Segment Time\"",
+    "# units: m N s",
+    "#",
+    "6e-9 6e-9 0.6",
+    "7e-9 7e-9 0.7"
+  )
+  f <- tempfile(fileext = ".txt")
+  writeLines(lines, f)
+  d <- afmReadJPK(f, silent = TRUE)
+  expect_setequal(levels(d$data$Segment), c("approach", "modulation", "retract"))
+  expect_equal(as.integer(table(d$data$Segment)), c(4L, 2L, 2L))
+  expect_equal(nrow(d$data), 8L)
+  expect_equal(sort(names(d$params$speeds)), c("approach", "modulation", "retract"))
+  unlink(f)
+})
+
+test_that("afmReadJPK falls back to positional names when no segment key is declared", {
+  lines <- c(
+    "# segmentIndex: 1",
+    "# columns: height vDeflection time",
+    "# fancyNames: \"Height (measured)\" \"Vertical Deflection\" \"Segment Time\"",
+    "# units: m N s",
+    "#",
+    "0 0 0",
+    "1e-9 1e-9 0.1",
+    " ",
+    "# segmentIndex: 2",
+    "# columns: height vDeflection time",
+    "# fancyNames: \"Height (measured)\" \"Vertical Deflection\" \"Segment Time\"",
+    "# units: m N s",
+    "#",
+    "2e-9 2e-9 0.2",
+    "1e-9 1e-9 0.3"
+  )
+  f <- tempfile(fileext = ".txt")
+  writeLines(lines, f)
+  d <- afmReadJPK(f, silent = TRUE)
+  expect_setequal(levels(d$data$Segment), c("approach", "retract"))
+  expect_equal(as.integer(table(d$data$Segment)), c(2L, 2L))
+  # The retract segment is normalised to increasing Z even without the key
+  expect_equal(d$data$Z[d$data$Segment == "retract"], c(1e-9, 2e-9))
+  unlink(f)
+})
