@@ -29,7 +29,8 @@ afmReadJPK(
 \value{
 A afmdata structure list containing a field 'data' which is a data frame with 
 variables Force, Z, Time (if aplicable) and Segment (one level per segment of 
-the file, see Details) and a field 'params' which is a list with the fields 
+the file, see Details), a SegmentID column when the file has several
+segments of the same type (see Details) and a field 'params' which is a list with the fields 
 'curvename' and 'SpringConstant'.
 }
 \description{
@@ -43,7 +44,13 @@ segment is taken from its "# segment:" key: "extend" is renamed to
 "approach" and any other declared name ("pause", "retract", "modulation",
 ...) is kept as is. Header blocks without a "# segment:" key fall back to
 the positional names "approach" (first block), "pause" (middle blocks) and
-"retract" (last block). The data of each segment is located through its
+"retract" (last block). When several header blocks declare the same
+segment name (e.g. several "modulation" segments), the data frame also
+carries a \code{SegmentID} column labelling every occurrence uniquely
+in file order ("modulation_1", "modulation_2", ...); segment names
+appearing only once keep their plain name, and files without repeated
+segment names have no \code{SegmentID} column. The data of each segment
+is located through its
 "# segmentIndex:" key when the file declares one per segment header (JPK
 5.0 and 6.1 exports do, possibly writing all the header blocks
 consecutively, without blank lines in between), and through the runs of

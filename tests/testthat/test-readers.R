@@ -100,6 +100,7 @@ test_that("afmReadJPK reads a single-segment retract-only JPK file", {
   d <- afmReadJPK(test_path("jpk-retract-only.txt"), silent = TRUE)
   expect_true(is.afmdata(d))
   expect_setequal(names(d$data), c("Z", "Force", "Time", "Segment"))
+  expect_false("SegmentID" %in% names(d$data))
   expect_setequal(levels(d$data$Segment), "retract")
   expect_equal(nrow(d$data), 100L)
   # Z comes from "Height (measured & smoothed)" and Force from
@@ -237,6 +238,12 @@ test_that("afmReadJPK reads every header, including modulation and repeated segm
   expect_equal(as.integer(table(d$data$Segment)), c(4L, 2L, 2L))
   expect_equal(nrow(d$data), 8L)
   expect_equal(sort(names(d$params$speeds)), c("approach", "modulation", "retract"))
+  # Two "extend" (approach) segments: the SegmentID column disambiguates
+  # them; unique names keep their plain segment name
+  expect_true("SegmentID" %in% names(d$data))
+  expect_equal(as.character(d$data$SegmentID),
+               c("approach_1", "approach_1", "modulation", "modulation",
+                 "approach_2", "approach_2", "retract", "retract"))
   unlink(f)
 })
 
@@ -312,6 +319,7 @@ test_that("afmReadJPK reads JPK 5.0 force-save exports (fancyNames keys, consecu
   expect_true(is.afmdata(d))
   expect_setequal(levels(d$data$Segment), c("approach", "pause", "retract"))
   expect_equal(as.integer(table(d$data$Segment)), c(3L, 2L, 2L))
+  expect_false("SegmentID" %in% names(d$data))
   # Z comes from the exact "Height (measured)" channel, not from
   # "Height (measured & smoothed)", despite the "prefix-fancy"/
   # "suffix-fancy" keys and the consecutively written header blocks

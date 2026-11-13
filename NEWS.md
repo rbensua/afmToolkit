@@ -41,6 +41,12 @@
   so experiments with modulation segments or with several approach or
   pause segments are read completely. Header blocks without the key
   keep the positional names approach/pause/retract (#13).
+* `afmReadJPK()` now adds a `SegmentID` column to the data frame when
+  the file contains several segments of the same type (e.g. several
+  "modulation" segments): every occurrence is labelled uniquely in file
+  order ("modulation_1", "modulation_2", ...), while segment names
+  appearing only once keep their plain name. Files without repeated
+  segment names are read exactly as before (#13).
 
 # afmToolkit 2.0.0
 
