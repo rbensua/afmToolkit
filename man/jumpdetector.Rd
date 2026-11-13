@@ -26,12 +26,12 @@ the amplitude of the detected jumps.}
 }
 \value{
 A list with the following components:
-\itemize{
-\item \code{jump_idx}: indices of the signal where the jumps were
-detected (\code{NULL} if no jump was found).
-\item \code{Fmin}: minimum of the signal around each jump.
-\item \code{Fmax}: maximum of the signal around each jump.
-}
+  \itemize{
+    \item \code{jump_idx}: indices of the signal where the jumps were
+      detected (\code{NULL} if no jump was found).
+    \item \code{Fmin}: minimum of the signal around each jump.
+    \item \code{Fmax}: maximum of the signal around each jump.
+  }
 }
 \description{
 Jump detector for AFM curves. It locates abrupt jumps (tethers,
@@ -49,4 +49,5 @@ signal <- c(rep(0, 200), rep(1, 150), rep(0, 150), rep(1, 100))
 jd <- jumpdetector(signal)
 jd$jump_idx
 jd$Fmax - jd$Fmin # amplitude of each jump
+
 }
