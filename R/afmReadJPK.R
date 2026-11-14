@@ -225,7 +225,8 @@ afmReadJPK <-
     nameCounts <- table(segmentNames)[segmentNames]
     occurrence <- ave(seq_len(numberOfHeader), segmentNames, FUN = seq_along)
     segmentIDs <- ifelse(nameCounts > 1,
-                         paste0(segmentNames, "_", occurrence),
+                         paste0(segmentNames, "_", 
+                                sprintf("%02d", occurrence)),
                          segmentNames)
     
     # Parse the data lines of every segment: only the numeric rows are
