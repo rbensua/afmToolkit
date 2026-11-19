@@ -31,6 +31,12 @@
   downstream results (speeds, contact point, slopes, hysteresis, ...)
   change accordingly. The golden master files of the test suite were
   regenerated to lock the corrected behaviour (#13).
+* `afmBaselineCorrection()` with `fitpause = "none"` misassigned the
+  corrected force of curves with more than two segments: the raw
+  forces of the approach and retract segments were given to the
+  intermediate segments (`pause`, `modulation`, ...) instead of
+  keeping their own values. The raw force of each intermediate
+  segment is now kept as is.
 
 ## Improvements
 
@@ -47,7 +53,18 @@
   order ("modulation_1", "modulation_2", ...), while segment names
   appearing only once keep their plain name. Files without repeated
   segment names are read exactly as before (#13).
-
+* `afmBaselineCorrection()` now corrects every segment of the curve
+  instead of assuming an approach/pause/retract layout. Intermediate
+  segments such as "modulation" are corrected according to the
+  `fitpause` option: with the approach segment fit (default), with
+  the retract segment fit, or left uncorrected ("none"). Curves
+  without a retract segment no longer fail; `fitpause = "retract"`
+  requires a retract segment and stops with an informative error
+  otherwise. The Force vs Time baseline (`vsTime = TRUE`) keeps
+  subtracting the approach segment fit from every segment.
+* The sinusoidal baseline fit of `afmBaselineCorrection()`
+  (`vsTime = TRUE`, `sinusoidal = TRUE`) no longer prints a leftover
+  debug message to the console.
 # afmToolkit 2.0.0
 
 ## Major internal refactoring, no user-facing API changes
