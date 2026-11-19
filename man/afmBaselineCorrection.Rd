@@ -22,10 +22,12 @@ that defines the approach baseline}
 \item{ZPointRet}{Point in the retract segment of the curves that 
 defines the retract baseline}
 
-\item{fitpause}{Behaviour for the baseline correction at the pause segment: if "approach" (default), 
-the pause segment is correted using the best line fit done on the approach segment, 
-if "retract" the best line fit of the retract segment is used, if "none", no baseline correction 
-is done on the pause segment.}
+\item{fitpause}{Behaviour for the baseline correction of every segment
+other than the approach and retract segments (e.g. "pause",
+"modulation"): if "approach" (default), those segments are corrected
+using the best line fit done on the approach segment, if "retract" the
+best line fit of the retract segment is used, if "none", no baseline
+correction is done on them.}
 
 \item{vsTime}{Logical. If TRUE then the baseline correction is performed following the Force vs time approach 
 described by S. Moreno-Flores (\cite{Moreno Flores (2016)}).}
@@ -41,10 +43,15 @@ the input, but with an additional \code{ForceCorrected} column in the
 This function performs the baseline correction to an AFM F-z curve within an
 \code{afmdata} structure.
 
- It substracts a best fit line to the cuve: for the approach and contact 
- segments, it fits a line to the approach curve
-points where for which |z|>ZPointApp and for the retract segment,
-it fits a line to the retract curve where |z|> ZpointRet.
+It substracts a best fit line to the curve: for the approach segment,
+it fits a line to the approach curve points for which |z|>ZPointApp,
+and for the retract segment it fits a line to the retract curve where
+|z|>ZPointRet. Every other segment of the curve (e.g. "pause" or
+"modulation") is corrected according to the \code{fitpause} option:
+corrected with the approach fit, with the retract fit, or left
+uncorrected ("none"). When the curve has no retract segment, only
+the approach segment is fitted and every other segment follows
+\code{fitpause}.
 
 If no ZPointApp is given and the contact point has been already estimated 
 (via \code{afmContactPoint()} function), then it is found as
