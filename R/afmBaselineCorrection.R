@@ -4,7 +4,6 @@
 #' This function performs the baseline correction to an AFM F-z curve within an
 #' \code{afmdata} structure.
 #'
-#'
 #' It substracts a best fit line to the curve: for the approach segment,
 #' it fits a line to the approach curve points for which |z|>ZPointApp,
 #' and for the retract segment it fits a line to the retract curve where
@@ -20,7 +19,7 @@
 #' that defines the approach baseline
 #' @param ZPointRet Point in the retract segment of the curves that 
 #' defines the retract baseline
-#' #' @param fitpause Behaviour for the baseline correction of every segment
+#' @param fitpause Behaviour for the baseline correction of every segment
 #' other than the approach and retract segments (e.g. "pause",
 #' "modulation"): if "approach" (default), those segments are corrected
 #' using the best line fit done on the approach segment, if "retract" the
