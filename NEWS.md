@@ -65,6 +65,7 @@
 * The sinusoidal baseline fit of `afmBaselineCorrection()`
   (`vsTime = TRUE`, `sinusoidal = TRUE`) no longer prints a leftover
   debug message to the console.
+
 # afmToolkit 2.0.0
 
 ## Major internal refactoring, no user-facing API changes

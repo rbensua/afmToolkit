@@ -4,7 +4,8 @@
 #' This function performs the baseline correction to an AFM F-z curve within an
 #' \code{afmdata} structure.
 #'
-#'  #' It substracts a best fit line to the curve: for the approach segment,
+#'
+#' It substracts a best fit line to the curve: for the approach segment,
 #' it fits a line to the approach curve points for which |z|>ZPointApp,
 #' and for the retract segment it fits a line to the retract curve where
 #' |z|>ZPointRet. Every other segment of the curve (e.g. "pause" or
@@ -14,7 +15,7 @@
 #' the approach segment is fitted and every other segment follows
 #' \code{fitpause}.
 #'
-@param afmdata An \code{afmdata} structure.
+#' @param afmdata An \code{afmdata} structure.
 #' @param ZPointApp Point in the approach segment of the curve
 #' that defines the approach baseline
 #' @param ZPointRet Point in the retract segment of the curves that 
@@ -25,7 +26,7 @@
 #' using the best line fit done on the approach segment, if "retract" the
 #' best line fit of the retract segment is used, if "none", no baseline
 #' correction is done on them.
-@param vsTime Logical. If TRUE then the baseline correction is performed following the Force vs time approach 
+#' @param vsTime Logical. If TRUE then the baseline correction is performed following the Force vs time approach 
 #' described by S. Moreno-Flores (\cite{Moreno Flores (2016)}). 
 #' @param sinusoidal Logical. If TRUE, then a pure harmonic is added to the fit of the baseline in order to remove possible periodical noise. Defaults to FALSE.
 #' @return \code{afmdata} An \code{afmdata} structure identical to the one in 
