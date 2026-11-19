@@ -43,7 +43,7 @@ the input, but with an additional \code{ForceCorrected} column in the
 This function performs the baseline correction to an AFM F-z curve within an
 \code{afmdata} structure.
 
- It substracts a best fit line to the curve: for the approach segment,
+It substracts a best fit line to the curve: for the approach segment,
 it fits a line to the approach curve points for which |z|>ZPointApp,
 and for the retract segment it fits a line to the retract curve where
 |z|>ZPointRet. Every other segment of the curve (e.g. "pause" or
