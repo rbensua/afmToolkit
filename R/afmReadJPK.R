@@ -35,12 +35,22 @@
 #' "Height (measured & smoothed)") are still recognized. When several channels
 #' match the force pattern, deflection channels are preferred. If no unique
 #' column can be identified, an informative error is thrown.
+#' The modulation frequency of every "modulation" segment is read from
+#' its "# force-settings.segment.<N>.frequency:" header key, where <N>
+#' is the segment index declared in the header block. Frequencies are
+#' returned in \code{params$modulation_frequencies} as a named numeric
+#' vector labelled with the \code{SegmentID} labels of the data rows
+#' ("modulation_01", "modulation_02", ...). The field is only present
+#' when the file has modulation segments; a modulation segment without
+#' the frequency key gets an \code{NA} entry.
 #' 
 #' @return A afmdata structure list containing a field 'data' which is a data frame with 
 #' variables Force, Z, Time (if aplicable) and Segment (one level per segment of 
 #' the file, see Details), a SegmentID column when the file has several
 #' segments of the same type (see Details) and a field 'params' which is a list with the fields 
-#' 'curvename' and 'SpringConstant'.
+#' 'curvename' and 'SpringConstant' and, when the file has
+#' modulation segments, the named numeric vector 'modulation_frequencies'
+#' (see Details).
 #'   
 #' @examples
 #' data <- afmReadJPK("force-save-JPK-3h.txt.gz",path = path.package("afmToolkit"))
@@ -230,6 +240,36 @@ afmReadJPK <-
                                 sprintf("%02d", occurrence)),
                          segmentNames)
     
+    # Modulation frequencies: every "modulation" segment declares its
+    # frequency in a "# force-settings.segment.<N>.frequency:" key, where
+    # <N> is the segment index of its header block.
+    freqs <- NULL
+    modBlocks <- which(segmentNames == "modulation")
+    if (length(modBlocks) > 0) {
+      freqLines <- grep("^# force-settings\\.segment\\.[0-9]+\\.frequency:",
+                        fullData)
+      freqLineIdx <- as.integer(sub(
+        "^# force-settings\\.segment\\.([0-9]+)\\.frequency:.*$", "\\1",
+        fullData[freqLines]))
+      freqVals <- as.numeric(trimws(sub("^[^:]*:", "", fullData[freqLines])))
+      # Segment index declared in the "# segmentIndex:" key of each header
+      # block; without the key, the positional 0-based index is assumed.
+      if (length(segIdxLines) == numberOfHeader) {
+        blockIdx <- as.integer(trimws(sub("# segmentIndex:", "",
+                                          fullData[segIdxLines])))
+      } else {
+        blockIdx <- seq_len(numberOfHeader) - 1L
+      }
+      freqs <- rep(NA_real_, length(modBlocks))
+      names(freqs) <- segmentIDs[modBlocks]
+      for (j in seq_along(freqLineIdx)) {
+        kk <- which(blockIdx == freqLineIdx[j])
+        if (length(kk) == 1 && segmentNames[kk] == "modulation") {
+          freqs[match(kk, modBlocks)] <- freqVals[j]
+        }
+      }
+    }
+
     # Parse the data lines of every segment: only the numeric rows are
     # kept, so the "#"-key and separator lines inside the range are dropped
     # whatever the export layout. Retract segments get the Z-increasing
@@ -296,6 +336,9 @@ afmReadJPK <-
     
     
     params <- append(params, list(speeds = speeds, Index = Index, xpos = xpos, ypos = ypos))
+    if (!is.null(freqs)) {
+      params <- append(params, list(modulation_frequencies = freqs))
+    }
     afmExperiment <- afmdata(data = afmExperiment, params = params)
     return(afmExperiment)
   }
