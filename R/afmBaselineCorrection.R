@@ -115,7 +115,7 @@ afmBaselineCorrectionSingle <-
           predict(fit.approach.time, data.frame(Time = afmdata$data$Time))
       }else{
         print("Doing sinus")
-        fit.approach.time <-nls(Force ~ a0 + a1*Time + b * cos(w*Time+phi), 
+        fit.approach.time <- nls(Force ~ a0 + a1*Time + b * cos(w*Time+phi), 
                                 data = data.approach, 
                                 start = list(a0 = -0.5, a1 = -0.001, b = 0.001, w = 0.2/(2*pi), phi = pi/4))
         afmdata$data$ForceCorrected <-
