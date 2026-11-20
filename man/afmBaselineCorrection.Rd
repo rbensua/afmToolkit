@@ -52,12 +52,6 @@ corrected with the approach fit, with the retract fit, or left
 uncorrected ("none"). When the curve has no retract segment, only
 the approach segment is fitted and every other segment follows
 \code{fitpause}.
-
-If no ZPointApp is given and the contact point has been already estimated 
-(via \code{afmContactPoint()} function), then it is found as
-\deqn{
-ZPointApp = 0.7 ContactPoint + 0.3 max(Z)
-}
 }
 \section{References}{
  
