@@ -50,7 +50,7 @@
 * `afmReadJPK()` now adds a `SegmentID` column to the data frame when
   the file contains several segments of the same type (e.g. several
   "modulation" segments): every occurrence is labelled uniquely in file
-  order ("modulation_1", "modulation_2", ...), while segment names
+  order ("modulation_01", "modulation_02", ...), while segment names
   appearing only once keep their plain name. Files without repeated
   segment names are read exactly as before (#13).
 * `afmBaselineCorrection()` now corrects every segment of the curve

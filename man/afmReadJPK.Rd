@@ -47,7 +47,7 @@ the positional names "approach" (first block), "pause" (middle blocks) and
 "retract" (last block). When several header blocks declare the same
 segment name (e.g. several "modulation" segments), the data frame also
 carries a \code{SegmentID} column labelling every occurrence uniquely
-in file order ("modulation_1", "modulation_2", ...); segment names
+in file order ("modulation_01", "modulation_02", ...); segment names
 appearing only once keep their plain name, and files without repeated
 segment names have no \code{SegmentID} column. The data of each segment
 is located through its

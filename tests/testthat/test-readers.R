@@ -242,8 +242,8 @@ test_that("afmReadJPK reads every header, including modulation and repeated segm
   # them; unique names keep their plain segment name
   expect_true("SegmentID" %in% names(d$data))
   expect_equal(as.character(d$data$SegmentID),
-               c("approach_1", "approach_1", "modulation", "modulation",
-                 "approach_2", "approach_2", "retract", "retract"))
+               c("approach_01", "approach_01", "modulation", "modulation",
+                 "approach_02", "approach_02", "retract", "retract"))
   unlink(f)
 })
 
