@@ -206,6 +206,7 @@ test_that("afmReadJPK reads every header, including modulation and repeated segm
     " ",
     "# segmentIndex: 2",
     "# segment: modulation",
+    "# force-settings.segment.2.frequency: 5.5",
     "# columns: height vDeflection time",
     "# fancyNames: \"Height (measured)\" \"Vertical Deflection\" \"Segment Time\"",
     "# units: m N s",
@@ -238,6 +239,9 @@ test_that("afmReadJPK reads every header, including modulation and repeated segm
   expect_equal(as.integer(table(d$data$Segment)), c(4L, 2L, 2L))
   expect_equal(nrow(d$data), 8L)
   expect_equal(sort(names(d$params$speeds)), c("approach", "modulation", "retract"))
+  # Modulation frequency: the key index (2) refers to the segmentIndex
+  # declared in the block, not to the position of the block in the file
+  expect_equal(d$params$modulation_frequencies, c(modulation = 5.5))
   # Two "extend" (approach) segments: the SegmentID column disambiguates
   # them; unique names keep their plain segment name
   expect_true("SegmentID" %in% names(d$data))
@@ -328,5 +332,56 @@ test_that("afmReadJPK reads JPK 5.0 force-save exports (fancyNames keys, consecu
   expect_equal(sort(names(d$params$speeds)), c("approach", "pause", "retract"))
   expect_equal(d$params$SpringConstant, 0.12)
   expect_equal(d$params$Index, 0)
+  expect_false("modulation_frequencies" %in% names(d$params))
+  unlink(f)
+})
+
+test_that("afmReadJPK collects the modulation frequencies of every modulation segment", {
+  lines <- c(
+    "# TEXT EXPORT",
+    "# springConstant: 0.1",
+    "# segmentIndex: 1",
+    "# segment: extend",
+    "# columns: height vDeflection time",
+    "# fancyNames: \"Height (measured)\" \"Vertical Deflection\" \"Segment Time\"",
+    "# units: m N s",
+    "#",
+    "0 0 0",
+    "1e-9 1e-9 0.1",
+    " ",
+    "# segmentIndex: 2",
+    "# segment: modulation",
+    "# force-settings.segment.2.frequency: 5.0",
+    "# columns: height vDeflection time",
+    "# fancyNames: \"Height (measured)\" \"Vertical Deflection\" \"Segment Time\"",
+    "# units: m N s",
+    "#",
+    "2e-9 2e-9 0.2",
+    " ",
+    "# segmentIndex: 3",
+    "# segment: modulation",
+    "# force-settings.segment.3.frequency: 6.3",
+    "# columns: height vDeflection time",
+    "# fancyNames: \"Height (measured)\" \"Vertical Deflection\" \"Segment Time\"",
+    "# units: m N s",
+    "#",
+    "3e-9 3e-9 0.3",
+    " ",
+    "# segmentIndex: 4",
+    "# segment: retract",
+    "# columns: height vDeflection time",
+    "# fancyNames: \"Height (measured)\" \"Vertical Deflection\" \"Segment Time\"",
+    "# units: m N s",
+    "#",
+    "5e-9 5e-9 0.5",
+    "4e-9 4e-9 0.45"
+  )
+  f <- tempfile(fileext = ".txt")
+  writeLines(lines, f)
+  d <- afmReadJPK(f, silent = TRUE)
+  expect_equal(d$params$modulation_frequencies,
+               c(modulation_01 = 5.0, modulation_02 = 6.3))
+  expect_equal(as.character(unique(d$data$SegmentID[d$data$Segment == "modulation"])),
+               c("modulation_01", "modulation_02"))
   unlink(f)
 })

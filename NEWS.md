@@ -65,6 +65,13 @@
 * The sinusoidal baseline fit of `afmBaselineCorrection()`
   (`vsTime = TRUE`, `sinusoidal = TRUE`) no longer prints a leftover
   debug message to the console.
+* `afmReadJPK()` now collects the modulation frequency of every
+  "modulation" segment from its
+  "# force-settings.segment.<N>.frequency:" header key and returns it
+  in `params$modulation_frequencies`, a named numeric vector labelled
+  like the `SegmentID` column ("modulation_01", "modulation_02",
+  ...). The field is only present when the file has modulation
+  segments; a modulation segment without the key gets an `NA` entry.
 
 # afmToolkit 2.0.0
 

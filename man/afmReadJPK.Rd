@@ -31,7 +31,9 @@ A afmdata structure list containing a field 'data' which is a data frame with
 variables Force, Z, Time (if aplicable) and Segment (one level per segment of 
 the file, see Details), a SegmentID column when the file has several
 segments of the same type (see Details) and a field 'params' which is a list with the fields 
-'curvename' and 'SpringConstant'.
+'curvename' and 'SpringConstant' and, when the file has
+modulation segments, the named numeric vector 'modulation_frequencies'
+(see Details).
 }
 \description{
 Read an ascii JPK file.
@@ -64,6 +66,14 @@ of the channel names in the export (e.g. "Height (measured)" also matching
 "Height (measured & smoothed)") are still recognized. When several channels
 match the force pattern, deflection channels are preferred. If no unique
 column can be identified, an informative error is thrown.
+The modulation frequency of every "modulation" segment is read from
+its "# force-settings.segment.<N>.frequency:" header key, where <N>
+is the segment index declared in the header block. Frequencies are
+returned in \code{params$modulation_frequencies} as a named numeric
+vector labelled with the \code{SegmentID} labels of the data rows
+("modulation_01", "modulation_02", ...). The field is only present
+when the file has modulation segments; a modulation segment without
+the frequency key gets an \code{NA} entry.
 }
 \examples{
 data <- afmReadJPK("force-save-JPK-3h.txt.gz",path = path.package("afmToolkit"))
