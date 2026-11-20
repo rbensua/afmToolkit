@@ -167,7 +167,7 @@ fitcurve <- function(afmdata, type, model, segment, tmax, nexp = 2,...){
       relaxFit <-
         predict(relaxModel, data.frame(Time = decay$Time))
     } else {
-      relaxModel <- lm( log(Z) ~ log(Time), data = decay )
+      relaxModel <- lm( log(Z) ~ log(Time), data = decay, ... )
       relaxFit <-
         exp(predict(relaxModel, data.frame(Time = decay$Time)))
     }
@@ -197,7 +197,7 @@ fitcurve <- function(afmdata, type, model, segment, tmax, nexp = 2,...){
       relaxFit <-
         predict(relaxModel, data.frame(Time = decay$Time))
     } else {
-      relaxModel <- lm( log(ForceCorrected) ~ log(Time), data = decay )
+      relaxModel <- lm( log(ForceCorrected) ~ log(Time), data = decay, ... )
       relaxFit <-
         exp(predict(relaxModel, data.frame(Time = decay$Time)))
     }
